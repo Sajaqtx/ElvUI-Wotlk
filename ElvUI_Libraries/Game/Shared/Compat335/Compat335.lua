@@ -60,24 +60,79 @@ rawset(env, "WOW_PROJECT_MISTS_CLASSIC", 19)
 rawset(env, "WOW_PROJECT_ID", 11)
 
 ---------------------------------------------------------------------------------------------------------------
---> CreateFrame: the 3.3.5 frames have SetBackdrop natively, there is no BackdropTemplate to inherit
+--> CreateFrame: templates of later clients 3.3.5 lacks. BackdropTemplate: the 3.3.5 frames have SetBackdrop natively.
+--  The dialog borders get their look from a backdrop of the 3.3.5 dialog art.
 
 local CreateFrame = realG.CreateFrame
-local function stripBackdropTemplate(template)
-	if (type(template) ~= "string" or not template:find("BackdropTemplate", 1, true)) then return template end
-	local out = template:gsub("%s*,?%s*BackdropTemplate%s*,?", ","):gsub("^,+", ""):gsub(",+$", ""):gsub(",,+", ",")
-	if (out == "") then return nil end
-	return out
+local DIALOG_BACKDROP = {bgFile = "Interface\DialogFrame\UI-DialogBox-Background", edgeFile = "Interface\DialogFrame\UI-DialogBox-Border",
+	tile = true, tileSize = 32, edgeSize = 32, insets = {left = 11, right = 12, top = 12, bottom = 11}}
+local MODERN_TEMPLATES = {
+	BackdropTemplate = false,
+	DialogBorderOpaqueTemplate = DIALOG_BACKDROP,
+	DialogBorderTemplate = DIALOG_BACKDROP,
+	DialogBorderDarkTemplate = DIALOG_BACKDROP,
+	TooltipBackdropTemplate = false,
+}
+--template list without the modern names; the backdrop one of them asks for
+local function stripModernTemplates(template)
+	if (type(template) ~= "string") then return template end
+	local kept, backdrop = {}, nil
+	for name in template:gmatch("[^,%s]+") do
+		local modern = MODERN_TEMPLATES[name]
+		if (modern == nil) then
+			kept[#kept + 1] = name
+		elseif (modern) then
+			backdrop = modern
+		end
+	end
+	return #kept > 0 and table.concat(kept, ",") or nil, backdrop
 end
-Compat.stripBackdropTemplate = stripBackdropTemplate
+Compat.stripModernTemplates = stripModernTemplates
 rawset(env, "CreateFrame", function(frameType, name, parent, template, id)
-	return CreateFrame(frameType, name, parent, stripBackdropTemplate(template), id)
+	local kept, backdrop = stripModernTemplates(template)
+	local frame = CreateFrame(frameType, name, parent, kept, id)
+	if (backdrop and frame.SetBackdrop) then frame:SetBackdrop(backdrop) end
+	return frame
 end)
 --what the Backdrop mixin adds to a frame on modern clients: the 3.3.5 frame already backs SetBackdrop natively
 rawset(env, "BackdropTemplateMixin", {
 	OnBackdropLoaded = noop, OnBackdropSizeChanged = noop, SetupTextureCoordinates = noop,
 	ApplyBackdrop = noop, ClearBackdrop = function(self) self:SetBackdrop(nil) end,
 })
+
+---------------------------------------------------------------------------------------------------------------
+--> hooksecurefunc: a hook on a function 3.3.5 does not have (MarkNewActionHighlight, ChatFrameUtil.InsertLink...)
+--  is skipped instead of raising; the skipped targets are listed in ElvUI335.skippedHooks
+
+do
+	local hook = realG.hooksecurefunc
+	local skipped = {}
+	Compat.skippedHooks = skipped
+	rawset(env, "hooksecurefunc", function(target, name, func)
+		if (type(target) == "string") then
+			if (type(realG[target]) ~= "function" and type(rawget(env, target)) ~= "function") then
+				skipped[target] = true
+				return
+			end
+			if (type(rawget(env, target)) == "function" and type(realG[target]) ~= "function") then
+				--a function of the environment (a compat one): hooked in place
+				local original = rawget(env, target)
+				rawset(env, target, function(...)
+					local r = {original(...)}
+					name(...)
+					return unpack(r)
+				end)
+				return
+			end
+			return hook(target, name)
+		end
+		if (type(target) ~= "table" or type(target[name]) ~= "function") then
+			skipped[tostring(name)] = true
+			return
+		end
+		return hook(target, name, func)
+	end)
+end
 
 ---------------------------------------------------------------------------------------------------------------
 --> C_Timer (the session may have one from another addon: ElvUI uses its own, with cancelable handles)
@@ -170,20 +225,18 @@ fill("C_CVar", {
 })
 
 ---------------------------------------------------------------------------------------------------------------
---> namespaces the modern client has and ElvUI indexes at load (their functions are added one by one, see the
---  other Compat335 files): an empty table keeps "local X = C_Foo.Bar" from failing while the function is missing
+--> namespaces ElvUI indexes unconditionally at load ("local X = C_Foo.Bar" at file level), from the ones it
+--  needs that 3.3.5 lacks: a table keeps the load from failing while a function is missing (filled one by one in
+--  Compat335_API.lua). The namespaces ElvUI only reaches behind a test ("C_Foo and C_Foo.Bar()": Housing, Seasons,
+--  MythicPlus, ChatBubbles, TooltipInfo...) stay absent, so it takes its 3.3.5-shaped path.
 
-for _, name in ipairs({"C_ActionBar", "C_BattleNet", "C_ChatBubbles", "C_ChatInfo", "C_ClassColor", "C_ColorUtil",
-	"C_Container", "C_CreatureInfo", "C_CurrencyInfo", "C_DateAndTime", "C_EncodingUtil", "C_EquipmentSet", "C_FriendList",
-	"C_GossipInfo", "C_GuildInfo", "C_Item", "C_LootHistory", "C_Map", "C_MerchantFrame", "C_NamePlate", "C_NamePlateManager",
-	"C_PaperDollInfo", "C_PartyInfo", "C_PetJournal", "C_PlayerInfo", "C_PvP", "C_QuestLog", "C_Reputation",
-	"C_SpecializationInfo", "C_Spell", "C_SpellBook", "C_StringUtil", "C_Texture", "C_TooltipInfo", "C_TradeSkillUI",
-	"C_TransmogCollection", "C_UnitAuras", "C_Housing", "C_HouseEditor", "C_Secrets", "C_CurveUtil", "C_DurationUtil",
-	"C_AssistedCombat", "C_ChallengeMode", "C_MythicPlus", "C_MajorFactions", "C_WowTokenPublic", "C_Club", "C_ClubFinder",
-	"C_RecentAllies", "C_SocialQueue", "C_PetBattles", "C_Engraving", "C_Seasons", "C_GameRules", "C_ClassTalents",
-	"C_StorePublic", "C_LevelLink", "C_SettingsUtil", "C_RestrictedActions", "C_TransmogOutfitInfo", "C_VoiceChat",
-	"C_PlayerInteractionManager", "C_UIFileAsset", "C_SpellActivationOverlay", "C_NewItems", "C_LFGList", "C_Bank",
-	"C_Timer", "C_AddOns", "C_CVar", "C_MountJournal", "C_ToyBox", "C_Heirloom"}) do
+for _, name in ipairs({"C_ActionBar", "C_AddOns", "C_BattleNet", "C_ChatInfo", "C_ClassColor", "C_ColorUtil", "C_Container",
+	"C_CreatureInfo", "C_CurrencyInfo", "C_CurveUtil", "C_CVar", "C_DateAndTime", "C_DurationUtil", "C_EncodingUtil",
+	"C_EquipmentSet", "C_FriendList", "C_GuildInfo", "C_Heirloom", "C_Item", "C_LFGList", "C_LootHistory", "C_Map",
+	"C_MerchantFrame", "C_MountJournal", "C_NewItems", "C_PaperDollInfo", "C_PartyInfo", "C_PlayerInfo", "C_PvP",
+	"C_QuestLog", "C_Reputation", "C_SpecializationInfo", "C_Spell", "C_SpellBook", "C_StorePublic", "C_StringUtil",
+	"C_Texture", "C_Timer", "C_TradeSkillUI", "C_TransmogCollection", "C_UnitAuras", "C_VoiceChat", "C_WowTokenPublic",
+	"C_Club", "C_ClubFinder", "C_UIFileAsset", "C_GameRules"}) do
 	fill(name, {})
 end
 
@@ -196,7 +249,7 @@ do
 	local samples = {holder, holder:CreateTexture(), holder:CreateFontString(), holder:CreateAnimationGroup(), GameFontNormal}
 	for _, frameType in ipairs({"Button", "CheckButton", "EditBox", "ScrollFrame", "Slider", "StatusBar", "Cooldown",
 		"GameTooltip", "MessageFrame", "ScrollingMessageFrame", "SimpleHTML", "ColorSelect", "Model", "PlayerModel",
-		"DressUpModel", "Minimap"}) do
+		"DressUpModel", "Minimap", "TabardModel", "MovieFrame", "QuestPOIFrame"}) do
 		local ok, frame = pcall(CreateFrame, frameType, nil, holder)
 		if (ok and frame) then samples[#samples + 1] = frame end
 	end

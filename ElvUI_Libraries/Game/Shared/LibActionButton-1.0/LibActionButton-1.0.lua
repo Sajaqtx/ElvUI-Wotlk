@@ -2724,18 +2724,20 @@ function ClearNewActionHighlight(action, preventIdenticalActionsFromClearing, va
 	end
 end
 
-hooksecurefunc("MarkNewActionHighlight", function(action)
+if MarkNewActionHighlight then hooksecurefunc("MarkNewActionHighlight", function(action)
 	lib.ACTION_HIGHLIGHT_MARKS[action] = true
 	for button in next, ButtonRegistry do
 		if button._state_type == "action" and action == tonumber(button._state_action) then
 			UpdateNewAction(button)
 		end
 	end
-end)
+end) end -- ElvUI Wotlk: no new-action highlight on 3.3.5
 
-hooksecurefunc("ClearNewActionHighlight", function(action, preventIdenticalActionsFromClearing)
-	ClearNewActionHighlight(action, preventIdenticalActionsFromClearing)
-end)
+if _G.ClearNewActionHighlight then -- ElvUI Wotlk: not on 3.3.5
+	hooksecurefunc("ClearNewActionHighlight", function(action, preventIdenticalActionsFromClearing)
+		ClearNewActionHighlight(action, preventIdenticalActionsFromClearing)
+	end)
+end
 
 function UpdateNewAction(self)
 	-- special handling for "New Action" markers

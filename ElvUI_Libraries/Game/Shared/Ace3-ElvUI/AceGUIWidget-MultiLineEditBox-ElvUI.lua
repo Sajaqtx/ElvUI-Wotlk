@@ -18,7 +18,12 @@ local ACCEPT = ACCEPT
 Support functions
 -------------------------------------------------------------------------------]]
 if not AceGUIMultiLineEditBoxInsertLinkElvUI then
-	hooksecurefunc(ChatFrameUtil, "InsertLink", function(...) return _G.AceGUIMultiLineEditBoxInsertLinkElvUI(...) end)
+	-- ElvUI Wotlk: 3.3.5 inserts links with ChatEdit_InsertLink (no ChatFrameUtil)
+	if ChatFrameUtil and ChatFrameUtil.InsertLink then
+		hooksecurefunc(ChatFrameUtil, "InsertLink", function(...) return _G.AceGUIMultiLineEditBoxInsertLinkElvUI(...) end)
+	elseif ChatEdit_InsertLink then
+		hooksecurefunc("ChatEdit_InsertLink", function(...) return _G.AceGUIMultiLineEditBoxInsertLinkElvUI(...) end)
+	end
 end
 
 function _G.AceGUIMultiLineEditBoxInsertLinkElvUI(text)

@@ -100,7 +100,11 @@ AB.barDefaults = {
 	bar15 = { page = 15, bindButtons = 'MULTIACTIONBAR7BUTTON', position = 'BOTTOMRIGHT,ElvUIParent,BOTTOMRIGHT,-4,400' }
 }
 
-do
+if ElvUI335 then
+	-- ElvUI Wotlk: 3.3.5 has no [overridebar] / [possessbar] / [shapeshift] conditions; vehicle and possess
+	-- are the bonus bar (bonusbar:5, page 11), as in the 3.3.5 ElvUI
+	AB.barDefaults.bar1.conditions = '[bonusbar:5] 11; [bar:2] 2; [bar:3] 3; [bar:4] 4; [bar:5] 5; [bar:6] 6;'
+else
 	-- https://github.com/Gethe/wow-ui-source/blob/6eca162dbca161e850b735bd5b08039f96caf2df/Interface/FrameXML/OverrideActionBar.lua#L136
 	local fullConditions = (E.Retail or E.Mists or E.Wrath) and format('[overridebar] %d; [vehicleui][possessbar] %d;', GetOverrideBarIndex(), GetVehicleBarIndex()) or ''
 	AB.barDefaults.bar1.conditions = fullConditions..format('[shapeshift] %d; [bar:2] 2; [bar:3] 3; [bar:4] 4; [bar:5] 5; [bar:6] 6; [bonusbar:5] 11;', GetTempShapeshiftBarIndex())
@@ -494,7 +498,10 @@ function AB:CreateBar(id)
 		bar:SetAttribute('hasTempBar', false)
 	end
 
-	bar:SetAttribute('_onstate-page', [[
+	bar:SetAttribute('_onstate-page', ElvUI335 and [[
+		self:SetAttribute('state', newstate)
+		control:ChildUpdate('state', newstate)
+	]] or [[
 		if newstate == 'possess' or newstate == '11' then
 			if HasVehicleActionBar() then
 				newstate = GetVehicleBarIndex()
