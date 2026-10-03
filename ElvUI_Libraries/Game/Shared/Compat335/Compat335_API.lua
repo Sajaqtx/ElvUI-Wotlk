@@ -525,6 +525,7 @@ define("UnitIsGroupAssistant", function(unit)
 	return NumRaid() > 0 and UnitIsRaidOfficer(unit) and not UnitIsPartyLeader(unit) and true or false
 end)
 define("IsEveryoneAssistant", returnFalse)
+define("UnitLeadsAnyGroup", function(unit) return UnitIsPartyLeader(unit) and true or false end)
 
 fill("C_PartyInfo", {
 	ConvertToRaid = ConvertToRaid,

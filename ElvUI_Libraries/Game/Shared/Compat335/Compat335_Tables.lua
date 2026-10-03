@@ -148,6 +148,10 @@ enum("UIWidgetVisualizationType", {IconAndText = 0, CaptureBar = 1, StatusBar = 
 	TextColumnRow = 21, Spacer = 22, UnitPowerBar = 23, FillUpFrames = 24, TextWithSubtext = 25, MapPinAnimation = 26,
 	ItemDisplay = 27, TugOfWar = 28, ScenarioHeaderDelves = 29, ButtonHeader = 30})
 
+for name, text in pairs({PLAYER_DIFFICULTY1 = "Normal", PLAYER_DIFFICULTY2 = "Heroic", PLAYER_DIFFICULTY3 = "Raid Finder",
+	PLAYER_DIFFICULTY6 = "Mythic"}) do
+	if (realG[name] == nil) then rawset(env, name, text) end
+end
 if (realG.ITEM_LEVEL_ALT == nil) then rawset(env, "ITEM_LEVEL_ALT", "Item Level %d (%d)") end
 if (realG.MAX_QUESTS == nil) then rawset(env, "MAX_QUESTS", 25) end
 

@@ -86,6 +86,8 @@ local MODERN_TEMPLATES = {
 	DialogBorderTemplate = DIALOG_BACKDROP,
 	DialogBorderDarkTemplate = DIALOG_BACKDROP,
 	TooltipBackdropTemplate = false,
+	--renamed: the 3.3.5 template of the same widget
+	MainMenuFrameButtonTemplate = "GameMenuButtonTemplate",
 }
 --template list without the modern names; the backdrop one of them asks for
 local function stripModernTemplates(template)
@@ -95,6 +97,8 @@ local function stripModernTemplates(template)
 		local modern = MODERN_TEMPLATES[name]
 		if (modern == nil) then
 			kept[#kept + 1] = name
+		elseif (type(modern) == "string") then
+			kept[#kept + 1] = modern
 		elseif (modern) then
 			backdrop = modern
 		end
@@ -324,10 +328,14 @@ do
 	--the 3.3.5 cooldown always draws its swipe, has no bling, edge or countdown numbers
 	for _, name in ipairs({"SetDrawSwipe", "SetDrawBling", "SetDrawEdge", "SetHideCountdownNumbers", "SetSwipeColor",
 		"SetSwipeTexture", "SetEdgeTexture", "SetBlingTexture", "SetUseCircularEdge", "SetCountdownFont",
-		"SetCountdownAbbrevThreshold", "SetEdgeScale", "SetRotation", "SetCountdownFormatter"}) do
+		"SetCountdownAbbrevThreshold", "SetEdgeScale", "SetRotation", "SetCountdownFormatter", "SetMinimumCountdownDuration",
+		"SetCooldownFromDurationObject", "SetCooldownDuration", "SetEdgeColor", "SetBlingColor"}) do
 		add(name, noop, objectType("Cooldown"))
 	end
 	add("GetDrawSwipe", function() return true end, objectType("Cooldown"))
+	--models: the 3.3.5 model has no separate model alpha, the frame's alpha is the model's
+	add("SetModelAlpha", function(self, alpha) self:SetAlpha(alpha) end, function(o) return o.SetModel ~= nil end)
+	add("GetModelAlpha", function(self) return self:GetAlpha() end, function(o) return o.SetModel ~= nil end)
 	--no mask textures on 3.3.5: a mask is a hidden texture, attaching it does nothing
 	add("CreateMaskTexture", function(self, ...)
 		local mask = self:CreateTexture(...)
