@@ -164,6 +164,5 @@ define("GetRaidDifficultyID", function() return realG.GetRaidDifficulty and real
 
 --tables of later clients ElvUI only reads a function or two from (absent on 3.3.5)
 rawset(env, "MapUtil", {GetMapParentInfo = function() return nil end})
-if (realG.PetActionBar == nil) then rawset(env, "PetActionBar", {}) end
 fill("C_GossipInfo", {})
 fill("C_PlayerInteractionManager", {IsReplacingUnit = returnFalse})

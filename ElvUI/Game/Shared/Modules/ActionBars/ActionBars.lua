@@ -45,7 +45,7 @@ local BINDING_SET = Enum.BindingSet
 local IsHouseEditorActive = C_HouseEditor and C_HouseEditor.IsHouseEditorActive
 local GetNextCastSpell = C_AssistedCombat and C_AssistedCombat.GetNextCastSpell
 local GetSpellBookItemInfo = C_SpellBook.GetSpellBookItemInfo or GetSpellBookItemInfo
-local ClearPetActionHighlightMarks = ClearPetActionHighlightMarks or PetActionBar.ClearPetActionHighlightMarks
+local ClearPetActionHighlightMarks = ClearPetActionHighlightMarks or (PetActionBar and PetActionBar.ClearPetActionHighlightMarks) -- ElvUI Wotlk: no PetActionBar mixin on 3.3.5
 local GetActionCooldownDuration = C_ActionBar.GetActionCooldownDuration
 
 local GetProfessionQualityInfo = C_ActionBar.GetProfessionQualityInfo
@@ -1290,7 +1290,68 @@ do
 		end
 	end
 
+	-- ElvUI Wotlk: the 3.3.5 bars, the way the 3.3.5 ElvUI hides them (no StatusTrackingBarManager, SettingsPanel,
+	-- ActionBarButtonEventsFrame or IconIntroTracker on that client)
+	function AB:DisableBlizzard335()
+		local hider = E.HiddenFrame
+		for _, name in next, { 'MultiBarBottomLeft', 'MultiBarBottomRight', 'MultiBarLeft', 'MultiBarRight' } do
+			local bar = _G[name]
+			if bar then
+				bar:SetParent(hider)
+				bar.Show = E.noop
+				bar.Hide = E.noop
+			end
+		end
+
+		local buttons = { 'ActionButton', 'MultiBarBottomLeftButton', 'MultiBarBottomRightButton', 'MultiBarRightButton',
+			'MultiBarLeftButton', 'VehicleMenuBarActionButton', 'BonusActionButton' }
+		if E.myclass ~= 'SHAMAN' then tinsert(buttons, 'MultiCastActionButton') end
+		for _, name in next, buttons do
+			for i = 1, 12 do
+				local button = _G[name..i]
+				if button then
+					button:Hide()
+					button:UnregisterAllEvents()
+					button:SetAttribute('statehidden', true)
+				end
+			end
+		end
+
+		if _G.MultiCastActionBarFrame then
+			_G.MultiCastActionBarFrame.ignoreFramePositionManager = true
+		end
+
+		local frames = { 'MainMenuBar', 'MainMenuExpBar', 'ReputationWatchBar', 'MainMenuBarArtFrame', 'ShapeshiftBarFrame',
+			'BonusActionBarFrame', 'PossessBarFrame', 'PetActionBarFrame', 'VehicleMenuBar' }
+		if E.myclass ~= 'SHAMAN' then tinsert(frames, 'MultiCastActionBarFrame') end
+		for _, name in next, frames do
+			local frame = _G[name]
+			if frame then
+				frame:UnregisterAllEvents()
+				frame:Hide()
+				frame:SetParent(hider)
+			end
+		end
+
+		-- the art frame keeps the currency events, as on 3.3.5 (the backpack token bar)
+		if _G.MainMenuBarArtFrame then
+			_G.MainMenuBarArtFrame:RegisterEvent('KNOWN_CURRENCY_TYPES_UPDATE')
+			_G.MainMenuBarArtFrame:RegisterEvent('CURRENCY_DISPLAY_UPDATE')
+		end
+
+		-- the stock bar options do nothing with ElvUI bars
+		for _, name in next, { 'InterfaceOptionsActionBarsPanelAlwaysShowActionBars', 'InterfaceOptionsActionBarsPanelLockActionBars' } do
+			local option = _G[name]
+			if option then
+				option:EnableMouse(false)
+				option:SetAlpha(0)
+			end
+		end
+	end
+
 	function AB:DisableBlizzard()
+		if ElvUI335 then return AB:DisableBlizzard335() end
+
 		for name in next, untaint do
 			local frame = _G[name]
 			if frame then

@@ -281,8 +281,10 @@ function B:BagBar_UpdateDesaturated(inactive)
 end
 
 function B:LoadBagBar()
-	_G.BagsBar:SetParent(E.HiddenFrame)
-	_G.BagsBar:UnregisterAllEvents()
+	if _G.BagsBar then -- ElvUI Wotlk: 3.3.5 has no BagsBar (its bag buttons sit on MainMenuBarArtFrame)
+		_G.BagsBar:SetParent(E.HiddenFrame)
+		_G.BagsBar:UnregisterAllEvents()
+	end
 
 	--_G.EventRegistry:UnregisterCallback('MainMenuBarManager.OnExpandChanged', _G.BagsBar.Layout, _G.BagsBar)
 

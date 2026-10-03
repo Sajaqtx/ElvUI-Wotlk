@@ -321,6 +321,12 @@ do
 	end, isFrame)
 	add("SetObeyStepOnDrag", noop, objectType("Slider"))
 	add("IsAnchoringRestricted", returnFalse, isRegionOrFrame)
+	--mouse propagation (10.x): no equivalent on 3.3.5, the frame keeps its own mouse handling
+	add("SetPassThroughButtons", noop, isFrame)
+	add("SetPropagateMouseMotion", noop, isFrame)
+	add("SetPropagateMouseClicks", noop, isFrame)
+	add("SetMouseClickEnabled", function(self, enabled) if (not enabled) then self:EnableMouse(false) end end, isFrame)
+	add("SetMouseMotionEnabled", noop, isFrame)
 
 	--status bars fill left to right on 3.3.5; the flag is kept for the getter (ElvUI places its own textures)
 	add("SetReverseFill", function(self, reverse) self.__elvReverseFill = reverse and true or false end, objectType("StatusBar"))
