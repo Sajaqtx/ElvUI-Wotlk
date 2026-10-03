@@ -11,7 +11,7 @@ function UF:Construct_RoleIcon(frame)
 	tex:Size(17)
 	tex:Point('BOTTOM', frame.Health, 'BOTTOM', 0, 2)
 	tex.Override = UF.UpdateRoleIcon
-	frame:RegisterEvent('UNIT_CONNECTION', UF.UpdateRoleIcon)
+	ElvUI335.RegisterEvent(frame, 'UNIT_CONNECTION', UF.UpdateRoleIcon)
 
 	return tex
 end

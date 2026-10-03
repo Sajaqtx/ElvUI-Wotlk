@@ -271,7 +271,7 @@ local options = {
 	Health = {
 		enable = function(frame)
 			if oUF.isClassic then
-				frame:RegisterEvent('UNIT_HEALTH_FREQUENT', Update)
+				ElvUI335.RegisterEvent(frame, 'UNIT_HEALTH_FREQUENT', Update)
 			end
 
 			frame:RegisterEvent('UNIT_HEALTH', Update)
@@ -281,8 +281,8 @@ local options = {
 	},
 	Power = {
 		enable = function(frame)
-			frame:RegisterEvent('UNIT_POWER_UPDATE', Update)
-			frame:RegisterEvent('UNIT_MAXPOWER', Update)
+			ElvUI335.RegisterEvent(frame, 'UNIT_POWER_UPDATE', Update)
+			ElvUI335.RegisterEvent(frame, 'UNIT_MAXPOWER', Update)
 		end,
 		events = {'UNIT_POWER_UPDATE','UNIT_MAXPOWER'}
 	},

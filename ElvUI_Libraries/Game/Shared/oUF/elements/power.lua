@@ -321,11 +321,11 @@ local function SetColorDisconnected(element, state, isForced)
 	if(element.colorDisconnected ~= state or isForced) then
 		element.colorDisconnected = state
 		if(state) then
-			element.__owner:RegisterEvent('UNIT_CONNECTION', ColorPath)
+			ElvUI335.RegisterEvent(element.__owner, 'UNIT_CONNECTION', ColorPath)
 			element.__owner:RegisterEvent('PARTY_MEMBER_ENABLE', ColorPath)
 			element.__owner:RegisterEvent('PARTY_MEMBER_DISABLE', ColorPath)
 		else
-			element.__owner:UnregisterEvent('UNIT_CONNECTION', ColorPath)
+			ElvUI335.UnregisterEvent(element.__owner, 'UNIT_CONNECTION', ColorPath)
 			element.__owner:UnregisterEvent('PARTY_MEMBER_ENABLE', ColorPath)
 			element.__owner:UnregisterEvent('PARTY_MEMBER_DISABLE', ColorPath)
 		end
@@ -420,7 +420,7 @@ local function Enable(self)
 		end
 
 		if(element.colorDisconnected) then
-			self:RegisterEvent('UNIT_CONNECTION', ColorPath)
+			ElvUI335.RegisterEvent(self, 'UNIT_CONNECTION', ColorPath)
 		end
 
 		if(element.colorSelection) then
@@ -438,8 +438,8 @@ local function Enable(self)
 		self:RegisterEvent('UNIT_DISPLAYPOWER', Path)
 		self:RegisterEvent('UNIT_POWER_BAR_HIDE', Path)
 		self:RegisterEvent('UNIT_POWER_BAR_SHOW', Path)
-		self:RegisterEvent('UNIT_POWER_FREQUENT', Path)
-		self:RegisterEvent('UNIT_MAXPOWER', Path)
+		ElvUI335.RegisterEvent(self, 'UNIT_POWER_FREQUENT', Path)
+		ElvUI335.RegisterEvent(self, 'UNIT_MAXPOWER', Path)
 
 		if(element:IsObjectType('StatusBar') and not element:GetStatusBarTexture()) then
 			element:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]])
@@ -464,7 +464,7 @@ local function Disable(self)
 	if(element) then
 		element:Hide()
 
-		self:UnregisterEvent('UNIT_CONNECTION', ColorPath)
+		ElvUI335.UnregisterEvent(self, 'UNIT_CONNECTION', ColorPath)
 		self:UnregisterEvent('UNIT_FACTION', ColorPath)
 		self:UnregisterEvent('UNIT_FLAGS', ColorPath)
 		self:UnregisterEvent('UNIT_THREAT_LIST_UPDATE', ColorPath)
@@ -472,8 +472,8 @@ local function Disable(self)
 		self:UnregisterEvent('UNIT_DISPLAYPOWER', Path)
 		self:UnregisterEvent('UNIT_POWER_BAR_HIDE', Path)
 		self:UnregisterEvent('UNIT_POWER_BAR_SHOW', Path)
-		self:UnregisterEvent('UNIT_POWER_FREQUENT', Path)
-		self:UnregisterEvent('UNIT_MAXPOWER', Path)
+		ElvUI335.UnregisterEvent(self, 'UNIT_POWER_FREQUENT', Path)
+		ElvUI335.UnregisterEvent(self, 'UNIT_MAXPOWER', Path)
 	end
 end
 

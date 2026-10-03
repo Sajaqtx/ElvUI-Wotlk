@@ -1063,7 +1063,7 @@ function E:Auras_Create(parent, which, override)
 	events:RegisterEvent('UNIT_FACTION') -- highlight: faction changes
 	events:RegisterEvent('UNIT_FLAGS') -- highlight: flags changes
 	events:RegisterEvent('UNIT_PHASE') -- highlight: phase changes
-	events:RegisterEvent('GROUP_ROSTER_UPDATE')
+	ElvUI335.RegisterEvent(events, 'GROUP_ROSTER_UPDATE')
 	events:RegisterEvent('PLAYER_TARGET_CHANGED')
 	events:RegisterEvent('PLAYER_FOCUS_CHANGED')
 	events:SetScript('OnEvent', E.Auras_OnEvent)

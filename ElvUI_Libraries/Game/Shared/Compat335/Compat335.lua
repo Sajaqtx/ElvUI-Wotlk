@@ -49,6 +49,20 @@ end
 Compat.define = define
 
 ---------------------------------------------------------------------------------------------------------------
+--> xpcall with arguments (later clients pass the extra arguments to the function, Lua 5.1 as 3.3.5 ships it does
+--  not: oUF's event validation, AceAddon and CallbackHandler rely on it)
+
+if (select(2, xpcall(function(a) return a end, function() end, true)) ~= true) then
+	local xpcall, select, unpack = realG.xpcall, select, unpack
+	rawset(env, "xpcall", function(func, handler, ...)
+		local n = select("#", ...)
+		if (n == 0) then return xpcall(func, handler) end
+		local args = {...}
+		return xpcall(function() return func(unpack(args, 1, n)) end, handler)
+	end)
+end
+
+---------------------------------------------------------------------------------------------------------------
 --> client flavor: ElvUI and its libraries tell Retail / Classic / Wrath... apart by WOW_PROJECT_ID
 
 rawset(env, "WOW_PROJECT_MAINLINE", 1)
@@ -302,6 +316,8 @@ do
 		return minW, minH, maxW, maxH
 	end, isFrame)
 	add("SetObeyStepOnDrag", noop, objectType("Slider"))
+	add("IsAnchoringRestricted", returnFalse, isRegionOrFrame)
+
 	--status bars fill left to right on 3.3.5; the flag is kept for the getter (ElvUI places its own textures)
 	add("SetReverseFill", function(self, reverse) self.__elvReverseFill = reverse and true or false end, objectType("StatusBar"))
 	add("GetReverseFill", function(self) return self.__elvReverseFill == true end, objectType("StatusBar"))
@@ -324,61 +340,192 @@ do
 end
 
 ---------------------------------------------------------------------------------------------------------------
---> RegisterUnitEvent (5.0): the event registered for every unit, the units filtered before the frame's handler.
---  The filter wraps the frame's OnEvent and follows it when the frame sets another one.
+--> events: the names and the unit filter of later clients on a 3.3.5 frame, without replacing a client method
+--  (the client's own code would then run ours and carry the taint into protected frames).
+--  ElvUI335.RegisterEvent / UnregisterEvent / RegisterUnitEvent / IsEventRegistered (obj, event, ...): for a frame,
+--  a later event name is registered as its 3.3.5 events and handed back under the later name (UNIT_MANA "player"
+--  -> UNIT_POWER_UPDATE "player", "MANA"); RegisterUnitEvent filters the units. For anything else (an AceEvent
+--  object) the object's own method is called. Used by AceEvent, oUF and the frames ElvUI registers directly
+--  (outils/elvui335_events.js rewrites those calls). The frame's OnEvent is wrapped and follows SetScript.
 
 do
-	local filters = setmetatable({}, {__mode = "k"}) --frame -> {event -> {unit = true}}
-	local wrapped = setmetatable({}, {__mode = "k"}) --frame -> original handler
-	local function wrap(frame)
-		local original = frame:GetScript("OnEvent")
-		if (wrapped[frame] ~= nil and frame.__elvUnitEventWrapper == original) then return end
-		wrapped[frame] = original or false
-		local wrapper = function(self, event, unit, ...)
-			local units = filters[self] and filters[self][event]
-			if (units and unit ~= nil and not units[unit]) then return end
-			local handler = wrapped[self]
-			if (handler) then return handler(self, event, unit, ...) end
+	local POWER_EVENTS = {"UNIT_MANA", "UNIT_RAGE", "UNIT_ENERGY", "UNIT_FOCUS", "UNIT_RUNIC_POWER", "UNIT_HAPPINESS"}
+	local MAXPOWER_EVENTS = {"UNIT_MAXMANA", "UNIT_MAXRAGE", "UNIT_MAXENERGY", "UNIT_MAXFOCUS", "UNIT_MAXRUNIC_POWER", "UNIT_MAXHAPPINESS"}
+	local POWER_TOKEN = {UNIT_MANA = "MANA", UNIT_RAGE = "RAGE", UNIT_ENERGY = "ENERGY", UNIT_FOCUS = "FOCUS",
+		UNIT_RUNIC_POWER = "RUNIC_POWER", UNIT_HAPPINESS = "HAPPINESS", UNIT_MAXMANA = "MANA", UNIT_MAXRAGE = "RAGE",
+		UNIT_MAXENERGY = "ENERGY", UNIT_MAXFOCUS = "FOCUS", UNIT_MAXRUNIC_POWER = "RUNIC_POWER", UNIT_MAXHAPPINESS = "HAPPINESS"}
+	--later name -> its 3.3.5 events
+	local ALIASES = {
+		UNIT_POWER_UPDATE = POWER_EVENTS,
+		UNIT_POWER_FREQUENT = POWER_EVENTS,
+		UNIT_MAXPOWER = MAXPOWER_EVENTS,
+		UNIT_HEALTH_FREQUENT = {"UNIT_HEALTH"},
+		GROUP_ROSTER_UPDATE = {"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"},
+		GROUP_JOINED = {"PARTY_MEMBERS_CHANGED"},
+		GROUP_LEFT = {"PARTY_MEMBERS_CHANGED"},
+		PLAYER_SPECIALIZATION_CHANGED = {"ACTIVE_TALENT_GROUP_CHANGED"},
+		PLAYER_LEVEL_CHANGED = {"PLAYER_LEVEL_UP"},
+		UPDATE_POSSESS_BAR = {"UPDATE_BONUS_ACTIONBAR"},
+		UPDATE_VEHICLE_ACTIONBAR = {"UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE"},
+		UPDATE_OVERRIDE_ACTIONBAR = {"UPDATE_BONUS_ACTIONBAR"},
+		UNIT_CONNECTION = {"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE"},
+	}
+	Compat.EVENT_ALIASES = ALIASES
+	--the arguments under the later name
+	local function Translate(modern, legacy, ...)
+		if (modern == "UNIT_POWER_UPDATE" or modern == "UNIT_POWER_FREQUENT" or modern == "UNIT_MAXPOWER") then
+			local unit = ...
+			return unit, POWER_TOKEN[legacy]
+		elseif (modern == "PLAYER_SPECIALIZATION_CHANGED" or modern == "UPDATE_VEHICLE_ACTIONBAR") then
+			return "player"
+		elseif (modern == "PLAYER_LEVEL_CHANGED") then
+			local level = ...
+			return (level or 1) - 1, level
+		elseif (modern == "UNIT_CONNECTION") then
+			local unit = ...
+			return unit, legacy == "PARTY_MEMBER_ENABLE"
 		end
-		frame.__elvUnitEventWrapper = wrapper
-		frame:SetScript("OnEvent", wrapper)
-		if (not frame.__elvUnitEventHooked) then
-			frame.__elvUnitEventHooked = true
-			hooksecurefunc(frame, "SetScript", function(self, script, func)
-				if (script == "OnEvent" and func ~= self.__elvUnitEventWrapper) then
-					wrapped[self] = func or false
-					self:SetScript("OnEvent", self.__elvUnitEventWrapper)
-				end
-			end)
-		end
+		return ...
 	end
+
+	local direct = setmetatable({}, {__mode = "k"})  --frame -> {event -> true} registered under its own name
+	local aliased = setmetatable({}, {__mode = "k"}) --frame -> {legacy -> {modern -> true}}
+	local filters = setmetatable({}, {__mode = "k"}) --frame -> {event -> {unit -> true}}
+	local handlers = setmetatable({}, {__mode = "k"}) --frame -> its own OnEvent
+
 	local holder = CreateFrame("Frame")
 	local index = getmetatable(holder).__index
-	local function registerUnitEvent(self, event, unit1, unit2)
-		self:RegisterEvent(event)
-		if (unit1 == nil and unit2 == nil) then
-			if (filters[self]) then filters[self][event] = nil end
-			return true
+	local nativeRegister, nativeUnregister, nativeIsRegistered = index.RegisterEvent, index.UnregisterEvent, index.IsEventRegistered
+
+	local function Passes(frame, event, unit)
+		local units = filters[frame] and filters[frame][event]
+		return not units or unit == nil or units[unit] ~= nil
+	end
+	local function Wrapper(self, event, ...)
+		local handler = handlers[self]
+		if (not handler) then return end
+		local d = direct[self]
+		if (d and d[event] and Passes(self, event, (...))) then
+			handler(self, event, ...)
 		end
-		filters[self] = filters[self] or {}
-		local units = {}
-		if (unit1) then units[unit1] = true end
-		if (unit2) then units[unit2] = true end
-		filters[self][event] = units
-		wrap(self)
+		local a = aliased[self] and aliased[self][event]
+		if (a) then
+			for modern in pairs(a) do
+				if (Passes(self, modern, (...))) then
+					handler(self, modern, Translate(modern, event, ...))
+				end
+			end
+		end
+	end
+	local function Wrap(frame)
+		if (frame.__elv335Wrapped) then return end
+		frame.__elv335Wrapped = true
+		handlers[frame] = frame:GetScript("OnEvent")
+		frame:SetScript("OnEvent", Wrapper)
+		hooksecurefunc(frame, "SetScript", function(self, script, func)
+			if (script == "OnEvent" and func ~= Wrapper) then
+				handlers[self] = func
+				self:SetScript("OnEvent", Wrapper)
+			end
+		end)
+	end
+	local function IsFrame(obj)
+		return type(obj) == "table" and type(rawget(obj, 0)) == "userdata"
+	end
+
+	local function RegisterEvent(frame, event, ...)
+		direct[frame] = direct[frame] or {}
+		local legacy = ALIASES[event]
+		if (legacy) then
+			aliased[frame] = aliased[frame] or {}
+			for _, l in ipairs(legacy) do
+				aliased[frame][l] = aliased[frame][l] or {}
+				aliased[frame][l][event] = true
+				nativeRegister(frame, l)
+			end
+		else
+			direct[frame][event] = true
+			--a name 3.3.5 does not know: nothing to register (the client would ignore it or raise)
+			pcall(nativeRegister, frame, event)
+		end
+		Wrap(frame)
 		return true
 	end
-	Compat.RegisterUnitEvent = registerUnitEvent
+	local function StillNeeded(frame, l)
+		if (direct[frame] and direct[frame][l]) then return true end
+		local a = aliased[frame] and aliased[frame][l]
+		return a ~= nil and next(a) ~= nil
+	end
+	local function UnregisterEvent(frame, event, ...)
+		if (filters[frame]) then filters[frame][event] = nil end
+		local legacy = ALIASES[event]
+		if (legacy) then
+			for _, l in ipairs(legacy) do
+				local a = aliased[frame] and aliased[frame][l]
+				if (a) then a[event] = nil end
+				if (not StillNeeded(frame, l)) then nativeUnregister(frame, l) end
+			end
+		else
+			if (direct[frame]) then direct[frame][event] = nil end
+			if (not StillNeeded(frame, event)) then pcall(nativeUnregister, frame, event) end
+		end
+	end
+	local function RegisterUnitEvent(frame, event, unit1, unit2, ...)
+		RegisterEvent(frame, event)
+		filters[frame] = filters[frame] or {}
+		if (unit1 == nil and unit2 == nil) then
+			filters[frame][event] = nil
+		else
+			local units = {}
+			if (unit1) then units[unit1] = true end
+			if (unit2) then units[unit2] = true end
+			filters[frame][event] = units
+		end
+		return true
+	end
+	local function IsEventRegistered(frame, event)
+		if (ALIASES[event]) then
+			for _, a in pairs(aliased[frame] or {}) do
+				if (a[event]) then return true end
+			end
+			return false
+		end
+		if (direct[frame] and direct[frame][event]) then return true end
+		return nativeIsRegistered(frame, event) and true or false
+	end
+	--raw, on a frame (oUF and AceEvent call these from their own methods)
+	Compat.FrameRegisterEvent, Compat.FrameUnregisterEvent = RegisterEvent, UnregisterEvent
+	Compat.FrameRegisterUnitEvent, Compat.FrameIsEventRegistered = RegisterUnitEvent, IsEventRegistered
+	--for any object (the rewritten call sites): a frame with the client's methods is translated, anything with
+	--methods of its own (an oUF frame, an AceEvent object) gets its own method called
+	local function Own(obj, method, native)
+		return not IsFrame(obj) or obj[method] ~= native
+	end
+	Compat.RegisterEvent = function(obj, event, ...)
+		if (Own(obj, "RegisterEvent", nativeRegister)) then return obj:RegisterEvent(event, ...) end
+		return RegisterEvent(obj, event)
+	end
+	Compat.UnregisterEvent = function(obj, event, ...)
+		if (Own(obj, "UnregisterEvent", nativeUnregister)) then return obj:UnregisterEvent(event, ...) end
+		return UnregisterEvent(obj, event)
+	end
+	Compat.RegisterUnitEvent = function(obj, event, ...)
+		if (Own(obj, "RegisterUnitEvent", RegisterUnitEvent)) then return obj:RegisterUnitEvent(event, ...) end
+		return RegisterUnitEvent(obj, event, ...)
+	end
+	Compat.IsEventRegistered = function(obj, event, ...)
+		if (Own(obj, "IsEventRegistered", nativeIsRegistered)) then return obj:IsEventRegistered(event, ...) end
+		return IsEventRegistered(obj, event)
+	end
+
+	--RegisterUnitEvent as a method, for the frames that call it themselves: a method the 3.3.5 frames lack, so the
+	--client never calls it (no taint path)
 	for _, frameType in ipairs({"Frame", "Button", "CheckButton", "StatusBar", "Cooldown", "Slider", "ScrollFrame", "EditBox",
-		"GameTooltip", "PlayerModel", "Model"}) do
+		"GameTooltip", "PlayerModel", "Model", "MessageFrame", "ScrollingMessageFrame"}) do
 		local ok, frame = pcall(CreateFrame, frameType, nil, holder)
 		local meta = ok and frame and getmetatable(frame)
 		if (meta and type(meta.__index) == "table" and meta.__index.RegisterUnitEvent == nil) then
-			meta.__index.RegisterUnitEvent = registerUnitEvent
+			meta.__index.RegisterUnitEvent = RegisterUnitEvent
 		end
 	end
-	--a later RegisterEvent of the same event drops its unit filter, UnregisterEvent too
-	hooksecurefunc(index, "UnregisterEvent", function(self, event)
-		if (filters[self]) then filters[self][event] = nil end
-	end)
 end

@@ -503,8 +503,8 @@ local function CheckCharges(self, event)
 end
 
 local function ClassPowerEnable(element, owner)
-	owner:RegisterEvent('UNIT_MAXPOWER', Path)
-	owner:RegisterEvent('UNIT_POWER_FREQUENT', Path)
+	ElvUI335.RegisterEvent(owner, 'UNIT_MAXPOWER', Path)
+	ElvUI335.RegisterEvent(owner, 'UNIT_POWER_FREQUENT', Path)
 
 	local classPowerID = element.classPowerID
 	if PoweredByCharges[classPowerID] then
@@ -533,8 +533,8 @@ local function ClassPowerEnable(element, owner)
 end
 
 local function ClassPowerDisable(element, owner)
-	owner:UnregisterEvent('UNIT_MAXPOWER', Path)
-	owner:UnregisterEvent('UNIT_POWER_FREQUENT', Path)
+	ElvUI335.UnregisterEvent(owner, 'UNIT_MAXPOWER', Path)
+	ElvUI335.UnregisterEvent(owner, 'UNIT_POWER_FREQUENT', Path)
 	owner:UnregisterEvent('SPELL_UPDATE_CHARGES', CheckCharges)
 	owner:UnregisterEvent('UNIT_AURA')
 

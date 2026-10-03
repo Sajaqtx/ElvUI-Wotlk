@@ -426,7 +426,7 @@ local function Enable(self)
 		self:RegisterEvent('UNIT_HEAL_PREDICTION', Path)
 
 		if oUF.isClassic then
-			self:RegisterEvent('UNIT_HEALTH_FREQUENT', Path)
+			ElvUI335.RegisterEvent(self, 'UNIT_HEALTH_FREQUENT', Path)
 		end
 
 		if oUF.isRetail or oUF.isMists then
@@ -556,7 +556,7 @@ local function Disable(self)
 		self:UnregisterEvent('UNIT_HEAL_PREDICTION', Path)
 
 		if oUF.isClassic then
-			self:UnregisterEvent('UNIT_HEALTH_FREQUENT', Path)
+			ElvUI335.UnregisterEvent(self, 'UNIT_HEALTH_FREQUENT', Path)
 		end
 
 		if oUF.isRetail or oUF.isMists then

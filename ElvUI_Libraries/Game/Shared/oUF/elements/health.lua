@@ -272,11 +272,11 @@ local function SetColorDisconnected(element, state, isForced)
 	if(element.colorDisconnected ~= state or isForced) then
 		element.colorDisconnected = state
 		if(state) then
-			element.__owner:RegisterEvent('UNIT_CONNECTION', ColorPath)
+			ElvUI335.RegisterEvent(element.__owner, 'UNIT_CONNECTION', ColorPath)
 			element.__owner:RegisterEvent('PARTY_MEMBER_ENABLE', ColorPath)
 			element.__owner:RegisterEvent('PARTY_MEMBER_DISABLE', ColorPath)
 		else
-			element.__owner:UnregisterEvent('UNIT_CONNECTION', ColorPath)
+			ElvUI335.UnregisterEvent(element.__owner, 'UNIT_CONNECTION', ColorPath)
 			element.__owner:UnregisterEvent('PARTY_MEMBER_ENABLE', ColorPath)
 			element.__owner:UnregisterEvent('PARTY_MEMBER_DISABLE', ColorPath)
 		end
@@ -389,11 +389,11 @@ local function Enable(self)
 		if oUF.isRetail then
 			self:RegisterEvent('UNIT_MAX_HEALTH_MODIFIERS_CHANGED', Path)
 		elseif oUF.isClassic then
-			self:RegisterEvent('UNIT_HEALTH_FREQUENT', Path)
+			ElvUI335.RegisterEvent(self, 'UNIT_HEALTH_FREQUENT', Path)
 		end
 
 		if(element.colorDisconnected) then
-			self:RegisterEvent('UNIT_CONNECTION', ColorPath)
+			ElvUI335.RegisterEvent(self, 'UNIT_CONNECTION', ColorPath)
 			self:RegisterEvent('PARTY_MEMBER_ENABLE', ColorPath)
 			self:RegisterEvent('PARTY_MEMBER_DISABLE', ColorPath)
 		end
@@ -441,12 +441,12 @@ local function Disable(self)
 		if oUF.isRetail then
 			self:UnregisterEvent('UNIT_MAX_HEALTH_MODIFIERS_CHANGED', Path)
 		elseif oUF.isClassic then
-			self:UnregisterEvent('UNIT_HEALTH_FREQUENT', Path)
+			ElvUI335.UnregisterEvent(self, 'UNIT_HEALTH_FREQUENT', Path)
 		end
 
 		self:UnregisterEvent('UNIT_HEALTH', Path)
 		self:UnregisterEvent('UNIT_MAXHEALTH', Path)
-		self:UnregisterEvent('UNIT_CONNECTION', ColorPath)
+		ElvUI335.UnregisterEvent(self, 'UNIT_CONNECTION', ColorPath)
 		self:UnregisterEvent('UNIT_FACTION', ColorPath)
 		self:UnregisterEvent('UNIT_FLAGS', ColorPath)
 		self:UnregisterEvent('PARTY_MEMBER_ENABLE', ColorPath)

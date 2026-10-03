@@ -29,12 +29,13 @@ if not AceEvent.events then
 		"RegisterEvent", "UnregisterEvent", "UnregisterAllEvents")
 end
 
+-- ElvUI Wotlk: later event names registered as their 3.3.5 events (see Compat335.lua)
 function AceEvent.events:OnUsed(target, eventname)
-	AceEvent.frame:RegisterEvent(eventname)
+	ElvUI335.FrameRegisterEvent(AceEvent.frame, eventname)
 end
 
 function AceEvent.events:OnUnused(target, eventname)
-	AceEvent.frame:UnregisterEvent(eventname)
+	ElvUI335.FrameUnregisterEvent(AceEvent.frame, eventname)
 end
 
 

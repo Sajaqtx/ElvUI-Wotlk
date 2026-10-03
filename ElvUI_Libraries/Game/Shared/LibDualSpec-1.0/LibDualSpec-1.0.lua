@@ -476,8 +476,8 @@ local function eventHandler(self, event)
 		self:UnregisterEvent(event)
 		self:RegisterEvent("PLAYER_ENTERING_WORLD")
 		if isSpecBased then
-			self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
-			self:RegisterEvent("PLAYER_LEVEL_CHANGED")
+			ElvUI335.RegisterUnitEvent(self, "PLAYER_SPECIALIZATION_CHANGED", "player")
+			ElvUI335.RegisterEvent(self, "PLAYER_LEVEL_CHANGED")
 		else
 			self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 		end

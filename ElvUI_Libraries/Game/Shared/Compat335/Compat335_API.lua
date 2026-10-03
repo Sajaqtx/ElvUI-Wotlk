@@ -976,7 +976,7 @@ do
 		GetLogIndexForQuestID = IndexForQuestID,
 		GetTitleForQuestID = function(questID) local index = IndexForQuestID(questID) return index and (GetQuestLogTitle(index)) end,
 		GetQuestDifficultyLevel = function(questID) local index = IndexForQuestID(questID) return index and (select(2, GetQuestLogTitle(index))) end,
-		GetMaxNumQuestsCanAccept = function() return MAX_QUESTS or 25 end,
+		GetMaxNumQuestsCanAccept = function() return 25 end, --WotLK quest log size
 		GetQuestWatchType = function(questID) local index = IndexForQuestID(questID) return index and IsQuestWatched(index) and 0 or nil end,
 		ReadyForTurnIn = Completed,
 		IsComplete = Completed,
@@ -1071,3 +1071,53 @@ do
 		end,
 	})
 end
+
+---------------------------------------------------------------------------------------------------------------
+--> helpers of later FrameXML
+
+--secure calls (4.x securecallfunction): the function called with its arguments, errors to the error handler
+define("securecallfunction", function(func, ...)
+	if (type(func) ~= "function") then return end
+	return securecall(func, ...)
+end)
+define("securecallmethod", function(object, method, ...)
+	local func = object and object[method]
+	if (type(func) ~= "function") then return end
+	return securecall(func, object, ...)
+end)
+
+--2D vectors (7.x CreateVector2D); the client's Vector2DMixin when it has one
+do
+	local Vector2DMixin = realG.Vector2DMixin
+	if (not Vector2DMixin) then
+		Vector2DMixin = {}
+		function Vector2DMixin:SetXY(x, y) self.x, self.y = x, y end
+		function Vector2DMixin:GetXY() return self.x, self.y end
+		function Vector2DMixin:Clone() return env.CreateVector2D(self.x, self.y) end
+		function Vector2DMixin:ScaleBy(s) self.x, self.y = self.x * s, self.y * s end
+		function Vector2DMixin:Add(o) self.x, self.y = self.x + o.x, self.y + o.y end
+		function Vector2DMixin:Subtract(o) self.x, self.y = self.x - o.x, self.y - o.y end
+		function Vector2DMixin:GetLength() return math.sqrt(self.x * self.x + self.y * self.y) end
+		function Vector2DMixin:IsEqualTo(o) return self.x == o.x and self.y == o.y end
+	end
+	define("CreateVector2D", function(x, y)
+		local v = setmetatable({}, {__index = Vector2DMixin})
+		v:SetXY(x or 0, y or 0)
+		return v
+	end)
+end
+
+--font families (9.x CreateFontFamily: one font per alphabet): 3.3.5 has one font object, made from the roman member
+define("CreateFontFamily", function(name, members)
+	local font = _G[name] or CreateFont(name)
+	local roman
+	for _, member in ipairs(members or {}) do
+		if (member.alphabet == "roman" or not roman) then roman = member end
+	end
+	if (roman and roman.file) then
+		font:SetFont(roman.file, roman.height or 12, roman.flags or "")
+	end
+	return font
+end)
+
+if (realG.ENCHANTED_TOOLTIP_LINE == nil) then rawset(env, "ENCHANTED_TOOLTIP_LINE", "Enchanted: %s") end

@@ -153,7 +153,7 @@ function TM:Initialize()
 	TM:RegisterEvent('PLAYER_ENTERING_WORLD', 'Update')
 
 	if E.Retail then
-		TM:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'Update')
+		ElvUI335.RegisterEvent(TM, 'PLAYER_SPECIALIZATION_CHANGED', 'Update')
 	else
 		TM:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'Update')
 	end

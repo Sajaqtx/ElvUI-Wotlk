@@ -273,7 +273,7 @@ function RU:CreateRoleIcons()
 	RoleIcons:Size(PANEL_WIDTH * 0.4, BUTTON_HEIGHT + 8)
 	RoleIcons:SetTemplate('Transparent')
 	RoleIcons:RegisterEvent('PLAYER_ENTERING_WORLD')
-	RoleIcons:RegisterEvent('GROUP_ROSTER_UPDATE')
+	ElvUI335.RegisterEvent(RoleIcons, 'GROUP_ROSTER_UPDATE')
 	RoleIcons:SetScript('OnEvent', RU.OnEvent_RoleIcons)
 	RoleIcons.icons = {}
 
@@ -879,7 +879,7 @@ function RU:Initialize()
 	RU:CreateCheckBox('RaidUtility_EveryoneAssist', RaidUtilityPanel, 'UICheckButtonTemplate', BUTTON_HEIGHT + 4, 'TOPLEFT', _G.RaidUtility_DungeonDifficulty or RaidCountdownButton or MainTankButton, 'BOTTOMLEFT', -4, -3, _G.ALL_ASSIST_LABEL_LONG, buttonEvents, RU.OnEvent_EveryoneAssist, RU.OnClick_EveryoneAssist)
 
 	-- Automatically show/hide the frame if we have RaidLeader or RaidOfficer
-	RU:RegisterEvent('GROUP_ROSTER_UPDATE', 'ToggleRaidUtil')
+	ElvUI335.RegisterEvent(RU, 'GROUP_ROSTER_UPDATE', 'ToggleRaidUtil')
 	RU:RegisterEvent('PLAYER_ENTERING_WORLD', 'ToggleRaidUtil')
 end
 

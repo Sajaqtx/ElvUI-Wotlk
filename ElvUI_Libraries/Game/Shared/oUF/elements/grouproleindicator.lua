@@ -99,7 +99,7 @@ local function Enable(self)
 		if(self.__unit == 'player') then
 			self:RegisterEvent('PLAYER_ROLES_ASSIGNED', Path, true)
 		else
-			self:RegisterEvent('GROUP_ROSTER_UPDATE', Path, true)
+			ElvUI335.RegisterEvent(self, 'GROUP_ROSTER_UPDATE', Path, true)
 		end
 
 		if(element:IsObjectType('Texture') and not element:GetTexture()) then
@@ -118,7 +118,7 @@ local function Disable(self)
 		self:UnregisterEvent('PLAYER_REGEN_DISABLED', Path)
 		self:UnregisterEvent('PLAYER_REGEN_ENABLED', Path)
 		self:UnregisterEvent('PLAYER_ROLES_ASSIGNED', Path)
-		self:UnregisterEvent('GROUP_ROSTER_UPDATE', Path, true)
+		ElvUI335.UnregisterEvent(self, 'GROUP_ROSTER_UPDATE', Path, true)
 	end
 end
 

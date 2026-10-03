@@ -132,7 +132,7 @@ function lib:RegisterPlugin(name, callback, isLib, version)
 		C_ChatInfo_RegisterAddonMessagePrefix(lib.prefix)
 
 		lib.VCFrame:RegisterEvent('CHAT_MSG_ADDON')
-		lib.VCFrame:RegisterEvent('GROUP_ROSTER_UPDATE')
+		ElvUI335.RegisterEvent(lib.VCFrame, 'GROUP_ROSTER_UPDATE')
 		lib.VCFrame:RegisterEvent('PLAYER_ENTERING_WORLD')
 
 		lib.registeredPrefix = true

@@ -1671,9 +1671,10 @@ do
 	local SetFrameUnit = {}
 	local SetFrameHidden = {}
 	local DisabledElements = {}
-	local AllowedFuncs = {
-		[_G.DefaultCompactUnitFrameSetup] = true
-	}
+	local AllowedFuncs = {}
+	if _G.DefaultCompactUnitFrameSetup then -- ElvUI Wotlk: no compact unit frames on 3.3.5
+		AllowedFuncs[_G.DefaultCompactUnitFrameSetup] = true
+	end
 
 	local function FrameShown(frame, shown)
 		if shown then

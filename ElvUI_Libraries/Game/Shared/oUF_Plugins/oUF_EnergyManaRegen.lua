@@ -128,7 +128,7 @@ local Disable = function(self)
 	if not element then return end
 
 	self:UnregisterEvent('UNIT_SPELLCAST_SUCCEEDED', OnUnitSpellcastSucceeded)
-	self:UnregisterEvent('UNIT_POWER_UPDATE', OnUnitPowerUpdate)
+	ElvUI335.UnregisterEvent(self, 'UNIT_POWER_UPDATE', OnUnitPowerUpdate)
 
 	element.Spark:Hide()
 	element:SetScript('OnUpdate', nil)
@@ -163,7 +163,7 @@ local Enable = function(self, unit)
 	end
 
 	self:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED', OnUnitSpellcastSucceeded)
-	self:RegisterEvent('UNIT_POWER_UPDATE', OnUnitPowerUpdate)
+	ElvUI335.RegisterEvent(self, 'UNIT_POWER_UPDATE', OnUnitPowerUpdate)
 
 	element:SetScript('OnUpdate', function(_, elapsed) Path(self, elapsed) end)
 

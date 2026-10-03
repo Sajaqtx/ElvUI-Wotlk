@@ -1498,8 +1498,8 @@ function E:UnregisterGameEvent(event)
 end
 
 function E:LoadAPI()
-	E:RegisterEvent('GROUP_LEFT')
-	E:RegisterEvent('GROUP_ROSTER_UPDATE')
+	ElvUI335.RegisterEvent(E, 'GROUP_LEFT')
+	ElvUI335.RegisterEvent(E, 'GROUP_ROSTER_UPDATE')
 	E:RegisterEvent('PLAYER_LEVEL_UP')
 	E:RegisterEvent('PLAYER_ENTERING_WORLD')
 	E:RegisterEvent('PLAYER_REGEN_ENABLED')
@@ -1536,7 +1536,7 @@ function E:LoadAPI()
 
 	if E.Retail or E.Mists then
 		E:RegisterEvent('NEUTRAL_FACTION_SELECT_RESULT')
-		E:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'CheckRole')
+		ElvUI335.RegisterEvent(E, 'PLAYER_SPECIALIZATION_CHANGED', 'CheckRole')
 		E:RegisterEvent('PET_BATTLE_CLOSE', 'AddNonPetBattleFrames')
 		E:RegisterEvent('PET_BATTLE_OPENING_START', 'RemoveNonPetBattleFrames')
 		E:RegisterEvent('UNIT_ENTERED_VEHICLE', 'EnterVehicleHideFrames')

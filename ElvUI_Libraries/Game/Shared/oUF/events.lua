@@ -9,11 +9,11 @@ local validateToken = Private.validateToken
 local isUnitEvent = Private.isUnitEvent
 local frame_metatable = Private.frame_metatable
 
--- Original event methods
-local registerEvent = frame_metatable.__index.RegisterEvent
-local registerUnitEvent = frame_metatable.__index.RegisterUnitEvent
-local unregisterEvent = frame_metatable.__index.UnregisterEvent
-local isEventRegistered = frame_metatable.__index.IsEventRegistered
+-- Original event methods (ElvUI Wotlk: through the 3.3.5 event translation, see Compat335.lua)
+local registerEvent = ElvUI335.FrameRegisterEvent
+local registerUnitEvent = ElvUI335.FrameRegisterUnitEvent
+local unregisterEvent = ElvUI335.FrameUnregisterEvent
+local isEventRegistered = ElvUI335.FrameIsEventRegistered
 
 local next, type, assert = next, type, assert
 local format, tinsert = format, tinsert

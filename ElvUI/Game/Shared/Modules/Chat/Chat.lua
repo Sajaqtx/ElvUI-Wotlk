@@ -4100,7 +4100,7 @@ function CH:Initialize()
 
 	CH:RegisterEvent('UPDATE_CHAT_WINDOWS', 'SetupChat')
 	CH:RegisterEvent('UPDATE_FLOATING_CHAT_WINDOWS', 'SetupChat')
-	CH:RegisterEvent('GROUP_ROSTER_UPDATE', 'CheckLFGRoles')
+	ElvUI335.RegisterEvent(CH, 'GROUP_ROSTER_UPDATE', 'CheckLFGRoles')
 	CH:RegisterEvent('PET_BATTLE_CLOSE')
 	CH:RegisterEvent('CVAR_UPDATE')
 

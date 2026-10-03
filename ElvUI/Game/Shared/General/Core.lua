@@ -1122,7 +1122,7 @@ do
 	local f = CreateFrame('Frame')
 	f:SetScript('OnEvent', SendRecieve)
 	f:RegisterEvent('CHAT_MSG_ADDON')
-	f:RegisterEvent('GROUP_ROSTER_UPDATE')
+	ElvUI335.RegisterEvent(f, 'GROUP_ROSTER_UPDATE')
 	f:RegisterEvent('PLAYER_ENTERING_WORLD')
 end
 

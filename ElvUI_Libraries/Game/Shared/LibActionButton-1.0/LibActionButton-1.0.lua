@@ -1518,7 +1518,7 @@ function InitializeEventHandler()
 
 		lib.eventFrame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", "player")
 		lib.eventFrame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "player")
-		lib.eventFrame:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR")
+		ElvUI335.RegisterEvent(lib.eventFrame, "UPDATE_VEHICLE_ACTIONBAR")
 	end
 
 	if WoWRetail then

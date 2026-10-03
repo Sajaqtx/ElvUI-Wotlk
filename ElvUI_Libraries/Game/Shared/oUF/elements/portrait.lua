@@ -140,7 +140,7 @@ local function Enable(self, unit)
 			self:RegisterEvent('PORTRAITS_UPDATED', Path, true)
 		end
 
-		self:RegisterEvent('UNIT_CONNECTION', Path)
+		ElvUI335.RegisterEvent(self, 'UNIT_CONNECTION', Path)
 
 		-- The quest log uses PARTY_MEMBER_{ENABLE,DISABLE} to handle updating of party
 		-- members overlapping quests. This will probably be enough to handle model updating.
@@ -172,7 +172,7 @@ local function Disable(self)
 
 		self:UnregisterEvent('PARTY_MEMBER_ENABLE', Path)
 		self:UnregisterEvent('PARTY_MEMBER_DISABLE', Path)
-		self:UnregisterEvent('UNIT_CONNECTION', Path)
+		ElvUI335.UnregisterEvent(self, 'UNIT_CONNECTION', Path)
 	end
 end
 

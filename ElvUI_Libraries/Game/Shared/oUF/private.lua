@@ -57,6 +57,9 @@ do
 	end
 
 	function Private.validateEvent(event)
+		-- ElvUI Wotlk: a later name registered as its 3.3.5 events (Compat335.lua)
+		if ElvUI335.EVENT_ALIASES[event] then return true end
+
 		local isOK = xpcall(validator.RegisterEvent, Private.nierror, validator, event)
 		if(isOK) then
 			validator:UnregisterEvent(event)

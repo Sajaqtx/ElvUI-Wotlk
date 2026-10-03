@@ -128,7 +128,7 @@ local function Enable(self)
 		end
 
 		if E.Classic then
-			self:RegisterEvent('UNIT_HEALTH_FREQUENT', Path)
+			ElvUI335.RegisterEvent(self, 'UNIT_HEALTH_FREQUENT', Path)
 		end
 
 		self:RegisterEvent('UNIT_HEALTH', Path)
@@ -145,7 +145,7 @@ local function Disable(self)
 		HideIndicators(element)
 
 		if E.Classic then
-			self:UnregisterEvent('UNIT_HEALTH_FREQUENT', Path)
+			ElvUI335.UnregisterEvent(self, 'UNIT_HEALTH_FREQUENT', Path)
 		end
 
 		self:UnregisterEvent('UNIT_HEALTH', Path)

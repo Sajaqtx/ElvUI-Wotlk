@@ -342,7 +342,7 @@ local function initObject(unit, style, styleFunc, header, ...)
 		else
 			-- update the frame when its prev unit is replaced with a new one
 			-- updateRaid relies on UnitGUID to detect the unit change
-			object:RegisterEvent('GROUP_ROSTER_UPDATE', updateRaid, true)
+			ElvUI335.RegisterEvent(object, 'GROUP_ROSTER_UPDATE', updateRaid, true)
 
 			if(num > 1) then
 				if(object:GetParent() == header) then
