@@ -1,4 +1,4 @@
-local E, L, V, P, G = unpack(ElvUI)
+setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local DT = E:GetModule('DataTexts')
 
 if not (E.Wrath or E.TBC or E.ClassicSOD or E.ClassicAnniv or E.ClassicAnnivHC) then return end

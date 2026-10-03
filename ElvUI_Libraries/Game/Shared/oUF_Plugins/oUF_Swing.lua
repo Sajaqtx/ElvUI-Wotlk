@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 	Project.: oUF_Swing
 	File....: oUF_Swing.lua
 	Version.: 40200.1

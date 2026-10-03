@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- Italian localization file for itIT
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- Italian localization file for itIT
 local L = E.Libs.ACL:NewLocale('ElvUI', 'itIT')
 
 L["ALT"] = true

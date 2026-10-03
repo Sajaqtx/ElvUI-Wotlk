@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Resurrect Indicator
 
 Handles the visibility and updating of an indicator based on the unit's incoming resurrect status.

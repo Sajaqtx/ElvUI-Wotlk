@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- French localization file for frFR
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- French localization file for frFR
 local L = E.Libs.ACL:NewLocale('ElvUI', 'frFR')
 
 L["Line Width:"] = true

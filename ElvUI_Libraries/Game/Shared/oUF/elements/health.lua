@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Health Bar
 
 Handles the updating of a status bar that displays the unit's health.

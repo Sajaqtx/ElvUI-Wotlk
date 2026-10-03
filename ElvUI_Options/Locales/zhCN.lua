@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- Simplified Chinese localization file for zhCN
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- Simplified Chinese localization file for zhCN
 local L = E.Libs.ACL:NewLocale('ElvUI', 'zhCN')
 
 L["ALT"] = true

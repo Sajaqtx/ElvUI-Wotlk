@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- Traditional Chinese localization file for zhTW
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- Traditional Chinese localization file for zhTW
 local L = E.Libs.ACL:NewLocale('ElvUI', 'zhTW')
 
 L["ALT"] = true

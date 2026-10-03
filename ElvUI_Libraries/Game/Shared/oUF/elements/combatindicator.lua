@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Combat Indicator
 
 Toggles the visibility of an indicator based on the player's combat status.

@@ -1,4 +1,4 @@
-﻿utf8_lc_uc = {
+﻿setfenv(1, ElvUI335_ENV) utf8_lc_uc = {
 	["a"] = "A",
 	["b"] = "B",
 	["c"] = "C",

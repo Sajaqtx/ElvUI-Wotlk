@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Raid Target Indicator
 
 Handles the visibility and updating of an indicator based on the unit's raid target assignment.

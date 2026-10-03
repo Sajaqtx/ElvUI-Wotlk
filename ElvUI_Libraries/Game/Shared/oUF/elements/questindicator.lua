@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Quest Indicator
 
 Handles the visibility and updating of an indicator based on the unit's involvement in a quest.

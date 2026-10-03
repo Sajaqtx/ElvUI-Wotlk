@@ -1,4 +1,4 @@
--- Credit Baudzilla and Simpy
+setfenv(1, ElvUI335_ENV) -- Credit Baudzilla and Simpy
 local E, L, V, P, G = unpack(ElvUI)
 local M = E:GetModule('Misc')
 

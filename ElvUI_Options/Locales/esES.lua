@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- Spanish localization file for esES
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- Spanish localization file for esES
 local L = E.Libs.ACL:NewLocale('ElvUI', 'esES')
 
 L["ALT"] = "ALT"

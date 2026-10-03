@@ -1,4 +1,4 @@
-local E = unpack(ElvUI)
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI)
 local S = E:GetModule('Skins')
 
 local next = next

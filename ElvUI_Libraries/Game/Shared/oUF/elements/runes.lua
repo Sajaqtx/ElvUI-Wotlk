@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Runes
 
 Handles the visibility and updating of Death Knight's runes.

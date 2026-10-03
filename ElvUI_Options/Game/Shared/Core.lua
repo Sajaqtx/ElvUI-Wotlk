@@ -1,4 +1,4 @@
-local E, _, V, P, G = unpack(ElvUI)
+setfenv(1, ElvUI335_ENV) local E, _, V, P, G = unpack(ElvUI)
 local UF = E:GetModule('UnitFrames')
 local MC = E:GetModule('ModuleCopy')
 local D = E:GetModule('Distributor')

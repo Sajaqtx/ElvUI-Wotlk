@@ -1,4 +1,4 @@
---[[---------------------------------------------------------------------------------
+setfenv(1, ElvUI335_ENV) --[[---------------------------------------------------------------------------------
   General Library providing an alternate StartMoving() that allows you to
   specify a number of frames to snap-to when moving the frame around
 

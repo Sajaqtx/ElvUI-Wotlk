@@ -1,4 +1,4 @@
-local E, _, V, P, G = unpack(ElvUI)
+setfenv(1, ElvUI335_ENV) local E, _, V, P, G = unpack(ElvUI)
 local C, L = unpack(E.Config)
 local TT = E:GetModule('Tooltip')
 local S = E:GetModule('Skins')

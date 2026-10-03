@@ -1,4 +1,4 @@
-local E, L, V, P, G = unpack(ElvUI)
+setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 
 local wipe, sort, unpack = wipe, sort, unpack
 local next, pairs, tinsert = next, pairs, tinsert

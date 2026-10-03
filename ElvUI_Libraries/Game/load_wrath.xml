@@ -1,4 +1,6 @@
 <Ui xmlns='http://www.blizzard.com/wow/ui/'>
+	<!-- ElvUI Wotlk: the private environment and the 3.3.5 compatibility, before anything else -->
+	<Script file='Shared\Compat335\Compat335.lua'/>
 	<Script file='Shared\LibStub\LibStub.lua'/>
 	<Script file='Shared\CallbackHandler-1.0\CallbackHandler-1.0.lua'/>
 

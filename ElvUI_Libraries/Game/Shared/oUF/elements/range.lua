@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Range Fader
 
 Changes the opacity of a unit frame based on whether the frame's unit is in the player's range.

@@ -1,4 +1,4 @@
---- AceConfigDialog-3.0 generates AceGUI-3.0 based windows based on option tables.
+setfenv(1, ElvUI335_ENV) --- AceConfigDialog-3.0 generates AceGUI-3.0 based windows based on option tables.
 -- @class file
 -- @name AceConfigDialog-3.0
 -- @release $Id$

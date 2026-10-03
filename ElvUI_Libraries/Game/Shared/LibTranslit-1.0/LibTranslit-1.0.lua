@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 Copyright (C) 2019-2022 Vardex
 
 This file is part of LibTranslit.

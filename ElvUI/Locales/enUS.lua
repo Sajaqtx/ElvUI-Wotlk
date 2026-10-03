@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- English localization file for enUS and enGB
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- English localization file for enUS and enGB
 local L = E.Libs.ACL:NewLocale('ElvUI', 'enUS', true, true)
 
 L["Line Width:"] = true

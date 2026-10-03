@@ -1,4 +1,4 @@
--- License: LICENSE.txt
+setfenv(1, ElvUI335_ENV) -- License: LICENSE.txt
 
 local MAJOR_VERSION = "LibActionButton-1.0-ElvUI"
 local MINOR_VERSION = 84 -- the real minor version is 155

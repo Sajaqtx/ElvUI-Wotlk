@@ -1,4 +1,4 @@
---[[ $Id$ ]]--
+setfenv(1, ElvUI335_ENV) --[[ $Id$ ]]--
 local AceGUI = LibStub("AceGUI-3.0")
 
 -- Lua APIs

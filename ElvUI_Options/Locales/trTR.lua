@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- Turkish localization file for trTR
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- Turkish localization file for trTR
 local L = E.Libs.ACL:NewLocale('ElvUI', 'trTR')
 
 L["ALT"] = true

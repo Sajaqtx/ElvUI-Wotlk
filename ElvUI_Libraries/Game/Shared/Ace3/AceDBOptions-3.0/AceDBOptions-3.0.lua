@@ -1,4 +1,4 @@
---- AceDBOptions-3.0 provides a universal AceConfig options screen for managing AceDB-3.0 profiles.
+setfenv(1, ElvUI335_ENV) --- AceDBOptions-3.0 provides a universal AceConfig options screen for managing AceDB-3.0 profiles.
 -- @class file
 -- @name AceDBOptions-3.0
 -- @release $Id: AceDBOptions-3.0.lua 1304 2023-05-19 19:50:10Z nevcairiel $

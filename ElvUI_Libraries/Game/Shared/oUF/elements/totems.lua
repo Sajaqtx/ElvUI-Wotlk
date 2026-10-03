@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Totem Indicator
 
 Handles the updating and visibility of totems.

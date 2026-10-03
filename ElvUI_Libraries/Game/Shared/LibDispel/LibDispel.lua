@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibDispel-1.0", 33
+setfenv(1, ElvUI335_ENV) local MAJOR, MINOR = "LibDispel-1.0", 33
 assert(LibStub, MAJOR.." requires LibStub")
 
 local lib = LibStub:NewLibrary(MAJOR, MINOR)

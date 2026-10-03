@@ -1,4 +1,4 @@
--- LibAnim by Hydra
+setfenv(1, ElvUI335_ENV) -- LibAnim by Hydra
 local Version = 2.903 -- based on 2.03
 
 -- Note, deprecated items will be removed next version.

@@ -1,4 +1,4 @@
-local LibStub = _G.LibStub
+setfenv(1, ElvUI335_ENV) local LibStub = _G.LibStub
 local MAJOR, MINOR = 'LibAceConfigHelper', 14
 local ACH = LibStub:NewLibrary(MAJOR, MINOR)
 local LSM = LibStub('LibSharedMedia-3.0')

@@ -1,4 +1,4 @@
--- Widget is based on the AceGUIWidget-DropDown.lua supplied with AceGUI-3.0
+setfenv(1, ElvUI335_ENV) -- Widget is based on the AceGUIWidget-DropDown.lua supplied with AceGUI-3.0
 -- Widget created by Yssaril
 
 local AceGUI = LibStub("AceGUI-3.0")

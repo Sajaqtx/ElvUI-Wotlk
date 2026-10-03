@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- Spanish localization file for esMX
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- Spanish localization file for esMX
 local L = E.Libs.ACL:NewLocale('ElvUI', 'esMX')
 
 L["ALT"] = true

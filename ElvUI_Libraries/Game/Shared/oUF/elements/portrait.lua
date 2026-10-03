@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Portraits
 
 Handles the updating of the unit's portrait.

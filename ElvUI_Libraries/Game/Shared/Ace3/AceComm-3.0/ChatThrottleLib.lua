@@ -1,4 +1,4 @@
---
+setfenv(1, ElvUI335_ENV) --
 -- ChatThrottleLib by Mikk
 --
 -- Manages AddOn chat output to keep player from getting kicked off.

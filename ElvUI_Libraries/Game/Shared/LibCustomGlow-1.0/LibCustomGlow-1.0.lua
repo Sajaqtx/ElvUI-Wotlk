@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 This library contains work of Hendrick "nevcairiel" Leppkes
 https://www.wowace.com/projects/libbuttonglow-1-0
 ]]

@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Group Role Indicator
 
 Toggles the visibility of an indicator based on the unit's current group role (tank, healer or damager).

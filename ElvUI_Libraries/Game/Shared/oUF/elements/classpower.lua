@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: ClassPower
 
 Handles the visibility and updating of the player's class resources (like Chi Orbs or Holy Power) and combo points.

@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Leader Indicator
 
 Toggles the visibility of an indicator based on the unit's leader status.

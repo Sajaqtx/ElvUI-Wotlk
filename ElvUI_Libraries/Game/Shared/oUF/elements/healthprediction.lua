@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Health Prediction Bars
 
 Handles the visibility and updating of incoming heals and heal/damage absorbs.

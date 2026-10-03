@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- Russian localization file for ruRU
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- Russian localization file for ruRU
 local L = E.Libs.ACL:NewLocale('ElvUI', 'ruRU')
 
 L["Line Width:"] = true

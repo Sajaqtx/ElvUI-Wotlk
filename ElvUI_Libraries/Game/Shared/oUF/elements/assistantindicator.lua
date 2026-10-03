@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Assistant Indicator
 
 Toggles the visibility of an indicator based on the unit's raid assistant status.

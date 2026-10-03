@@ -1,4 +1,4 @@
--- Widget created by Yssaril
+setfenv(1, ElvUI335_ENV) -- Widget created by Yssaril
 local DataVersion = 9004
 local AGSMW = LibStub:NewLibrary("AceGUISharedMediaWidgets-1.0", DataVersion)
 

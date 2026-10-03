@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- Portuguese localization file for ptBR
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- Portuguese localization file for ptBR
 local L = E.Libs.ACL:NewLocale('ElvUI', 'ptBR')
 
 L["ALT"] = true

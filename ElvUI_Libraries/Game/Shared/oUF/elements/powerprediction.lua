@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Power Prediction Bar
 
 Handles the visibility and updating of power cost prediction.

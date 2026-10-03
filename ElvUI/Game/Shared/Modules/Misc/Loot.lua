@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 	Copyright (c) 2007-2012 Trond A Ekseth troeks@gmail.com
 
 	Permission is hereby granted, free of charge, to any person

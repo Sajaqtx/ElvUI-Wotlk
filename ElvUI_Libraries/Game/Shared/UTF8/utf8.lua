@@ -1,4 +1,4 @@
--- $Id: utf8.lua 179 2009-04-03 18:10:03Z pasta $
+setfenv(1, ElvUI335_ENV) -- $Id: utf8.lua 179 2009-04-03 18:10:03Z pasta $
 --
 -- Provides UTF-8 aware string functions implemented in pure lua:
 -- * string.utf8len(s)

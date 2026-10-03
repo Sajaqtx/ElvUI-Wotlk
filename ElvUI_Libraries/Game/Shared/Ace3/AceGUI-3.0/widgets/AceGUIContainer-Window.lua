@@ -1,4 +1,4 @@
-local AceGUI = LibStub("AceGUI-3.0")
+setfenv(1, ElvUI335_ENV) local AceGUI = LibStub("AceGUI-3.0")
 
 -- Lua APIs
 local pairs, assert, type = pairs, assert, type

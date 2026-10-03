@@ -1,4 +1,4 @@
---- AceConfigCmd-3.0 handles access to an options table through the "command line" interface via the ChatFrames.
+setfenv(1, ElvUI335_ENV) --- AceConfigCmd-3.0 handles access to an options table through the "command line" interface via the ChatFrames.
 -- @class file
 -- @name AceConfigCmd-3.0
 -- @release $Id$

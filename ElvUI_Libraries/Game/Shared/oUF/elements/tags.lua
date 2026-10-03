@@ -1,4 +1,4 @@
--- Credits: Vika, Cladhaire, Tekkub, and Simpy
+setfenv(1, ElvUI335_ENV) -- Credits: Vika, Cladhaire, Tekkub, and Simpy
 --[[
 # Element: Tags
 

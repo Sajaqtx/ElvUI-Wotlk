@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Auras
 
 Handles creation and updating of aura buttons.

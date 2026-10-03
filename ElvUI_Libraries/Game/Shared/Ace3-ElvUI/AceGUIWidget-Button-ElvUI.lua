@@ -1,4 +1,4 @@
---[[-----------------------------------------------------------------------------
+setfenv(1, ElvUI335_ENV) --[[-----------------------------------------------------------------------------
 Button Widget (Modified to change text color on SetDisabled method and add Drag and Drop support for Filter lists)
 Graphical Button.
 -------------------------------------------------------------------------------]]

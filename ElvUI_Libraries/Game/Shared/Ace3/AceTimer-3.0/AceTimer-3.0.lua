@@ -1,4 +1,4 @@
---- **AceTimer-3.0** provides a central facility for registering timers.
+setfenv(1, ElvUI335_ENV) --- **AceTimer-3.0** provides a central facility for registering timers.
 -- AceTimer supports one-shot timers and repeating timers. All timers are stored in an efficient
 -- data structure that allows easy dispatching and fast rescheduling. Timers can be registered
 -- or canceled at any time, even from within a running timer, without conflict or large overhead.\\

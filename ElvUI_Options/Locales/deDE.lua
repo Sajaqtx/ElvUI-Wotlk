@@ -1,4 +1,4 @@
-local E = unpack(ElvUI) -- German localization file for deDE
+setfenv(1, ElvUI335_ENV) local E = unpack(ElvUI) -- German localization file for deDE
 local L = E.Libs.ACL:NewLocale('ElvUI', 'deDE')
 
 L["ALT"] = true --No need to translate

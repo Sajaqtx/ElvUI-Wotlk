@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: PvP and Honor Level Icons
 
 Handles the visibility and updating of an indicator based on the unit's PvP status and honor level.

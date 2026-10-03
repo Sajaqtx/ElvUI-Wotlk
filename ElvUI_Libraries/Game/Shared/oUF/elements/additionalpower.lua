@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Additional Power Bar
 
 Handles the visibility and updating of a status bar that displays the player's additional power, such as Mana for

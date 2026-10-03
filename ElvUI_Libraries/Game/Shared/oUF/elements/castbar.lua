@@ -1,4 +1,4 @@
---[[
+setfenv(1, ElvUI335_ENV) --[[
 # Element: Castbar
 
 Handles the visibility and updating of spell castbars.

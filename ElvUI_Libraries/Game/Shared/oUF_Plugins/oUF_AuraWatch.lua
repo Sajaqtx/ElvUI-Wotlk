@@ -1,4 +1,4 @@
--- Original work by Astromech
+setfenv(1, ElvUI335_ENV) -- Original work by Astromech
 -- Rewritten based on Auras by Azilroka and Simpy
 
 local _, ns = ...
