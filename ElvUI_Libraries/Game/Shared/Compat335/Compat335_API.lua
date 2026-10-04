@@ -1305,9 +1305,43 @@ end
 --  regions). ElvUI's plate is a child of it: the native parts are emptied once, as the 3.3.5 ElvUI did (the client
 --  shows and hides them on its own, so they are made invisible rather than hidden)
 
+--what the native plates are made of on this client, saved once per session in ElvDB.debug335_plate (read from the
+--WTF after a /reload: the simulator's plates are a guess)
+local function DescribeRegion(region)
+	local text = region:GetObjectType()
+	if (region.GetTexture) then text = text .. " tex=" .. tostring(region:GetTexture()) end
+	if (region.GetText) then text = text .. " text=" .. tostring(region:GetText()) end
+	return text .. " shown=" .. tostring(region:IsShown()) .. " alpha=" .. tostring(region:GetAlpha())
+end
+local function RecordPlate(plate, when)
+	if (type(ElvDB) ~= "table") then return end
+	ElvDB.debug335_plate = ElvDB.debug335_plate or {}
+	local record = ElvDB.debug335_plate
+	if (record[when]) then return end
+	local info = {name = tostring(plate:GetName()), type = plate:GetObjectType(), children = {}, regions = {}, keys = {}}
+	for i = 1, select("#", plate:GetChildren()) do
+		local child = select(i, plate:GetChildren())
+		local entry = DescribeRegion(child) .. " name=" .. tostring(child:GetName()) .. " regions=" .. child:GetNumRegions()
+			.. " children=" .. child:GetNumChildren()
+		for j = 1, select("#", child:GetRegions()) do
+			entry = entry .. " | " .. DescribeRegion((select(j, child:GetRegions())))
+		end
+		info.children[#info.children + 1] = entry
+	end
+	for i = 1, select("#", plate:GetRegions()) do
+		info.regions[#info.regions + 1] = DescribeRegion((select(i, plate:GetRegions())))
+	end
+	for key, value in pairs(plate) do
+		if (type(key) == "string") then info.keys[#info.keys + 1] = key .. "=" .. type(value) end
+	end
+	record[when] = info
+end
+Compat.RecordPlate = RecordPlate
+
 function Compat.HideNativePlate(plate)
 	if (plate.__elvNativeHidden) then return end
 	plate.__elvNativeHidden = true
+	RecordPlate(plate, "before")
 
 	for i = 1, select("#", plate:GetChildren()) do
 		local child = select(i, plate:GetChildren())
@@ -1327,6 +1361,7 @@ function Compat.HideNativePlate(plate)
 			region:SetAlpha(0)
 		end
 	end
+	RecordPlate(plate, "after")
 end
 
 ---------------------------------------------------------------------------------------------------------------
@@ -1591,3 +1626,25 @@ end
 --totem orders (4.x names): 3.3.5 has TOTEM_PRIORITIES (earth, fire, water, air) for the shaman bar
 if (realG.SHAMAN_TOTEM_PRIORITIES == nil) then rawset(env, "SHAMAN_TOTEM_PRIORITIES", realG.TOTEM_PRIORITIES or {2, 1, 3, 4}) end
 if (realG.STANDARD_TOTEM_PRIORITIES == nil) then rawset(env, "STANDARD_TOTEM_PRIORITIES", {1, 2, 3, 4}) end
+
+--cooldown helpers (7.x names): the 3.3.5 CooldownFrame_SetTimer
+define("CooldownFrame_Set", function(cooldown, start, duration, enable, forceShowDrawEdge, modRate)
+	return CooldownFrame_SetTimer(cooldown, start, duration, (enable and enable ~= 0) and 1 or 0)
+end)
+define("CooldownFrame_Clear", function(cooldown)
+	cooldown:SetCooldown(0, 0)
+	cooldown:Hide()
+end)
+--the key ring: always on 3.3.5
+define("IsKeyRingEnabled", function() return true end)
+--realm relationship (5.x connected realms): one realm
+define("UnitRealmRelationship", Compat.returnNil)
+
+--3.3.5 raises on a unit it does not know (rebuffed.dll's nameplate tokens with some functions): no threat then
+do
+	local UnitThreatSituation = realG.UnitThreatSituation
+	rawset(env, "UnitThreatSituation", function(unit, mob)
+		local ok, status = pcall(UnitThreatSituation, unit, mob)
+		if (ok) then return status end
+	end)
+end

@@ -186,3 +186,18 @@ define("GetRaidDifficultyID", function() return realG.GetRaidDifficulty and real
 rawset(env, "MapUtil", {GetMapParentInfo = function() return nil end})
 fill("C_GossipInfo", {})
 fill("C_PlayerInteractionManager", {IsReplacingUnit = returnFalse})
+
+--hyperlink types (11.x LinkTypes): the 3.3.5 link prefixes ("|Hplayer:Name:lineID|h", extra fields are ignored)
+if (realG.LinkTypes == nil) then
+	rawset(env, "LinkTypes", {Player = "player", BNPlayer = "BNplayer", DiscordUser = "discordUser", Channel = "channel"})
+end
+
+--class colors: plain tables on 3.3.5, color objects (ColorMixin: WrapTextInColorCode, GetRGB...) on later clients.
+--ElvUI gets its own copy as color objects; the client's table stays as it is for everyone else
+do
+	local colors = {}
+	for class, color in pairs(realG.RAID_CLASS_COLORS or {}) do
+		colors[class] = env.CreateColor(color.r, color.g, color.b)
+	end
+	rawset(env, "RAID_CLASS_COLORS", colors)
+end

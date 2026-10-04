@@ -289,6 +289,16 @@ function lib:CreateButton(id, name, header, config)
 	button:RegisterForDrag("LeftButton", "RightButton")
 	button:RegisterForClicks("AnyDown", "AnyUp")
 
+	-- ElvUI Wotlk: the method calls of the secure snippets (3.3.5 frame handles have no CallMethod): a counter attribute
+	-- set after the method name and its arguments
+	button:HookScript("OnAttributeChanged", function(self, name)
+		if name ~= "_lab335n" then return end
+		local method = self[self:GetAttribute("_lab335call")]
+		if method then
+			method(self, self:GetAttribute("_lab335arg1"), self:GetAttribute("_lab335arg2"), self:GetAttribute("_lab335arg3"))
+		end
+	end)
+
 	button.cooldown:SetSwipeColor(0, 0, 0, 0.8)
 	button.cooldown:SetFrameStrata(button:GetFrameStrata())
 	button.cooldown:SetFrameLevel(button:GetFrameLevel() + 1)
@@ -384,7 +394,7 @@ function SetupSecureSnippets(button)
 	-- secure UpdateState(self, state)
 
 	-- button state for push casting
-	if C_Spell.IsPressHoldReleaseSpell then -- retail only
+	if C_Spell.IsPressHoldReleaseSpell and not ElvUI335 then -- retail only (the 3.3.5 restricted code has no IsPressHoldReleaseSpell)
 		button:SetAttribute("UpdateReleaseCasting", [[
 			local type, action = ...
 
@@ -442,7 +452,8 @@ function SetupSecureSnippets(button)
 	-- this function is invoked by the header when the state changes
 	button:SetAttribute("_childupdate-state", [[
 		control:RunFor(self, self:GetAttribute("UpdateState"), message)
-		self:CallMethod("UpdateAction")
+		-- ElvUI Wotlk: 3.3.5 handles have no CallMethod, the button's OnAttributeChanged calls it (see CreateButton)
+		self:SetAttribute("_lab335call", "UpdateAction") lab335n = (lab335n or 0) + 1 self:SetAttribute("_lab335n", lab335n)
 	]])
 
 	-- secure PickupButton(self, kind, value, ...)
@@ -481,7 +492,7 @@ function SetupSecureSnippets(button)
 			-- update internal state
 			control:RunFor(self, self:GetAttribute("UpdateState"), state)
 			-- send a notification to the insecure code
-			self:CallMethod("ButtonContentsChanged", state, "empty", nil)
+			self:SetAttribute("_lab335arg1", state) self:SetAttribute("_lab335arg2", "empty") self:SetAttribute("_lab335arg3", nil) self:SetAttribute("_lab335call", "ButtonContentsChanged") lab335n = (lab335n or 0) + 1 self:SetAttribute("_lab335n", lab335n)
 		end
 		-- return the button contents for pickup
 		return control:RunFor(self, self:GetAttribute("PickupButton"), type, action)
@@ -522,7 +533,7 @@ function SetupSecureSnippets(button)
 			-- update internal state
 			control:RunFor(self, self:GetAttribute("UpdateState"), state)
 			-- send a notification to the insecure code
-			self:CallMethod("ButtonContentsChanged", state, kind, value)
+			self:SetAttribute("_lab335arg1", state) self:SetAttribute("_lab335arg2", kind) self:SetAttribute("_lab335arg3", value) self:SetAttribute("_lab335call", "ButtonContentsChanged") lab335n = (lab335n or 0) + 1 self:SetAttribute("_lab335n", lab335n)
 		else
 			-- get the action for (pet-)action buttons
 			buttonAction = self:GetAttribute("action")
@@ -2398,7 +2409,9 @@ end
 local function OnCooldownDone(self, requireCooldownUpdate)
 	local button = self:GetParent()
 
-	self:SetScript("OnCooldownDone", nil)
+	if self:HasScript("OnCooldownDone") then
+		self:SetScript("OnCooldownDone", nil)
+	end
 
 	lib.callbacks:Fire("OnCooldownDone", button, self)
 
@@ -2406,6 +2419,31 @@ local function OnCooldownDone(self, requireCooldownUpdate)
 		UpdateCooldown(button)
 	end
 end
+
+-- ElvUI Wotlk: the 3.3.5 cooldown has no OnCooldownDone script: a timer frame of its own calls the handler when the
+-- cooldown ends (finish: GetTime() at the end, nil to stop)
+local function SetCooldownDone(cooldown, finish, requireCooldownUpdate)
+	if cooldown:HasScript("OnCooldownDone") then
+		cooldown:SetScript("OnCooldownDone", OnCooldownDone, requireCooldownUpdate)
+		return
+	end
+
+	local timer = cooldown.lab335DoneTimer
+	if not timer then
+		timer = CreateFrame("Frame", nil, cooldown)
+		timer:SetScript("OnUpdate", function(frame)
+			if GetTime() >= frame.finish then
+				frame:Hide()
+				OnCooldownDone(cooldown, frame.requireCooldownUpdate)
+			end
+		end)
+		cooldown.lab335DoneTimer = timer
+	end
+
+	timer.finish, timer.requireCooldownUpdate = finish, requireCooldownUpdate
+	if finish then timer:Show() else timer:Hide() end
+end
+
 
 local defaultCooldownInfo = { startTime = 0; duration = 0; isEnabled = false; isActive = false; modRate = 0 }
 local defaultChargeInfo = { currentCharges = 0; maxCharges = 0; cooldownStartTime = 0; cooldownDuration = 0; chargeModRate = 0; isActive = false }
@@ -2467,14 +2505,14 @@ else
 			end
 
 			CooldownFrame_Set(self.cooldown, locStart, locDuration, true, true, modRate)
-			self.cooldown:SetScript("OnCooldownDone", OnCooldownDone, false)
+			SetCooldownDone(self.cooldown, locStart + locDuration, false)
 			ClearChargeCooldown(self)
 		else
 			if self.cooldown.currentCooldownType ~= _G.COOLDOWN_TYPE_NORMAL then
 				self.cooldown.currentCooldownType = _G.COOLDOWN_TYPE_NORMAL
 			end
 
-			self.cooldown:SetScript("OnCooldownDone", OnCooldownDone, hasLocCooldown)
+			SetCooldownDone(self.cooldown, hasCooldown and (start + duration) or nil, hasLocCooldown)
 
 			if charges and maxCharges and maxCharges > 1 and charges < maxCharges then
 				StartChargeCooldown(self, chargeStart, chargeDuration, chargeModRate)

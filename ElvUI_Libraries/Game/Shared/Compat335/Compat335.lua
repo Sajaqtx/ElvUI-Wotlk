@@ -172,6 +172,14 @@ rawset(env, "CreateFrame", function(frameType, name, parent, template, id)
 		addParentKeys(frame, name, frame:GetRegions())
 	end
 	if (itemButton or (kept and kept:find("ItemButton"))) then addItemButtonParts(frame) end
+	--the 3.3.5 UIPanelButtonTemplate has no size (later ones: 40 x 22) and its text has no parentKey
+	if (kept and kept:find("UIPanelButtonTemplate")) then
+		if (frame:GetHeight() == 0) then frame:SetHeight(22) end
+		if (frame:GetWidth() == 0) then frame:SetWidth(40) end
+	end
+	if (kept and frame.GetFontString and frame.Text == nil) then
+		frame.Text = frame:GetFontString()
+	end
 	return frame
 end)
 --what the Backdrop mixin adds to a frame on modern clients: the 3.3.5 frame already backs SetBackdrop natively

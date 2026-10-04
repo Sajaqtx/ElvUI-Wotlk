@@ -493,6 +493,7 @@ local function FontTemplate(fs, fontName, fontSize, fontStyle, skip)
 	-- grab values from profile before conversion
 	if not fontStyle then fontStyle = E.db.general.fontStyle or P.general.fontStyle end
 	if not fontSize then fontSize = E.db.general.fontSize or P.general.fontSize end
+	if ElvUI335 and fontSize <= 0 then fontSize = E.db.general.fontSize or P.general.fontSize end -- 3.3.5 refuses a size of 0
 	if fontStyle == 'NONE' then fontStyle = '' end -- none isnt a real style
 
 	local slug = E:CanFlagSlug(fontStyle)

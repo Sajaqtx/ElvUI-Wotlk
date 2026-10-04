@@ -174,6 +174,7 @@ function oUF:DisableBlizzard(unit)
 		end
 	elseif(unit:match('nameplate%d+$')) then
 		local frame = GetNamePlateForUnit(unit)
+		if frame and ElvUI335 then ElvUI335.RecordPlate(frame, "added") end -- what the native plate is made of (ElvDB)
 		if frame and frame.UnitFrame then
 			handleFrame(frame.UnitFrame, true)
 		elseif frame and ElvUI335 then -- the native 3.3.5 plate draws its own bars and texts
