@@ -30,6 +30,17 @@ Référence pour les porter : l'ElvUI 6.10 de `Addons ressource\ElvUI\ElvUI 3.3.
 - [ ] Carte du monde, Aide, Options Blizzard, Liste des addons, Fenêtres diverses (BlizzardMiscFrames : menu Échap...)
 - [ ] Battle.net, Paramètres (SettingsPanel), Éditeur (EditorManagerFrame) : retail, sans doute à retirer
 
+## Reprise après le test en jeu n°6 (2026-10-04)
+
+Ancien ElvUI remis en place ; la version testée est dans `Backport Wotlk\_retire du jeu (ElvUI Wotlk test 6)`.
+Fonctionnent en jeu : plaques de nom, cadres joueur / cible / cible de la cible, clavier, options (`/ec`).
+
+- [ ] La carte du monde ne s'ouvre pas.
+- [ ] Les sacs s'ouvrent un par un au lieu du sac unique d'ElvUI ; erreur `BagBar.lua:239`
+      (`ToggleAllBags` absent en 3.3.5 : `OpenAllBags` / `ToggleBackpack`).
+- [ ] `Tooltip.lua:1062` : `format` reçoit une chaîne au lieu d'un nombre (x5).
+- [ ] Relevé de la structure des plaques natives Rebuffed : `test6_plaque.txt` ; erreurs complètes : `test6_erreurs.txt`.
+
 ## Autres points ouverts
 
 - [ ] Hooks ignorés (fonctions absentes en 3.3.5, liste `ElvUI335.skippedHooks` affichée par le simulateur) :

@@ -1,0 +1,73 @@
+	["debug335_plate"] = {
+		["before"] = {
+			["regions"] = {
+				"Texture tex=Interface\\TargetingFrame\\UI-TargetingFrame-Flash shown=1 alpha=1.000000059139", -- [1]
+				"Texture tex=Interface\\Tooltips\\Nameplate-Border shown=1 alpha=1.000000059139", -- [2]
+				"Texture tex=Interface\\Tooltips\\Nameplate-Border shown=nil alpha=1.000000059139", -- [3]
+				"Texture tex=Interface\\Tooltips\\Nameplate-CastBar-Shield shown=nil alpha=1.000000059139", -- [4]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [5]
+				"Texture tex=Interface\\Tooltips\\Nameplate-Glow shown=nil alpha=1.000000059139", -- [6]
+				"FontString text=Deme shown=1 alpha=1.000000059139", -- [7]
+				"FontString text=54 shown=1 alpha=1.000000059139", -- [8]
+				"Texture tex=Interface\\TargetingFrame\\UI-TargetingFrame-Skull shown=nil alpha=1.000000059139", -- [9]
+				"Texture tex=Interface\\TargetingFrame\\UI-RaidTargetingIcons shown=nil alpha=1.000000059139", -- [10]
+				"Texture tex=Interface\\Tooltips\\EliteNameplateIcon shown=nil alpha=1.000000059139", -- [11]
+			},
+			["type"] = "Frame",
+			["name"] = "nil",
+			["keys"] = {
+				"__elvNativeHidden=boolean", -- [1]
+			},
+			["children"] = {
+				"StatusBar shown=1 alpha=1 name=nil regions=1 children=0 | Texture tex=Interface\\TargetingFrame\\UI-TargetingFrame-BarFill shown=1 alpha=1.000000059139", -- [1]
+				"StatusBar shown=nil alpha=1 name=nil regions=1 children=0 | Texture tex=Interface\\TargetingFrame\\UI-TargetingFrame-BarFill shown=1 alpha=1.000000059139", -- [2]
+			},
+		},
+		["added"] = {
+			["regions"] = {
+				"Texture tex=Interface\\TargetingFrame\\UI-TargetingFrame-Flash shown=1 alpha=1.000000059139", -- [1]
+				"Texture tex=Interface\\Tooltips\\Nameplate-Border shown=1 alpha=1.000000059139", -- [2]
+				"Texture tex=Interface\\Tooltips\\Nameplate-Border shown=nil alpha=1.000000059139", -- [3]
+				"Texture tex=Interface\\Tooltips\\Nameplate-CastBar-Shield shown=nil alpha=1.000000059139", -- [4]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [5]
+				"Texture tex=Interface\\Tooltips\\Nameplate-Glow shown=nil alpha=1.000000059139", -- [6]
+				"FontString text=Deme shown=1 alpha=1.000000059139", -- [7]
+				"FontString text=54 shown=1 alpha=1.000000059139", -- [8]
+				"Texture tex=Interface\\TargetingFrame\\UI-TargetingFrame-Skull shown=nil alpha=1.000000059139", -- [9]
+				"Texture tex=Interface\\TargetingFrame\\UI-RaidTargetingIcons shown=nil alpha=1.000000059139", -- [10]
+				"Texture tex=Interface\\Tooltips\\EliteNameplateIcon shown=nil alpha=1.000000059139", -- [11]
+			},
+			["type"] = "Frame",
+			["name"] = "nil",
+			["keys"] = {
+			},
+			["children"] = {
+				"StatusBar shown=1 alpha=1 name=nil regions=1 children=0 | Texture tex=Interface\\TargetingFrame\\UI-TargetingFrame-BarFill shown=1 alpha=1.000000059139", -- [1]
+				"StatusBar shown=nil alpha=1 name=nil regions=1 children=0 | Texture tex=Interface\\TargetingFrame\\UI-TargetingFrame-BarFill shown=1 alpha=1.000000059139", -- [2]
+			},
+		},
+		["after"] = {
+			["regions"] = {
+				"Texture tex=nil shown=1 alpha=1.000000059139", -- [1]
+				"Texture tex=nil shown=1 alpha=1.000000059139", -- [2]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [3]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [4]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [5]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [6]
+				"FontString text=Deme shown=1 alpha=0", -- [7]
+				"FontString text=54 shown=1 alpha=0", -- [8]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [9]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [10]
+				"Texture tex=nil shown=nil alpha=1.000000059139", -- [11]
+			},
+			["type"] = "Frame",
+			["name"] = "nil",
+			["keys"] = {
+				"__elvNativeHidden=boolean", -- [1]
+			},
+			["children"] = {
+				"StatusBar shown=1 alpha=0 name=nil regions=1 children=0 | Texture tex=nil shown=1 alpha=1.000000059139", -- [1]
+				"StatusBar shown=nil alpha=0 name=nil regions=1 children=0 | Texture tex=nil shown=1 alpha=1.000000059139", -- [2]
+			},
+		},
+	},
