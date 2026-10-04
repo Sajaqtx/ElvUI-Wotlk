@@ -91,22 +91,32 @@ local MODERN_TEMPLATES = {
 	--renamed: the 3.3.5 template of the same widget
 	MainMenuFrameButtonTemplate = "GameMenuButtonTemplate",
 	StanceButtonTemplate = "ShapeshiftButtonTemplate",
+	--a template that only adds behavior: done on the frame after its creation
+	TitleDragAreaTemplate = function(frame)
+		local parent = frame:GetParent()
+		frame:EnableMouse(true)
+		frame:RegisterForDrag("LeftButton")
+		frame:SetScript("OnDragStart", function() if (parent:IsMovable()) then parent:StartMoving() end end)
+		frame:SetScript("OnDragStop", function() parent:StopMovingOrSizing() end)
+	end,
 }
---template list without the modern names; the backdrop one of them asks for
+--template list without the modern names; the backdrop one of them asks for, the behavior to add
 local function stripModernTemplates(template)
 	if (type(template) ~= "string") then return template end
-	local kept, backdrop = {}, nil
+	local kept, backdrop, behavior = {}, nil, nil
 	for name in template:gmatch("[^,%s]+") do
 		local modern = MODERN_TEMPLATES[name]
 		if (modern == nil) then
 			kept[#kept + 1] = name
 		elseif (type(modern) == "string") then
 			kept[#kept + 1] = modern
+		elseif (type(modern) == "function") then
+			behavior = modern
 		elseif (modern) then
 			backdrop = modern
 		end
 	end
-	return #kept > 0 and table.concat(kept, ",") or nil, backdrop
+	return #kept > 0 and table.concat(kept, ",") or nil, backdrop, behavior
 end
 Compat.stripModernTemplates = stripModernTemplates
 --3.3.5 templates only name their children ($parentScrollBar) where later ones also give them a parentKey (ScrollBar):
@@ -153,9 +163,10 @@ Compat.AddItemButtonParts = addItemButtonParts
 rawset(env, "CreateFrame", function(frameType, name, parent, template, id)
 	local itemButton = (type(frameType) == "string" and frameType:lower() == "itembutton")
 	if (itemButton) then frameType = "Button" end
-	local kept, backdrop = stripModernTemplates(template)
+	local kept, backdrop, behavior = stripModernTemplates(template)
 	local frame = CreateFrame(frameType, name, parent, kept, id)
 	if (backdrop and frame.SetBackdrop) then frame:SetBackdrop(backdrop) end
+	if (behavior) then behavior(frame) end
 	if (kept and type(name) == "string") then
 		addParentKeys(frame, name, frame:GetChildren())
 		addParentKeys(frame, name, frame:GetRegions())
@@ -464,6 +475,29 @@ do
 	add("GetModelAlpha", function(self) return self:GetAlpha() end, function(o) return o.SetModel ~= nil end)
 	--no camera distance on the 3.3.5 model: it keeps its default framing
 	add("SetCamDistanceScale", noop, function(o) return o.SetModel ~= nil end)
+	--7.0 absolute animation values on the 3.3.5 relative ones: an alpha change, a scale factor (from the region's
+	--alpha and scale when the animation starts, which is what the start value is in ElvUI's animations)
+	local isAlpha, isScale = objectType("Alpha"), objectType("Scale")
+	add("SetFromAlpha", function(self, from)
+		self.__elvFromAlpha = from
+		self:SetChange((self.__elvToAlpha or from) - from)
+	end, isAlpha)
+	add("SetToAlpha", function(self, to)
+		self.__elvToAlpha = to
+		self:SetChange(to - (self.__elvFromAlpha or 1))
+	end, isAlpha)
+	add("GetFromAlpha", function(self) return self.__elvFromAlpha or 1 end, isAlpha)
+	add("GetToAlpha", function(self) return self.__elvToAlpha or (1 + self:GetChange()) end, isAlpha)
+	local function applyScale(self)
+		local fromX, fromY = self.__elvFromScaleX or 1, self.__elvFromScaleY or 1
+		local toX, toY = self.__elvToScaleX or fromX, self.__elvToScaleY or fromY
+		self:SetScale(fromX ~= 0 and toX / fromX or toX, fromY ~= 0 and toY / fromY or toY)
+	end
+	add("SetScaleFrom", function(self, x, y) self.__elvFromScaleX, self.__elvFromScaleY = x, y or x applyScale(self) end, isScale)
+	add("SetScaleTo", function(self, x, y) self.__elvToScaleX, self.__elvToScaleY = x, y or x applyScale(self) end, isScale)
+	add("SetFromScale", function(self, x, y) self.__elvFromScaleX, self.__elvFromScaleY = x, y or x applyScale(self) end, isScale)
+	add("SetToScale", function(self, x, y) self.__elvToScaleX, self.__elvToScaleY = x, y or x applyScale(self) end, isScale)
+	add("SetToFinalAlpha", noop, function(o) return o.GetAnimations ~= nil end)
 	--no mask textures on 3.3.5: a mask is a hidden texture, attaching it does nothing
 	add("CreateMaskTexture", function(self, ...)
 		local mask = self:CreateTexture(...)

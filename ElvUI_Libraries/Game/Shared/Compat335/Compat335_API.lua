@@ -1174,3 +1174,73 @@ define("CreateFontFamily", function(name, members)
 end)
 
 if (realG.ENCHANTED_TOOLTIP_LINE == nil) then rawset(env, "ENCHANTED_TOOLTIP_LINE", "Enchanted: %s") end
+
+---------------------------------------------------------------------------------------------------------------
+--> unit menus: the 3.3.5 secure unit button has no "togglemenu" type; its "menu" type calls frame.menu(frame, unit),
+--  which opens the unit popup from a dropdown of ElvUI's own (as the 3.3.5 oUF did). ElvUI335.SetUnitMenu(frame)
+--  sets both on a unit button.
+
+do
+	local dropdown
+	local function InitializeMenu(self)
+		local unit = self.unit
+		if (not unit) then return end
+
+		local unitType = unit:match("^([a-z]+)[0-9]+$") or unit
+		local menu
+		if (unitType == "party") then
+			menu = "PARTY"
+		elseif (unitType == "boss") then
+			menu = "BOSS"
+		elseif (unitType == "focus") then
+			menu = "FOCUS"
+		elseif (unitType == "arenapet" or unitType == "arena") then
+			menu = "ARENAENEMY"
+		elseif (UnitIsUnit(unit, "player")) then
+			menu = "SELF"
+		elseif (UnitIsUnit(unit, "vehicle")) then
+			menu = "VEHICLE"
+		elseif (UnitIsUnit(unit, "pet")) then
+			menu = "PET"
+		elseif (UnitIsPlayer(unit)) then
+			if (UnitInRaid(unit)) then
+				menu = "RAID_PLAYER"
+			elseif (UnitInParty(unit)) then
+				menu = "PARTY"
+			else
+				menu = "PLAYER"
+			end
+		elseif (UnitIsUnit(unit, "target")) then
+			menu = "TARGET"
+		end
+
+		if (menu) then
+			UnitPopup_ShowMenu(self, menu, unit)
+		end
+	end
+
+	function Compat.ToggleUnitMenu(frame, unit)
+		unit = unit or frame:GetAttribute("unit")
+		if (not unit) then return end
+
+		if (not dropdown) then
+			dropdown = CreateFrame("Frame", "ElvUI335UnitMenu", realG.UIParent, "UIDropDownMenuTemplate")
+			dropdown:SetID(1)
+			tinsert(UnitPopupFrames, dropdown:GetName())
+			UIDropDownMenu_Initialize(dropdown, InitializeMenu, "MENU")
+		end
+
+		if (dropdown.openedFor and dropdown.openedFor ~= frame) then
+			CloseDropDownMenus()
+		end
+
+		dropdown.unit = unit:lower()
+		dropdown.openedFor = frame
+		ToggleDropDownMenu(1, nil, dropdown, "cursor")
+	end
+
+	function Compat.SetUnitMenu(frame)
+		frame:SetAttribute("*type2", "menu")
+		frame.menu = Compat.ToggleUnitMenu
+	end
+end

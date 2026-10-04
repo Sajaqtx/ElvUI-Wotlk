@@ -1077,7 +1077,11 @@ function NP:Initialize()
 	local staticSecure = CreateFrame('Button', 'ElvNP_StaticSecure', UIParent, 'SecureUnitButtonTemplate')
 	staticSecure:SetAttribute('unit', 'player')
 	staticSecure:SetAttribute('*type1', 'target')
-	staticSecure:SetAttribute('*type2', 'togglemenu')
+	if ElvUI335 then -- the 3.3.5 unit button has no togglemenu type
+		ElvUI335.SetUnitMenu(staticSecure)
+	else
+		staticSecure:SetAttribute('*type2', 'togglemenu')
+	end
 	staticSecure:SetAttribute('toggleForVehicle', true)
 	staticSecure:RegisterForClicks('LeftButtonDown', 'RightButtonDown')
 	staticSecure:SetScript('OnEnter', UF.UnitFrame_OnEnter)

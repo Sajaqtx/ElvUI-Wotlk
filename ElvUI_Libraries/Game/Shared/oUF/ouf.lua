@@ -331,7 +331,11 @@ local function initObject(unit, style, styleFunc, header, ...)
 		if(not header) then
 			-- No header means it's a frame created through :Spawn().
 			object:SetAttribute('*type1', 'target')
-			object:SetAttribute('*type2', 'togglemenu')
+			if ElvUI335 then -- the 3.3.5 unit button has no togglemenu type
+				ElvUI335.SetUnitMenu(object)
+			else
+				object:SetAttribute('*type2', 'togglemenu')
+			end
 			object:SetAttribute('toggleForVehicle', true)
 
 			if(isEventlessUnit(objectUnit)) then
@@ -704,6 +708,58 @@ do
 		end
 	]]
 
+	-- ElvUI Wotlk: the 3.3.5 group header runs header.initialConfigFunction, a Lua function, on each new child out of
+	-- combat (FrameXML/SecureTemplates.lua ApplyConfig); it has no restricted snippet nor _initialAttribute-*, the
+	-- vehicle swap is the toggleForVehicle attribute. The snippet above, as Lua.
+	local function initialConfigFunction335(self)
+		local header = self:GetParent()
+		local frames = {self, self:GetChildren()}
+		for i = 1, #frames do
+			local frame = frames[i]
+			local unit
+			if(not frame:GetAttribute('oUF-onlyProcessChildren')) then
+				RegisterUnitWatch(frame)
+
+				local groupFilter = header:GetAttribute('groupFilter')
+				if(type(groupFilter) == 'string' and groupFilter:match('MAIN[AT]')) then
+					unit = (groupFilter:match('MAIN([AT])') == 'T') and 'maintank' or 'mainassist'
+				elseif(header:GetAttribute('showRaid')) then
+					unit = 'raid'
+				elseif(header:GetAttribute('showParty')) then
+					unit = 'party'
+				end
+
+				local headerType = header:GetAttribute('oUF-headerType')
+				local suffix = frame:GetAttribute('unitsuffix')
+				if(unit and suffix) then
+					if(headerType == 'pet' and suffix == 'target') then
+						unit = unit .. headerType .. suffix
+					else
+						unit = unit .. suffix
+					end
+				elseif(unit and headerType == 'pet') then
+					unit = unit .. headerType
+				end
+
+				frame:SetAttribute('*type1', 'target')
+				ElvUI335.SetUnitMenu(frame)
+				frame:SetAttribute('toggleForVehicle', true)
+				frame:SetAttribute('oUF-guessUnit', unit)
+			end
+
+			local body = header:GetAttribute('oUF-initialConfigFunction')
+			if(body) then
+				local func = loadstring('local self, unit = ...; ' .. body)
+				if(func) then
+					setfenv(func, ElvUI335_ENV)
+					func(frame, unit)
+				end
+			end
+		end
+
+		styleProxy(header, self:GetName())
+	end
+
 	local headerMixin = {}
 	--[[ header:SetVisibility(visibility)
 	Sets the macro conditional(s) controlling when to display the header (string).
@@ -749,7 +805,11 @@ do
 		local name = overrideName or createName(nil, attributes)
 		local header = Mixin(CreateFrame('Frame', name, UFParentHider, template), headerMixin)
 
-		header:SetAttribute('template', 'SecureUnitButtonTemplate, SecureHandlerStateTemplate, SecureHandlerEnterLeaveTemplate' .. (oUF.isRetail and ', PingableUnitFrameTemplate' or ''))
+		if ElvUI335 then
+			header:SetAttribute('template', 'SecureUnitButtonTemplate')
+		else
+			header:SetAttribute('template', 'SecureUnitButtonTemplate, SecureHandlerStateTemplate, SecureHandlerEnterLeaveTemplate' .. (oUF.isRetail and ', PingableUnitFrameTemplate' or ''))
+		end
 
 		for att, val in next, attributes do
 			header:SetAttribute(att, val)
@@ -760,6 +820,17 @@ do
 
 		-- Expose the header through oUF.headers.
 		tinsert(headers, header)
+
+		if ElvUI335 then
+			header.initialConfigFunction = initialConfigFunction335
+			header:SetAttribute('oUF-headerType', isPetHeader and 'pet' or 'group')
+
+			if(header:GetAttribute('showParty')) then
+				self:DisableBlizzard('party')
+			end
+
+			return header
+		end
 
 		-- We set it here so layouts can't directly override it.
 		header:SetAttribute('initialConfigFunction', initialConfigFunction)
