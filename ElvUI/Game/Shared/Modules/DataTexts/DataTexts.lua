@@ -908,7 +908,15 @@ end
 function DT:CurrencyListInfo(index)
 	local info = E.Retail and C_CurrencyInfo_GetCurrencyListInfo(index) or {}
 
-	if E.Mists or E.Wrath then
+	if ElvUI335 then -- 3.3.5: extraCurrencyType (1 arena, 2 honor) before the icon, then the item ID
+		local extraType
+		info.name, info.isHeader, info.isHeaderExpanded, info.isUnused, info.isWatched, info.quantity, extraType, info.iconFileID, info.itemID = GetCurrencyListInfo(index)
+		if extraType == 1 then
+			info.iconFileID = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
+		elseif extraType == 2 then
+			info.iconFileID = [[Interface\TargetingFrame\UI-PVP-]]..(E.myfaction or 'Alliance')
+		end
+	elseif E.Mists or E.Wrath then
 		info.name, info.isHeader, info.isHeaderExpanded, info.isUnused, info.isWatched, info.quantity, info.iconFileID, info.maxQuantity, info.weeklyMax, info.earnedThisWeek, info.isTradeable, info.itemID = GetCurrencyListInfo(index)
 	end
 

@@ -37,6 +37,7 @@ local QUICK_KEYBIND_MODE = QUICK_KEYBIND_MODE
 local MAX_ACCOUNT_MACROS = MAX_ACCOUNT_MACROS
 
 local bind = CreateFrame('Frame', 'ElvUI_KeyBinder', E.UIParent)
+bind:Hide() -- ElvUI Wotlk: hidden from the start, a setup stopped half way must not leave it taking the keyboard
 AB.KeyBinder = bind
 
 function AB:ActivateBindMode()

@@ -115,6 +115,22 @@ do
 		if (realG.ChatFrame_SendTell) then realG.ChatFrame_SendTell(name) end
 	end)
 	rawset(ChatFrameUtil, "CanChatGroupPerformExpressionExpansion", returnFalse)
+	--the filter pass 3.3.5's ChatFrame_MessageEventHandler runs inline: true when a filter drops the message, else
+	--false and the arguments (a filter may return new ones)
+	rawset(ChatFrameUtil, "ProcessMessageEventFilters", function(frame, event, ...)
+		local filters = realG.ChatFrame_GetMessageEventFilters and realG.ChatFrame_GetMessageEventFilters(event)
+		if (not filters) then return false, ... end
+		local args = {...}
+		for _, filterFunc in next, filters do
+			local result = {filterFunc(frame, event, unpack(args, 1, 17))}
+			if (result[1]) then
+				return true
+			elseif (result[2] ~= nil) then
+				for i = 1, 17 do args[i] = result[i + 1] end
+			end
+		end
+		return false, unpack(args, 1, 17)
+	end)
 	rawset(env, "ChatFrameUtil", ChatFrameUtil)
 end
 

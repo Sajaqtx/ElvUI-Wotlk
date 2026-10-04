@@ -793,6 +793,7 @@ define("IsUnitModelReadyForUI", function() return true end)
 define("IsPlayerMoving", function() return (GetUnitSpeed("player") or 0) > 0 end)
 --the 8.x level color of a creature: the quest one of the same level
 define("GetCreatureDifficultyColor", function(level) return GetQuestDifficultyColor(level) end)
+define("GetMaxLevelForExpansionLevel", function(level) return MAX_PLAYER_LEVEL_TABLE and MAX_PLAYER_LEVEL_TABLE[level or GetExpansionLevel()] or 80 end)
 define("GetMaxPlayerLevel", function() return MAX_PLAYER_LEVEL_TABLE and MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()] or 80 end)
 define("GetServerTime", function() return time() end)
 define("Ambiguate", function(name) return name end)
@@ -1390,3 +1391,82 @@ define("IsChatDND", function() return UnitIsDND("player") and true or false end)
 
 --the spell book button's slot (3.3.5 SpellBook_GetSpellID takes the button's ID)
 define("SpellBook_GetSpellBookSlot", function(button) return SpellBook_GetSpellID(button:GetID()) end)
+
+--no arena specializations (5.0), no item quality on the 3.3.5 item button (ElvUI colors the slot border itself)
+define("GetArenaOpponentSpec", Compat.returnNil)
+define("GetNumArenaOpponentSpecs", function() return 0 end)
+define("SetItemButtonQuality", noop)
+
+---------------------------------------------------------------------------------------------------------------
+--> namespaces ElvUI calls at play time (found by the simulator's event sweep and C_ function list)
+
+--no "new item" flags on 3.3.5
+fill("C_NewItems", {IsNewItem = returnFalse, RemoveNewItem = noop, ClearAll = noop})
+
+--currencies: the 3.3.5 list (name, isHeader, isExpanded, isUnused, isWatched, count, extraCurrencyType, icon, itemID)
+fill("C_CurrencyInfo", {
+	GetCurrencyListSize = GetCurrencyListSize,
+	ExpandCurrencyList = ExpandCurrencyList,
+	GetCoinTextureString = GetCoinTextureString,
+	GetCurrencyListLink = Compat.returnNil,
+	GetCurrencyInfo = function(id)
+		for index = 1, GetCurrencyListSize() do
+			local name, isHeader, _, _, isWatched, count, _, icon, itemID = GetCurrencyListInfo(index)
+			if (not isHeader and itemID == id) then
+				return {name = name, quantity = count or 0, iconFileID = icon, discovered = true, quality = 1, isShowInBackpack = isWatched}
+			end
+		end
+	end,
+})
+
+fill("C_PvP", {GetMatchPVPStatColumns = Compat.returnNil})
+fill("C_TradeSkillUI", {GetItemReagentQualityInfo = Compat.returnNil})
+
+--profile export and sharing (12.x C_EncodingUtil): AceSerializer for the data, no compression, a pure Lua base64.
+--Strings stay between clients of this backport (retail exports are CBOR, not readable here)
+do
+	local CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+	local byte, char, sub, concat, floor = string.byte, string.char, string.sub, table.concat, math.floor
+	local DECODE = {}
+	for i = 1, 64 do DECODE[byte(CHARS, i)] = i - 1 end
+
+	local function EncodeBase64(data)
+		local out, length = {}, #data
+		for i = 1, length, 3 do
+			local a, b, c = byte(data, i, i + 2)
+			local n = a * 65536 + (b or 0) * 256 + (c or 0)
+			local c1, c2, c3, c4 = floor(n / 262144) % 64, floor(n / 4096) % 64, floor(n / 64) % 64, n % 64
+			out[#out + 1] = sub(CHARS, c1 + 1, c1 + 1) .. sub(CHARS, c2 + 1, c2 + 1)
+				.. (b and sub(CHARS, c3 + 1, c3 + 1) or "=") .. (c and sub(CHARS, c4 + 1, c4 + 1) or "=")
+		end
+		return concat(out)
+	end
+
+	local function DecodeBase64(text)
+		text = text:gsub("[^%w%+/=]", "")
+		local out = {}
+		for i = 1, #text, 4 do
+			local d1, d2, d3, d4 = DECODE[byte(text, i)], DECODE[byte(text, i + 1)], DECODE[byte(text, i + 2)], DECODE[byte(text, i + 3)]
+			if (not d1 or not d2) then break end
+			local n = d1 * 262144 + d2 * 4096 + (d3 or 0) * 64 + (d4 or 0)
+			out[#out + 1] = char(floor(n / 65536) % 256)
+			if (d3) then out[#out + 1] = char(floor(n / 256) % 256) end
+			if (d4) then out[#out + 1] = char(n % 256) end
+		end
+		return concat(out)
+	end
+
+	local function Serializer() return LibStub("AceSerializer-3.0") end
+
+	fill("C_EncodingUtil", {
+		SerializeCBOR = function(data) return Serializer():Serialize(data) end,
+		DeserializeCBOR = function(text)
+			local ok, data = Serializer():Deserialize(text)
+			if (ok) then return data end
+		end,
+		CompressString = function(text) return text end,
+		DecompressString = function(text) return text end,
+		EncodeBase64 = EncodeBase64,
+		DecodeBase64 = DecodeBase64,
+	})
+end

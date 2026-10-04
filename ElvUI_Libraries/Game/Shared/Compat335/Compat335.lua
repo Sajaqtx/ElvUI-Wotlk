@@ -504,6 +504,8 @@ do
 		mask:Hide()
 		return mask
 	end, isFrame)
+	--4.x SetDesaturation(amount) on the 3.3.5 SetDesaturated(on)
+	add("SetDesaturation", function(self, amount) self:SetDesaturated(amount and amount > 0) end, function(o) return o.SetDesaturated ~= nil end)
 	add("AddMaskTexture", noop, function(o) return o.SetTexCoord ~= nil end)
 	add("RemoveMaskTexture", noop, function(o) return o.SetTexCoord ~= nil end)
 	add("GetNumMaskTextures", function() return 0 end, function(o) return o.SetTexCoord ~= nil end)

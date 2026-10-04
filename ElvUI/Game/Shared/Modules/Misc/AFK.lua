@@ -51,6 +51,7 @@ end
 
 -- create these early and set the chat as moveable so the drag sticks
 local afk = CreateFrame('Frame', 'ElvUIAFKFrame')
+afk:Hide() -- ElvUI Wotlk: hidden from the start, a setup stopped half way must not leave it taking the keyboard
 local chat = CreateFrame('ScrollingMessageFrame', 'ElvUIAFKChat', afk)
 local bottom = CreateFrame('Frame', nil, afk)
 chat:UnregisterAllEvents()

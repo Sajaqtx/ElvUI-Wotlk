@@ -335,11 +335,17 @@ function M:LOOT_OPENED(_, autoloot)
 end
 
 function M:OPEN_MASTER_LOOT_LIST()
-	_G.MasterLooterFrame_Show(_G.LootFrame.selectedLootButton)
+	if ElvUI335 then -- the 3.3.5 master loot list is the group loot dropdown, as its LootFrame opens it
+		_G.ToggleDropDownMenu(1, nil, _G.GroupLootDropDown, _G.LootFrame.selectedLootButton, 0, 0)
+	else
+		_G.MasterLooterFrame_Show(_G.LootFrame.selectedLootButton)
+	end
 end
 
 function M:UPDATE_MASTER_LOOT_LIST()
-	if _G.LootFrame.selectedLootButton then
+	if ElvUI335 then
+		_G.UIDropDownMenu_Refresh(_G.GroupLootDropDown)
+	elseif _G.LootFrame.selectedLootButton then
 		_G.MasterLooterFrame_UpdatePlayers()
 	end
 end
