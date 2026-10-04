@@ -39,7 +39,8 @@ Fonctionnent en jeu : plaques de nom, cadres joueur / cible / cible de la cible,
       3.3.5 masque. Carte Blizzard d'origine pour l'instant (+ coordonnées ElvUI). **(corrigé, à revérifier)**
 - [ ] Refaire la « petite carte » d'ElvUI à la manière 3.3.5 (sans reparenter la carte).
 - [x] Les sacs s'ouvraient un par un : un seul sac qui suit le sac à dos Blizzard, comme l'ElvUI 6.10. **(corrigé, à revérifier)**
-- [ ] `Tooltip.lua:1062` : `format` reçoit une chaîne au lieu d'un nombre (x5).
+- [x] `Tooltip.lua:1062` (ID du sort dans l'infobulle) : en 3.3.5 `GetSpell` donne le rang, l'ID vient du lien
+      du sort. **(corrigé, à revérifier)**
 - [x] Relevé de la structure des plaques natives Rebuffed : conforme au simulateur, elles sont bien vidées.
 - [ ] (archive) relevé : `test6_plaque.txt` ; erreurs complètes : `test6_erreurs.txt`.
 
