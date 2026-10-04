@@ -717,21 +717,74 @@ define("UnitHasIncomingResurrection", returnFalse)
 define("UnitIsOwnerOrControllerOfUnit", function(owner, unit) return UnitIsUnit(owner .. "pet", unit) or false end)
 define("UnitInPartyIsAI", returnFalse)
 define("UnitIsQuestBoss", returnFalse)
+--macro conditions of later clients the 3.3.5 one does not know ([petbattle] 5.0, [overridebar] / [possessbar] /
+--[extrabar] 4.x...): a [group] holding one never matches there, so it is dropped (and a clause left without any group
+--with it); their no- forms always match, so they leave their group. ElvUI's state drivers and option parsing get the
+--result (the 3.3.5 ElvUI only used [vehicleui], [bonusbar], [bar]...)
+do
+	local UNKNOWN_CONDITIONS = {petbattle = true, overridebar = true, possessbar = true, extrabar = true, shapeshift = true}
+
+	local function cleanGroup(conditions)
+		local kept = {}
+		for condition in conditions:gmatch("[^,]+") do
+			local text = condition:match("^%s*(.-)%s*$")
+			local name = (text:match("^(%a+)") or ""):lower()
+			if (UNKNOWN_CONDITIONS[name]) then
+				return nil
+			elseif (not (name:sub(1, 2) == "no" and UNKNOWN_CONDITIONS[name:sub(3)])) then
+				kept[#kept + 1] = text
+			end
+		end
+		return "[" .. table.concat(kept, ",") .. "]"
+	end
+
+	function Compat.MacroConditions(text)
+		if (type(text) ~= "string" or not text:find("%[")) then return text end
+
+		local clauses = {}
+		for clause in (text .. ";"):gmatch("([^;]*);") do
+			local rest, groups, hadGroups = clause, {}, false
+			while true do
+				local group, after = rest:match("^%s*(%b[])(.*)$")
+				if (not group) then break end
+				hadGroups = true
+				groups[#groups + 1] = cleanGroup(group:sub(2, -2))
+				rest = after
+			end
+
+			if (not hadGroups) then
+				clauses[#clauses + 1] = clause
+			elseif (#groups > 0) then
+				clauses[#clauses + 1] = table.concat(groups) .. " " .. rest:match("^%s*(.-)%s*$")
+			end
+		end
+
+		return table.concat(clauses, ";")
+	end
+
+	local RegisterStateDriver, SecureCmdOptionParse = realG.RegisterStateDriver, realG.SecureCmdOptionParse
+	rawset(env, "RegisterStateDriver", function(frame, state, values)
+		return RegisterStateDriver(frame, state, Compat.MacroConditions(values))
+	end)
+	rawset(env, "SecureCmdOptionParse", function(text, ...)
+		return SecureCmdOptionParse(Compat.MacroConditions(text), ...)
+	end)
+end
 --4.x attribute drivers: the 3.3.5 state driver handles the state- attributes (state-visibility shows and hides)
 define("RegisterAttributeDriver", function(frame, attribute, values)
 	local state = attribute:match("^state%-(.+)$")
-	if (state) then return RegisterStateDriver(frame, state, values) end
+	if (state) then return env.RegisterStateDriver(frame, state, values) end
 end)
 define("UnregisterAttributeDriver", function(frame, attribute)
 	local state = attribute:match("^state%-(.+)$")
 	if (state) then return UnregisterStateDriver(frame, state) end
 end)
---3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
 --3.3.5 returns three values per weapon (no enchant ID, no ranged slot): the later order, for ElvUI only
 rawset(env, "GetWeaponEnchantInfo", function()
 	local hasMain, mainExpiration, mainCharges, hasOff, offExpiration, offCharges = realG.GetWeaponEnchantInfo()
 	return hasMain, mainExpiration, mainCharges, nil, hasOff, offExpiration, offCharges, nil
 end)
+--3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
 rawset(env, "GetPetActionInfo", function(index)
 	local name, _, texture, isToken, isActive, autoCastAllowed, autoCastEnabled = realG.GetPetActionInfo(index)
 	return name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, nil
