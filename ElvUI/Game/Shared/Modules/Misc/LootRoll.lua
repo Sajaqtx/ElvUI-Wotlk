@@ -535,6 +535,8 @@ function M:UpdateLootRollFrames()
 end
 
 function M:PositionGroupLootContainer() -- used by PostAlertMove and AlertFrame post hooks GroupLootContainer_Update
+	if not _G.GroupLootContainer then return end -- none on 3.3.5
+
 	local _, anchor, position, point, xOffset, yOffset = BL:GetAlertAnchors()
 
 	_G.GroupLootContainer:ClearAllPoints()

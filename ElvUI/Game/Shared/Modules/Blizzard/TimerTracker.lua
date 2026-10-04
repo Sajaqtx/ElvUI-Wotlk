@@ -44,6 +44,8 @@ function BL:START_TIMER()
 end
 
 function BL:SkinBlizzTimers()
+	if not _G.TimerTracker then return end -- 4.x: 3.3.5 has no start timers
+
 	if E.Mists then
 		hooksecurefunc('TimerTracker_StartTimerOfType', BL.START_TIMER)
 	else

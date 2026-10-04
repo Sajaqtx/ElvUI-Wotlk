@@ -95,10 +95,47 @@ function BL:AdjustAnchorsNonAlert(relativeAnchor)
 end
 
 function BL:HandleGroupLootContainer()
+	if not _G.GroupLootContainer then return end -- 3.3.5: GroupLootFrame1-4, replaced by ElvUI's loot rolls
+
 	_G.GroupLootContainer:EnableMouse(false) -- Prevent this weird non-clickable area stuff since 8.1; Monitor this, as it may cause addon compatibility.
 	_G.GroupLootContainer.ignoreInLayout = true
 
 	hooksecurefunc('GroupLootContainer_Update', M.PositionGroupLootContainer)
+end
+
+-- ElvUI Wotlk: the 3.3.5 alerts are AchievementAlertFrame1-2 and DungeonCompletionAlertFrame1, which
+-- AlertFrame_FixAnchors places under AlertFrame: placed again from the mover, growing its way (as the 3.3.5 ElvUI)
+function BL:AchievementAlertFrame_FixAnchors335()
+	local alertAnchor
+	for i = 1, _G.MAX_ACHIEVEMENT_ALERTS or 2 do
+		local frame = _G['AchievementAlertFrame'..i]
+		if frame then
+			frame:ClearAllPoints()
+			if alertAnchor and alertAnchor:IsShown() then
+				frame:Point(POSITION, alertAnchor, POINT, 0, Y_OFFSET)
+			else
+				frame:Point(POSITION, _G.AlertFrame, POINT)
+			end
+
+			alertAnchor = frame
+		end
+	end
+end
+
+function BL:DungeonCompletionAlertFrame_FixAnchors335()
+	local dungeon = _G.DungeonCompletionAlertFrame1
+	if not dungeon then return end
+
+	dungeon:ClearAllPoints()
+	for i = _G.MAX_ACHIEVEMENT_ALERTS or 2, 1, -1 do
+		local frame = _G['AchievementAlertFrame'..i]
+		if frame and frame:IsShown() then
+			dungeon:Point(POSITION, frame, POINT, 0, Y_OFFSET)
+			return
+		end
+	end
+
+	dungeon:Point(POSITION, _G.AlertFrame, POINT)
 end
 
 function BL:AlertMovers()
@@ -109,6 +146,14 @@ function BL:AlertMovers()
 	E:CreateMover(AlertFrameHolder, 'AlertFrameMover', L["Loot / Alert Frames"], nil, nil, E.PostAlertMove, nil, nil, 'general,blizzardImprovements')
 
 	BL:HandleGroupLootContainer()
+
+	if ElvUI335 then
+		hooksecurefunc('AlertFrame_FixAnchors', E.PostAlertMove)
+		hooksecurefunc('AchievementAlertFrame_FixAnchors', BL.AchievementAlertFrame_FixAnchors335)
+		hooksecurefunc('DungeonCompletionAlertFrame_FixAnchors', BL.DungeonCompletionAlertFrame_FixAnchors335)
+
+		return
+	end
 
 	--Replace AdjustAnchors functions to allow alerts to grow down if needed.
 	--We will need to keep an eye on this in case it taints. It shouldn't, but you never know.

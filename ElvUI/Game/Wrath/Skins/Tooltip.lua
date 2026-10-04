@@ -20,6 +20,8 @@ function S:StyleTooltips()
 		_G.WorldMapTooltip,
 		_G.ShoppingTooltip1,
 		_G.ShoppingTooltip2,
+		_G.ShoppingTooltip3, -- 3.3.5
+		_G.ItemRefShoppingTooltip3, -- 3.3.5
 		_G.QuickKeybindTooltip,
 		-- ours
 		E.ConfigTooltip,
@@ -29,6 +31,12 @@ function S:StyleTooltips()
 		_G.SettingsTooltip,
 	} do
 		TT:SetStyle(tt)
+
+		-- ElvUI Wotlk: no SharedTooltip_SetBackdropStyle on 3.3.5, and GameTooltip_OnHide puts the stock colors back
+		if ElvUI335 and tt and not tt.isStyled335 and tt.HookScript then
+			tt.isStyled335 = true
+			tt:HookScript('OnShow', function(tooltip) TT:SetStyle(tooltip) end)
+		end
 	end
 end
 
@@ -39,9 +47,11 @@ function S:TooltipFrames()
 	S:HandleCloseButton(_G.ItemRefCloseButton)
 
 	-- EmbeddedItemTooltip (also Paragon Reputation)
-	local EmbeddedTT = _G.EmbeddedItemTooltip.ItemTooltip
-	S:HandleIcon(EmbeddedTT.Icon, true)
-	S:HandleIconBorder(EmbeddedTT.IconBorder, EmbeddedTT.Icon.backdrop)
+	local EmbeddedTT = _G.EmbeddedItemTooltip and _G.EmbeddedItemTooltip.ItemTooltip -- none on 3.3.5
+	if EmbeddedTT then
+		S:HandleIcon(EmbeddedTT.Icon, true)
+		S:HandleIconBorder(EmbeddedTT.IconBorder, EmbeddedTT.Icon.backdrop)
+	end
 
 	-- Skin GameTooltip Status Bar
 	_G.GameTooltipStatusBar:SetStatusBarTexture(E.media.normTex)

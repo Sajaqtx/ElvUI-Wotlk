@@ -1860,7 +1860,7 @@ function S:HandleSliderFrame(frame, template, frameLevel)
 		for _, region in next, { frame:GetRegions() } do
 			if region:IsObjectType('FontString') then
 				local point, anchor, anchorPoint, x, y = region:GetPoint()
-				if strfind(anchorPoint, 'BOTTOM') then
+				if anchorPoint and strfind(anchorPoint, 'BOTTOM') then
 					region:Point(point, anchor, anchorPoint, x, y - 4)
 				end
 			end
@@ -2467,7 +2467,20 @@ end
 -- nonAddonsToLoad:
 --- this is used for loading skins when our skin init function executes.
 --- please add a given name, non-given-name is specific for elvui core addon.
+-- ElvUI Wotlk: the Wrath Classic skins not ported to the 3.3.5 frames yet (they stop half way through on them):
+-- those frames keep the stock look until each skin is ported (TODO_WOTLK.md at the root of ELVUI WOTLK)
+S.Unported335 = {
+	AddonList = true, BattleNetFrames = true, CharacterFrame = true, GossipFrame = true, GuildRegistrarFrame = true,
+	BlizzardMiscFrames = true, SkinBattlefield = true, BlizzardOptions = true, DressUpFrame = true,
+	EditorManagerFrame = true, LootFrame = true, MailFrame = true, MerchantFrame = true, PVPReadyDialog = true,
+	BlizzardQuestFrames = true, SettingsPanel = true, SpellBookFrame = true, TabardFrame = true, TradeFrame = true,
+	WorldMapFrame = true, FriendsFrame = true, HelpFrame = true, LookingForGroupFrames = true, RaidInfoFrame = true,
+	PetitionFrame = true,
+}
+
 function S:AddCallback(name, func, position) -- arg1: name is 'given name'
+	if ElvUI335 and type(name) == 'string' and S.Unported335[name] then return end
+
 	local load = (type(name) == 'function' and name) or (not func and S[name])
 	S:RegisterSkin('ElvUI', load or func, nil, nil, position)
 end

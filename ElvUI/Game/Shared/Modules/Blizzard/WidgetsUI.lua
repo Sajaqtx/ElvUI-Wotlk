@@ -150,8 +150,11 @@ end
 
 function BL:HandleWidgets()
 	local BelowMinimapContainer = _G.UIWidgetBelowMinimapContainerFrame
-	BL:BuildWidgetHolder('TopCenterContainerHolder', 'TopCenterContainerMover', 'CENTER', L["TopCenterWidget"], _G.UIWidgetTopCenterContainerFrame, 'TOP', E.UIParent, 'TOP', 0, -30, 125, 20, 'ALL,WIDGETS')
-	BL:BuildWidgetHolder('BelowMinimapContainerHolder', 'BelowMinimapContainerMover', 'CENTER', L["BelowMinimapWidget"], BelowMinimapContainer, 'TOPRIGHT', _G.Minimap, 'BOTTOMRIGHT', 0, -16, 150, 30, 'ALL,WIDGETS')
+	local TopCenterContainer = _G.UIWidgetTopCenterContainerFrame or _G.WorldStateAlwaysUpFrame -- 3.3.5: the battleground / world PvP state
+	BL:BuildWidgetHolder('TopCenterContainerHolder', 'TopCenterContainerMover', 'CENTER', L["TopCenterWidget"], TopCenterContainer, 'TOP', E.UIParent, 'TOP', 0, -30, 125, 20, 'ALL,WIDGETS')
+	if BelowMinimapContainer then -- none on 3.3.5
+		BL:BuildWidgetHolder('BelowMinimapContainerHolder', 'BelowMinimapContainerMover', 'CENTER', L["BelowMinimapWidget"], BelowMinimapContainer, 'TOPRIGHT', _G.Minimap, 'BOTTOMRIGHT', 0, -16, 150, 30, 'ALL,WIDGETS')
+	end
 	BL:BuildWidgetHolder(nil, 'GMMover', 'TOP', L["GM Ticket Frame"], _G.TicketStatusFrame, 'TOPLEFT', E.UIParent, 'TOPLEFT', 250, -5, nil, nil, 'ALL,GENERAL')
 
 	if E.Retail then
@@ -176,6 +179,8 @@ function BL:HandleWidgets()
 	hooksecurefunc(_G.UIWidgetTemplateCaptureBarMixin, 'Setup', BL.UIWidgetTemplateCaptureBar)
 
 	-- Below Minimap Widgets
+	if not BelowMinimapContainer then return end -- 3.3.5: no widgets (its capture bar is WorldStateCaptureBar, see PositionCaptureBar)
+
 	if BelowMinimapContainer.ProcessWidget then
 		hooksecurefunc(BelowMinimapContainer, 'ProcessWidget', BL.BelowMinimap_ProcessWidget)
 	end
