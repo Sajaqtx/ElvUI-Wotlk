@@ -355,6 +355,31 @@ end
 ---------------------------------------------------------------------------------------------------------------
 --> items and bags
 
+--item locations (8.0 ItemLocation): the fields and methods of Rebuffed's own (SharedXML/ItemUtil.lua), so its
+--Item:CreateFromItemLocation takes ours; the link is read from the bag slot or the equipment slot
+do
+	local Location = {}
+	function Location:HasAnyLocation() return self.slotIndex ~= nil or self.equipmentSlotIndex ~= nil end
+	Location.IsValid = Location.HasAnyLocation
+	function Location:IsBagAndSlot() return self.bagID ~= nil and self.slotIndex ~= nil end
+	function Location:IsEquipmentSlot() return self.equipmentSlotIndex ~= nil end
+	function Location:GetBagAndSlot() return self.bagID, self.slotIndex end
+	function Location:GetEquipmentSlot() return self.equipmentSlotIndex end
+	function Location:Clear() self.bagID, self.slotIndex, self.equipmentSlotIndex = nil, nil, nil end
+	function Location:SetBagAndSlot(bagID, slotIndex) self:Clear() self.bagID, self.slotIndex = bagID, slotIndex end
+	function Location:SetEquipmentSlot(slotIndex) self:Clear() self.equipmentSlotIndex = slotIndex end
+	function Location:GetItemLink()
+		if (self:IsBagAndSlot()) then return GetContainerItemLink(self.bagID, self.slotIndex) end
+		if (self:IsEquipmentSlot()) then return GetInventoryItemLink("player", self.equipmentSlotIndex) end
+	end
+	local meta = {__index = Location}
+	rawset(env, "ItemLocation", {
+		CreateEmpty = function() return setmetatable({}, meta) end,
+		CreateFromBagAndSlot = function(_, bagID, slotIndex) return setmetatable({bagID = bagID, slotIndex = slotIndex}, meta) end,
+		CreateFromEquipmentSlot = function(_, slotIndex) return setmetatable({equipmentSlotIndex = slotIndex}, meta) end,
+	})
+end
+
 fill("C_Item", {
 	GetItemInfo = GetItemInfo,
 	GetItemInfoInstant = realG.GetItemInfoInstant,
@@ -384,7 +409,7 @@ fill("C_Item", {
 		local link = location and location.GetItemLink and location:GetItemLink()
 		return link and (select(4, GetItemInfo(link))) or nil
 	end,
-	DoesItemExist = function(location) return location ~= nil and location.IsValid and location:IsValid() or false end,
+	DoesItemExist = function(location) return location ~= nil and location.GetItemLink ~= nil and location:GetItemLink() ~= nil end,
 	IsBound = returnFalse,
 	IsBoundToAccountUntilEquip = returnFalse,
 	CanScrapItem = returnFalse,
@@ -700,6 +725,11 @@ end)
 define("UnregisterAttributeDriver", function(frame, attribute)
 	local state = attribute:match("^state%-(.+)$")
 	if (state) then return UnregisterStateDriver(frame, state) end
+end)
+--3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
+rawset(env, "GetPetActionInfo", function(index)
+	local name, _, texture, isToken, isActive, autoCastAllowed, autoCastEnabled = realG.GetPetActionInfo(index)
+	return name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, nil
 end)
 define("IsUnitModelReadyForUI", function() return true end)
 define("IsPlayerMoving", function() return (GetUnitSpeed("player") or 0) > 0 end)

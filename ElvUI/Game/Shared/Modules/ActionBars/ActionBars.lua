@@ -1206,6 +1206,8 @@ function AB:UnloadTalentFrame()
 end
 
 function AB:UnloadController()
+	if not _G.ActionBarController then return end -- 3.3.5 bars have no controller
+
 	_G.ActionBarController:UnregisterAllEvents() -- shut down some events for things we dont use
 	_G.ActionBarController:RegisterEvent('SETTINGS_LOADED') -- this is needed for page controller to spawn properly
 	_G.ActionBarController:RegisterEvent('UPDATE_EXTRA_ACTIONBAR') -- this is needed to let the ExtraActionBar show

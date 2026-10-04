@@ -4077,11 +4077,17 @@ function CH:Initialize()
 		CH:HandleChatVoiceIcons()
 	end
 
-	CH:SecureHook(_G.EditModeManagerFrame, 'UpdateLayoutInfo', 'ResnapDock')
+	if ElvUI335 then -- no edit mode, the chat edit functions are globals
+		CH:SecureHook('ChatEdit_ActivateChat')
+		CH:SecureHook('ChatEdit_DeactivateChat')
+		CH:SecureHook('ChatEdit_SetLastActiveWindow')
+	else
+		CH:SecureHook(_G.EditModeManagerFrame, 'UpdateLayoutInfo', 'ResnapDock')
 
-	CH:SecureHook(_G.ChatFrameUtil, 'ActivateChat', 'ChatEdit_ActivateChat')
-	CH:SecureHook(_G.ChatFrameUtil, 'DeactivateChat', 'ChatEdit_DeactivateChat')
-	CH:SecureHook(_G.ChatFrameUtil, 'SetLastActiveWindow', 'ChatEdit_SetLastActiveWindow')
+		CH:SecureHook(_G.ChatFrameUtil, 'ActivateChat', 'ChatEdit_ActivateChat')
+		CH:SecureHook(_G.ChatFrameUtil, 'DeactivateChat', 'ChatEdit_DeactivateChat')
+		CH:SecureHook(_G.ChatFrameUtil, 'SetLastActiveWindow', 'ChatEdit_SetLastActiveWindow')
+	end
 
 	CH:SecureHook('FCFTab_UpdateColors')
 	CH:SecureHook('FCFDock_SelectWindow')
@@ -4095,7 +4101,9 @@ function CH:Initialize()
 	CH:SecureHook('FCF_SetChatWindowFontSize', 'SetChatFont')
 	CH:SecureHook('FCF_UnDockFrame', 'SnappingChanged')
 	CH:SecureHook('FCF_SetWindowAlpha')
-	CH:SecureHook('RedockChatWindows', 'ClearSnapping')
+	if _G.RedockChatWindows then -- not on 3.3.5
+		CH:SecureHook('RedockChatWindows', 'ClearSnapping')
+	end
 	CH:SecureHook('UIDropDownMenu_AddButton')
 	CH:SecureHook('GetPlayerInfoByGUID')
 

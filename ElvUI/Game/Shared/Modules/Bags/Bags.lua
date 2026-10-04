@@ -312,8 +312,21 @@ end
 do
 	local GetBackpackCurrencyInfo = GetBackpackCurrencyInfo or C_CurrencyInfo.GetBackpackCurrencyInfo
 
+	-- 3.3.5: name, count, extraCurrencyType (1 arena points, 2 honor: no icon of their own), icon, itemID
+	local EXTRA_CURRENCY_ICONS = { [1] = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]] }
+
 	function B:GetBackpackCurrencyInfo(index)
-		if _G.GetBackpackCurrencyInfo then
+		if ElvUI335 then
+			local info = {}
+			local extraType
+			info.name, info.quantity, extraType, info.iconFileID, info.currencyTypesID = GetBackpackCurrencyInfo(index)
+			if extraType == 2 then
+				info.iconFileID = [[Interface\TargetingFrame\UI-PVP-]]..(E.myfaction or 'Alliance')
+			elseif extraType then
+				info.iconFileID = EXTRA_CURRENCY_ICONS[extraType] or info.iconFileID
+			end
+			return info
+		elseif _G.GetBackpackCurrencyInfo then
 			local info = {}
 			info.name, info.quantity, info.iconFileID, info.currencyTypesID = GetBackpackCurrencyInfo(index)
 			return info
@@ -1504,6 +1517,11 @@ function B:Container_OnEvent(event, ...)
 	end
 end
 
+function B:Token335_OnEnter()
+	_G.GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
+	_G.GameTooltip:SetBackpackToken(self:GetID())
+end
+
 function B:UpdateTokensIfVisible()
 	if B.BagFrame:IsVisible() then
 		B:UpdateTokens()
@@ -1531,7 +1549,7 @@ function B:UpdateTokens()
 		button:Show()
 
 		if (E.Wrath or E.Mists) and button.currencyID then
-			local tokens = _G.TokenFrameContainer.buttons
+			local tokens = _G.TokenFrameContainer and _G.TokenFrameContainer.buttons -- load on demand on 3.3.5
 			if tokens then
 				for _, token in next, tokens do
 					if token.itemID == button.currencyID then
@@ -2594,7 +2612,15 @@ function B:ConstructContainerFrame(name, isBank)
 			f.currencyButton:Height(22)
 
 			for i = 1, MAX_WATCHED_TOKENS do
-				local currency = CreateFrame('Button', format('%sCurrencyButton%d', name, i), f.currencyButton, 'BackpackTokenTemplate')
+				local currency
+				if ElvUI335 then -- the 3.3.5 token template lives in the load on demand token UI
+					currency = CreateFrame('Button', format('%sCurrencyButton%d', name, i), f.currencyButton)
+					currency.icon = currency:CreateTexture(nil, 'ARTWORK')
+					currency:SetScript('OnEnter', B.Token335_OnEnter)
+					currency:SetScript('OnLeave', _G.GameTooltip_Hide)
+				else
+					currency = CreateFrame('Button', format('%sCurrencyButton%d', name, i), f.currencyButton, 'BackpackTokenTemplate')
+				end
 				currency:Size(20)
 				currency:SetTemplate()
 				currency:SetID(i)

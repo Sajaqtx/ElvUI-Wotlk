@@ -86,7 +86,18 @@ function AB:UpdatePet(event, unit)
 			autoCast:Hide()
 		end
 
-		autoCast:ShowAutoCastEnabled(autoCastEnabled)
+		if autoCast.ShowAutoCastEnabled then
+			autoCast:ShowAutoCastEnabled(autoCastEnabled)
+		else -- 3.3.5: the shine model of the button
+			local shine = _G[buttonName..'Shine']
+			if shine then
+				if autoCastEnabled then
+					_G.AutoCastShine_AutoCastStart(shine)
+				else
+					_G.AutoCastShine_AutoCastStop(shine)
+				end
+			end
+		end
 
 		if not PetHasActionBar() and texture and name ~= 'PET_ACTION_FOLLOW' then
 			if PetActionButton_StopFlash then
@@ -234,6 +245,9 @@ function AB:CreateBarPet()
 
 	for i = 1, _G.NUM_PET_ACTION_SLOTS do
 		local button = _G['PetActionButton'..i]
+		if ElvUI335 then -- icon, cooldown... are only named children on 3.3.5
+			ElvUI335.AddParentKeys(button)
+		end
 		if not button:IsShown() then
 			button:Show() -- for some reason they start hidden on DF ?
 		end

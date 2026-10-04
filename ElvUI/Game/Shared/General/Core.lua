@@ -1929,6 +1929,10 @@ function E:CallLoadedModule(obj, silent, object, index)
 	local module = name and E:GetModule(name, silent)
 	if not module then return end
 
+	if ElvUI335 then -- hooks on later functions are skipped (ElvUI335.skippedHooks)
+		ElvUI335.SafeHooks(module)
+	end
+
 	if func and type(func) == 'string' then
 		E:CallLoadFunc(module[func], module)
 	elseif func and type(func) == 'function' then
@@ -2008,6 +2012,10 @@ function E:OnEnable()
 end
 
 function E:Initialize()
+	if ElvUI335 then -- hooks on later functions are skipped (ElvUI335.skippedHooks)
+		ElvUI335.SafeHooks(E)
+	end
+
 	E:InitDB()
 
 	E.myspec = GetSpecialization()

@@ -90,6 +90,7 @@ local MODERN_TEMPLATES = {
 	ItemAnimTemplate = false,
 	--renamed: the 3.3.5 template of the same widget
 	MainMenuFrameButtonTemplate = "GameMenuButtonTemplate",
+	StanceButtonTemplate = "ShapeshiftButtonTemplate",
 }
 --template list without the modern names; the backdrop one of them asks for
 local function stripModernTemplates(template)
@@ -223,6 +224,51 @@ do
 	end)
 end
 
+--the AceHook methods of an ElvUI module (its own table) skip a target 3.3.5 does not have, as hooksecurefunc above,
+--instead of raising and stopping the module's setup at the first later function (EditModeManagerFrame...)
+do
+	local skipped = Compat.skippedHooks
+	local function functionExists(object, method)
+		if (object == nil) then
+			return type(realG[method]) == "function" or type(rawget(env, method)) == "function"
+		end
+		return type(object) == "table" and type(object[method]) == "function"
+	end
+	local function scriptExists(frame, script)
+		return type(frame) == "table" and frame.HasScript ~= nil and frame:HasScript(script) and true or false
+	end
+	function Compat.SafeHooks(obj)
+		if (obj.__elvSafeHooks) then return end
+		obj.__elvSafeHooks = true
+		for _, name in ipairs({"Hook", "RawHook", "SecureHook"}) do
+			local original = obj[name]
+			if (original) then
+				obj[name] = function(self, object, method, ...)
+					if (type(object) == "string") then
+						if (not functionExists(nil, object)) then skipped[object] = true return end
+					elseif (not functionExists(object, method)) then
+						skipped[tostring(method)] = true
+						return
+					end
+					return original(self, object, method, ...)
+				end
+			end
+		end
+		for _, name in ipairs({"HookScript", "RawHookScript", "SecureHookScript"}) do
+			local original = obj[name]
+			if (original) then
+				obj[name] = function(self, frame, script, ...)
+					if (not scriptExists(frame, script)) then
+						skipped[tostring(script)] = true
+						return
+					end
+					return original(self, frame, script, ...)
+				end
+			end
+		end
+	end
+end
+
 ---------------------------------------------------------------------------------------------------------------
 --> C_Timer (the session may have one from another addon: ElvUI uses its own, with cancelable handles)
 
@@ -302,8 +348,10 @@ fill("C_AddOns", {
 	DoesAddOnExist = function(addon) return realG.GetAddOnInfo(addon) ~= nil end,
 })
 
+--a later cvar (most nameplate ones, unless rebuffed.dll adds them) is absent: nil, or an error on some builds
 local function cvarExists(name)
-	return (realG.GetCVar(name)) ~= nil
+	local ok, value = pcall(realG.GetCVar, name)
+	return ok and value ~= nil
 end
 fill("C_CVar", {
 	GetCVar = function(name) if (cvarExists(name)) then return realG.GetCVar(name) end end,
