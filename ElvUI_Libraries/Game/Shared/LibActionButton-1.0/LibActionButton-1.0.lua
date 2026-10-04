@@ -290,12 +290,12 @@ function lib:CreateButton(id, name, header, config)
 	button:RegisterForClicks("AnyDown", "AnyUp")
 
 	-- ElvUI Wotlk: the method calls of the secure snippets (3.3.5 frame handles have no CallMethod): a counter attribute
-	-- set after the method name and its arguments
+	-- set after the method name and its arguments (restricted code cannot set a name starting with "_")
 	button:HookScript("OnAttributeChanged", function(self, name)
-		if name ~= "_lab335n" then return end
-		local method = self[self:GetAttribute("_lab335call")]
+		if name ~= "lab335n" then return end
+		local method = self[self:GetAttribute("lab335call")]
 		if method then
-			method(self, self:GetAttribute("_lab335arg1"), self:GetAttribute("_lab335arg2"), self:GetAttribute("_lab335arg3"))
+			method(self, self:GetAttribute("lab335arg1"), self:GetAttribute("lab335arg2"), self:GetAttribute("lab335arg3"))
 		end
 	end)
 
@@ -453,7 +453,7 @@ function SetupSecureSnippets(button)
 	button:SetAttribute("_childupdate-state", [[
 		control:RunFor(self, self:GetAttribute("UpdateState"), message)
 		-- ElvUI Wotlk: 3.3.5 handles have no CallMethod, the button's OnAttributeChanged calls it (see CreateButton)
-		self:SetAttribute("_lab335call", "UpdateAction") lab335n = (lab335n or 0) + 1 self:SetAttribute("_lab335n", lab335n)
+		self:SetAttribute("lab335call", "UpdateAction") lab335n = (lab335n or 0) + 1 self:SetAttribute("lab335n", lab335n)
 	]])
 
 	-- secure PickupButton(self, kind, value, ...)
@@ -492,7 +492,7 @@ function SetupSecureSnippets(button)
 			-- update internal state
 			control:RunFor(self, self:GetAttribute("UpdateState"), state)
 			-- send a notification to the insecure code
-			self:SetAttribute("_lab335arg1", state) self:SetAttribute("_lab335arg2", "empty") self:SetAttribute("_lab335arg3", nil) self:SetAttribute("_lab335call", "ButtonContentsChanged") lab335n = (lab335n or 0) + 1 self:SetAttribute("_lab335n", lab335n)
+			self:SetAttribute("lab335arg1", state) self:SetAttribute("lab335arg2", "empty") self:SetAttribute("lab335arg3", nil) self:SetAttribute("lab335call", "ButtonContentsChanged") lab335n = (lab335n or 0) + 1 self:SetAttribute("lab335n", lab335n)
 		end
 		-- return the button contents for pickup
 		return control:RunFor(self, self:GetAttribute("PickupButton"), type, action)
@@ -533,7 +533,7 @@ function SetupSecureSnippets(button)
 			-- update internal state
 			control:RunFor(self, self:GetAttribute("UpdateState"), state)
 			-- send a notification to the insecure code
-			self:SetAttribute("_lab335arg1", state) self:SetAttribute("_lab335arg2", kind) self:SetAttribute("_lab335arg3", value) self:SetAttribute("_lab335call", "ButtonContentsChanged") lab335n = (lab335n or 0) + 1 self:SetAttribute("_lab335n", lab335n)
+			self:SetAttribute("lab335arg1", state) self:SetAttribute("lab335arg2", kind) self:SetAttribute("lab335arg3", value) self:SetAttribute("lab335call", "ButtonContentsChanged") lab335n = (lab335n or 0) + 1 self:SetAttribute("lab335n", lab335n)
 		else
 			-- get the action for (pet-)action buttons
 			buttonAction = self:GetAttribute("action")

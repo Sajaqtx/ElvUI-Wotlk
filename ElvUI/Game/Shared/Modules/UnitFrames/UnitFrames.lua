@@ -1860,6 +1860,11 @@ do
 
 					HideFrame(plate, 1)
 				end
+
+				if frame and ElvUI335 and not plate then -- the native 3.3.5 plate draws its own bars and texts
+					ElvUI335.RecordPlate(frame, 'added')
+					ElvUI335.HideNativePlate(frame)
+				end
 			end
 		elseif E.private.unitframe.enable and not handledUnits[unit] then
 			handledUnits[unit] = true

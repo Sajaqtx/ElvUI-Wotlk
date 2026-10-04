@@ -1648,3 +1648,12 @@ do
 		if (ok) then return status end
 	end)
 end
+--free slots of the character's bags (4.x): the general purpose bags only, as the later client counts them
+define("CalculateTotalNumberOfFreeBagSlots", function()
+	local free = 0
+	for bag = 0, NUM_BAG_SLOTS or 4 do
+		local slots, bagType = GetContainerNumFreeSlots(bag)
+		if (slots and (bagType == 0 or bagType == nil)) then free = free + slots end
+	end
+	return free
+end)

@@ -303,6 +303,11 @@ function B:LoadBagBar()
 	B.BagBar:EnableMouse(true)
 	B.BagBar.buttons = {}
 
+	if ElvUI335 then -- the 3.3.5 bag buttons only name their parts (Count, icon...)
+		ElvUI335.AddParentKeys(_G.MainMenuBarBackpackButton)
+		for i = 0, NUM_BAG_FRAMES - 1 do ElvUI335.AddParentKeys(_G['CharacterBag'..i..'Slot']) end
+	end
+
 	_G.MainMenuBarBackpackButton:SetParent(B.BagBar)
 	_G.MainMenuBarBackpackButton:ClearAllPoints()
 	_G.MainMenuBarBackpackButton:HookScript('OnEnter', B.BagButton_OnEnter)
