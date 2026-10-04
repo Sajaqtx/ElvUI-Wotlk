@@ -2014,6 +2014,7 @@ end
 function E:Initialize()
 	if ElvUI335 then -- hooks on later functions are skipped (ElvUI335.skippedHooks)
 		ElvUI335.SafeHooks(E)
+		E.myguid = E.myguid or UnitGUID('player') -- not known yet when the addon loaded
 	end
 
 	E:InitDB()

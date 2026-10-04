@@ -4,6 +4,8 @@
 	<Script file='Shared\Compat335\Compat335_API.lua'/>
 	<Script file='Shared\Compat335\Compat335_Tables.lua'/>
 	<Script file='Shared\LibStub\LibStub.lua'/>
+	<!-- ElvUI Wotlk: ElvUI's libraries in a LibStub of its own, away from the other addons' 3.3.5 copies -->
+	<Script file='Shared\Compat335\Compat335_LibStub.lua'/>
 	<Script file='Shared\CallbackHandler-1.0\CallbackHandler-1.0.lua'/>
 
 	<Include file='Shared\Ace3\AceGUI-3.0\AceGUI-3.0.xml'/>

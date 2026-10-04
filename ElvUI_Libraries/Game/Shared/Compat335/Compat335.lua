@@ -399,6 +399,11 @@ do
 		"GameTooltip", "MessageFrame", "ScrollingMessageFrame", "SimpleHTML", "ColorSelect", "Model", "PlayerModel",
 		"DressUpModel", "Minimap", "TabardModel", "MovieFrame", "QuestPOIFrame"}) do
 		local ok, frame = pcall(CreateFrame, frameType, nil, holder)
+		if (ok and frame and frameType == "EditBox") then -- 3.3.5: autoFocus is on by default
+			frame:SetAutoFocus(false)
+			frame:ClearFocus()
+			frame:Hide()
+		end
 		if (ok and frame) then samples[#samples + 1] = frame end
 	end
 	local group = samples[4]
@@ -565,7 +570,9 @@ do
 	local filters = setmetatable({}, {__mode = "k"}) --frame -> {event -> {unit -> true}}
 	local handlers = setmetatable({}, {__mode = "k"}) --frame -> its own OnEvent
 
+	--hidden: its sample children must never show (a 3.3.5 edit box shown with autoFocus takes the keyboard)
 	local holder = CreateFrame("Frame")
+	holder:Hide()
 	local index = getmetatable(holder).__index
 	local nativeRegister, nativeUnregister, nativeIsRegistered = index.RegisterEvent, index.UnregisterEvent, index.IsEventRegistered
 
@@ -695,6 +702,11 @@ do
 	for _, frameType in ipairs({"Frame", "Button", "CheckButton", "StatusBar", "Cooldown", "Slider", "ScrollFrame", "EditBox",
 		"GameTooltip", "PlayerModel", "Model", "MessageFrame", "ScrollingMessageFrame"}) do
 		local ok, frame = pcall(CreateFrame, frameType, nil, holder)
+		if (ok and frame and frameType == "EditBox") then -- 3.3.5: autoFocus is on by default
+			frame:SetAutoFocus(false)
+			frame:ClearFocus()
+			frame:Hide()
+		end
 		local meta = ok and frame and getmetatable(frame)
 		if (meta and type(meta.__index) == "table" and meta.__index.RegisterUnitEvent == nil) then
 			meta.__index.RegisterUnitEvent = RegisterUnitEvent

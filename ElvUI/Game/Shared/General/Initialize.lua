@@ -719,8 +719,9 @@ function E:OnInitialize()
 	E.myClassColor = E:ClassColor(E.myclass, true)
 	E.loadedtime = GetTime()
 
-	local playerGUID = UnitGUID('player')
-	local _, serverID = strsplit('-', playerGUID)
+	local playerGUID = UnitGUID('player') -- ElvUI Wotlk: nil here at a 3.3.5 first login, taken again in E:Initialize
+	local _, serverID
+	if playerGUID then _, serverID = strsplit('-', playerGUID) end
 	E.serverID = tonumber(serverID) or GetRealmID() -- the 3.3.5 guid has no server part
 	E.myguid = playerGUID
 

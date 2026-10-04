@@ -169,6 +169,10 @@ for name, text in pairs({PLAYER_DIFFICULTY1 = "Normal", PLAYER_DIFFICULTY2 = "He
 	if (realG[name] == nil) then rawset(env, name, text) end
 end
 if (realG.ITEM_LEVEL_ALT == nil) then rawset(env, "ITEM_LEVEL_ALT", "Item Level %d (%d)") end
+--strings of later clients 3.3.5 lacks
+for name, text in pairs({WEEKLY = "Weekly", RAID_INFO_WORLD_BOSS = "World Bosses", DAILY = "Daily"}) do
+	if (realG[name] == nil) then rawset(env, name, text) end
+end
 if (realG.MAX_QUESTS == nil) then rawset(env, "MAX_QUESTS", 25) end
 
 --sound output devices: the 3.3.5 Sound_GameSystem_* functions

@@ -1470,3 +1470,59 @@ do
 		DecodeBase64 = DecodeBase64,
 	})
 end
+
+---------------------------------------------------------------------------------------------------------------
+--> sounds: 3.3.5's PlaySound takes a sound name ("igMainMenuOpen"), not the 7.x sound kit numbers, and has no
+--  SOUNDKIT table at login (Rebuffed's SharedXML SoundKit.lua is not loaded). ElvUI's keys get the 3.3.5 names;
+--  the environment's PlaySound turns a number into its name (an unknown one plays the menu option click)
+
+do
+	rawset(env, "SOUNDKIT", setmetatable({
+		GS_TITLE_OPTION_EXIT = "gsTitleOptionExit",
+		IG_BACKPACK_CLOSE = "igBackPackClose",
+		IG_BACKPACK_OPEN = "igBackPackOpen",
+		IG_CHARACTER_INFO_TAB = "igCharacterInfoTab",
+		IG_CHARACTER_INFO_OPEN = "igCharacterInfoOpen",
+		IG_CHARACTER_INFO_CLOSE = "igCharacterInfoClose",
+		IG_CHARACTER_NPC_SELECT = "igCharacterNPCSelect",
+		IG_CREATURE_AGGRO_SELECT = "igCreatureAggroSelect",
+		IG_CREATURE_NEUTRAL_SELECT = "igCreatureNeutralSelect",
+		IG_MAINMENU_OPEN = "igMainMenuOpen",
+		IG_MAINMENU_CLOSE = "igMainMenuClose",
+		IG_MAINMENU_OPTION = "igMainMenuOption",
+		IG_MAINMENU_OPTION_CHECKBOX_OFF = "igMainMenuOptionCheckBoxOff",
+		IG_MAINMENU_OPTION_CHECKBOX_ON = "igMainMenuOptionCheckBoxOn",
+		IG_PLAYER_INVITE_DECLINE = "igPlayerInviteDecline",
+		INTERFACE_SOUND_LOST_TARGET_UNIT = "INTERFACESOUND_LOSTTARGETUNIT",
+		TUTORIAL_POPUP = "TutorialPopup",
+		UI_70_BOOST_THANKSFORPLAYING_SMALLER = "ReadyCheck",
+		U_CHAT_SCROLL_BUTTON = "UChatScrollButton",
+	}, {__index = function() return "igMainMenuOption" end}))
+
+	local NUMBERS = {
+		[798] = "gsTitleOptionOK", [799] = "gsTitleOptionExit", [839] = "igCharacterInfoOpen", [840] = "igCharacterInfoClose",
+		[841] = "igCharacterInfoTab", [850] = "igMainMenuOpen", [851] = "igMainMenuClose", [852] = "igMainMenuOption",
+		[853] = "igMainMenuContinue", [854] = "igMainMenuOption", [856] = "igMainMenuOptionCheckBoxOn",
+		[857] = "igMainMenuOptionCheckBoxOff", [862] = "igBackPackOpen", [863] = "igBackPackClose",
+		[882] = "igQuestListOpen", [888] = "LEVELUPSOUND", [1115] = "UChatScrollButton",
+	}
+	local PlaySound = realG.PlaySound
+	rawset(env, "PlaySound", function(sound)
+		if (type(sound) == "number") then
+			sound = NUMBERS[sound] or "igMainMenuOption"
+		end
+		if (type(sound) == "string") then
+			return PlaySound(sound)
+		end
+	end)
+end
+
+--atlas markup (6.0): the atlas' region of its file as a texture escape (coordinates scaled on a 1024 square, the
+--escape only uses their ratios); an atlas Rebuffed lacks gives no markup
+define("CreateAtlasMarkup", function(atlas, width, height, offsetX, offsetY)
+	if (not Compat.AtlasExists(atlas)) then return "" end
+	local info = realG.AtlasUtil:GetAtlasInfo(atlas)
+	local size = 1024
+	return ("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t"):format(info.filename, height or 0, width or 0, offsetX or 0, offsetY or 0,
+		size, size, info.leftTexCoord * size, info.rightTexCoord * size, info.topTexCoord * size, info.bottomTexCoord * size)
+end)
