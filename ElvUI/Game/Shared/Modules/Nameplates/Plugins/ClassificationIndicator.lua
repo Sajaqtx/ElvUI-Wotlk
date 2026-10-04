@@ -20,7 +20,7 @@ local function Update(self)
 	local atlas = atlases[classification]
 	local texture = textures[classification]
 	if atlas then
-		element:SetAtlas(atlas)
+		ElvUI335.SetAtlas(element, atlas)
 		element:Show()
 	elseif texture then
 		element:SetTexture(texture)

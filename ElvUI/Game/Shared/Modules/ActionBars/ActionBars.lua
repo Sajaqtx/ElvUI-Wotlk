@@ -895,7 +895,7 @@ function AB:UpdateProfessionQuality(button)
 		atlas = info and info.iconInventory or nil
 
 		if atlas then
-			button.ProfessionQualityOverlayFrame.Texture:SetAtlas(atlas, true)
+			ElvUI335.SetAtlas(button.ProfessionQualityOverlayFrame.Texture, atlas, true)
 		end
 	end
 

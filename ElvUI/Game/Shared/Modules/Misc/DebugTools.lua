@@ -119,6 +119,11 @@ function D:Initialize()
 	D.Initialized = true
 	D.HideFrame:Hide()
 
+	if ElvUI335 then -- the 3.3.5 error frame is another one (and BugSack shows the errors): only the blocked action popup
+		D:SecureHook('StaticPopup_Show')
+		return
+	end
+
 	local frame = _G.ScriptErrorsFrame
 	D:SecureHookScript(frame, 'OnShow', D.ModifyErrorFrame)
 	D:SecureHook(frame, 'UpdateButtons', D.ScriptErrorsFrame_UpdateButtons)

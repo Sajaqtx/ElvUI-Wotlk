@@ -2730,7 +2730,9 @@ function CH:SetupChat()
 	CH:StyleOverflowButton()
 	CH:PositionChats()
 
-	_G.TextToSpeechButtonFrame:Hide()
+	if _G.TextToSpeechButtonFrame then -- none on 3.3.5
+		_G.TextToSpeechButtonFrame:Hide()
+	end
 
 	if E.Retail then
 		_G.QuickJoinToastButton:Hide()
@@ -3456,7 +3458,7 @@ do -- securely lock the atlas texture; we need this cause its not shown on init 
 	local ttsAtlas = 'chatframe-button-icon-TTS'
 	local function LockAtlas(icon, atlas)
 		if atlas ~= ttsAtlas then
-			icon:SetAtlas(ttsAtlas)
+			ElvUI335.SetAtlas(icon, ttsAtlas)
 		end
 	end
 
@@ -4070,7 +4072,10 @@ function CH:Initialize()
 	CH:CheckLFGRoles()
 	CH:Panels_ColorUpdate()
 	CH:UpdateEditboxAnchors()
-	CH:HandleChatVoiceIcons()
+
+	if not ElvUI335 then -- no voice chat buttons nor dock overflow button on 3.3.5
+		CH:HandleChatVoiceIcons()
+	end
 
 	CH:SecureHook(_G.EditModeManagerFrame, 'UpdateLayoutInfo', 'ResnapDock')
 

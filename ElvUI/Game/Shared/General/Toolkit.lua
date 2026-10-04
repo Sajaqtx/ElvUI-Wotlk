@@ -446,7 +446,7 @@ local function StripRegion(which, object, kill, zero)
 	elseif which == STRIP_TEX then
 		object:SetTexture(E.ClearTexture)
 		if not ElvUI335 then -- ElvUI Wotlk: the Rebuffed SetAtlas raises on an empty name; the texture is cleared above
-			object:SetAtlas('')
+			ElvUI335.SetAtlas(object, '')
 		end
 	elseif which == STRIP_FONT then
 		object:SetText('')

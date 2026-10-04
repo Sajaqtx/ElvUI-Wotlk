@@ -1724,7 +1724,7 @@ end
 function B:SetBagShownTexture(icon, shown)
 	local texture = shown and (_G.READY_CHECK_READY_TEXTURE or READY_TEX) or (_G.READY_CHECK_NOT_READY_TEXTURE or NOT_READY_TEX)
 	if C_Texture_GetAtlasInfo(texture) then
-		icon:SetAtlas(texture)
+		ElvUI335.SetAtlas(icon, texture)
 	else
 		icon:SetTexture(texture)
 	end
@@ -2698,14 +2698,14 @@ function B:ConstructContainerButton(f, bagID, slotID)
 
 	if not slot.JunkIcon then
 		slot.JunkIcon = slot:CreateTexture(nil, 'OVERLAY', nil, 2)
-		slot.JunkIcon:SetAtlas('bags-junkcoin', true)
+		ElvUI335.SetAtlas(slot.JunkIcon, 'bags-junkcoin', true)
 		slot.JunkIcon:Point('TOPRIGHT', -1, -1)
 		slot.JunkIcon:Hide()
 	end
 
 	if not slot.ScrapIcon then
 		slot.ScrapIcon = slot:CreateTexture(nil, 'OVERLAY', nil, 2)
-		slot.ScrapIcon:SetAtlas('bags-icon-scrappable')
+		ElvUI335.SetAtlas(slot.ScrapIcon, 'bags-icon-scrappable')
 		slot.ScrapIcon:Size(14, 12)
 		slot.ScrapIcon:Point('TOPRIGHT', -1, -1)
 		slot.ScrapIcon:Hide()

@@ -64,7 +64,7 @@ end
 
 local function SetIcon(element, texture)
 	if C_Texture_GetAtlasInfo and C_Texture_GetAtlasInfo(texture) then
-		element:SetAtlas(texture)
+		ElvUI335.SetAtlas(element, texture)
 	else
 		element:SetTexture(texture)
 	end

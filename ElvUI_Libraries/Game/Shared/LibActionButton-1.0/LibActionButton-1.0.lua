@@ -1098,15 +1098,15 @@ if UseCustomFlyout then
 			lib.flyoutHandler.Background = CreateFrame("Frame", nil, lib.flyoutHandler)
 			lib.flyoutHandler.Background:SetAllPoints()
 			lib.flyoutHandler.Background.End = lib.flyoutHandler.Background:CreateTexture(nil, "BACKGROUND")
-			lib.flyoutHandler.Background.End:SetAtlas("UI-HUD-ActionBar-IconFrame-FlyoutButton", true)
+			ElvUI335.SetAtlas(lib.flyoutHandler.Background.End, "UI-HUD-ActionBar-IconFrame-FlyoutButton", true)
 			lib.flyoutHandler.Background.HorizontalMiddle = lib.flyoutHandler.Background:CreateTexture(nil, "BACKGROUND")
-			lib.flyoutHandler.Background.HorizontalMiddle:SetAtlas("_UI-HUD-ActionBar-IconFrame-FlyoutMidLeft", true)
+			ElvUI335.SetAtlas(lib.flyoutHandler.Background.HorizontalMiddle, "_UI-HUD-ActionBar-IconFrame-FlyoutMidLeft", true)
 			lib.flyoutHandler.Background.HorizontalMiddle:SetHorizTile(true)
 			lib.flyoutHandler.Background.VerticalMiddle = lib.flyoutHandler.Background:CreateTexture(nil, "BACKGROUND")
-			lib.flyoutHandler.Background.VerticalMiddle:SetAtlas("!UI-HUD-ActionBar-IconFrame-FlyoutMid", true)
+			ElvUI335.SetAtlas(lib.flyoutHandler.Background.VerticalMiddle, "!UI-HUD-ActionBar-IconFrame-FlyoutMid", true)
 			lib.flyoutHandler.Background.VerticalMiddle:SetVertTile(true)
 			lib.flyoutHandler.Background.Start = lib.flyoutHandler.Background:CreateTexture(nil, "BACKGROUND")
-			lib.flyoutHandler.Background.Start:SetAtlas("UI-HUD-ActionBar-IconFrame-FlyoutBottom", true)
+			ElvUI335.SetAtlas(lib.flyoutHandler.Background.Start, "UI-HUD-ActionBar-IconFrame-FlyoutBottom", true)
 
 			lib.flyoutHandler.Background.Start:SetVertexColor(0.7, 0.7, 0.7)
 			lib.flyoutHandler.Background.HorizontalMiddle:SetVertexColor(0.7, 0.7, 0.7)
@@ -2202,7 +2202,7 @@ function Update(self, which)
 		self.icon:SetTexture(texture)
 		self.icon:Show()
 
-		if not self.MasqueSkinned then
+		if not self.MasqueSkinned and self.SlotBackground then -- ElvUI Wotlk: the 3.3.5 template has no slot art
 			self.SlotBackground:Hide()
 			if self.config.hideElements.border then
 				self.NormalTexture:SetTexture()
@@ -2230,7 +2230,7 @@ function Update(self, which)
 			self.cooldown:Hide()
 		end
 
-		if not self.MasqueSkinned then
+		if not self.MasqueSkinned and self.SlotBackground then -- ElvUI Wotlk: the 3.3.5 template has no slot art
 			self.SlotBackground:Show()
 			if self.config.hideElements.borderIfEmpty then
 				self.NormalTexture:SetTexture()
@@ -2785,7 +2785,9 @@ function UpdateSpellHighlight(self)
 		end
 	end
 
-	if shown then
+	if not self.SpellHighlightTexture then -- ElvUI Wotlk: not on the 3.3.5 template
+		return
+	elseif shown then
 		self.SpellHighlightTexture:Show()
 		self.SpellHighlightAnim:Play()
 	else
@@ -2939,7 +2941,7 @@ else -- for mists right now
 			end
 		end
 
-		if hideArrow then
+		if hideArrow and self.FlyoutArrowContainer then -- ElvUI Wotlk: no flyouts on 3.3.5
 			self.FlyoutArrowContainer:Hide()
 		end
 

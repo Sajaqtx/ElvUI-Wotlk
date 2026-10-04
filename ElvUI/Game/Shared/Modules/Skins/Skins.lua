@@ -733,7 +733,11 @@ function S:SkinReadyDialog(dialog, bottom)
 
 		dialog:CreateBackdrop('Transparent', nil, nil, true) -- just for art so pixel mode it
 		dialog.backdrop:SetOutside(background)
-		dialog.backdrop.Center:Hide()
+		if dialog.backdrop.Center then
+			dialog.backdrop.Center:Hide()
+		else -- the native 3.3.5 backdrop has no center texture
+			dialog.backdrop:SetBackdropColor(0, 0, 0, 0)
+		end
 	end
 
 	if dialog.bottomArt then
@@ -1324,14 +1328,14 @@ function S:HandleRotateButton(frame, width, height, noSize)
 	local normTex = frame:GetNormalTexture()
 	if normTex then
 		normTex:SetInside()
-		normTex:SetAtlas(rotate)
+		ElvUI335.SetAtlas(normTex, rotate)
 		normTex:SetTexCoord(0.05, 1.05, -0.05, 1)
 	end
 
 	local pushTex = frame:GetPushedTexture()
 	if pushTex then
 		pushTex:SetAllPoints(normTex)
-		pushTex:SetAtlas(rotate)
+		ElvUI335.SetAtlas(pushTex, rotate)
 		pushTex:SetTexCoord(0, 1, -0.1, 0.95)
 	end
 
@@ -1963,7 +1967,7 @@ function S:HandleShipFollowerPage(followerTab)
 	for i = 1, #equipment do
 		local icon = equipment[i].Icon
 		local border = equipment[i].Border
-		border:SetAtlas('ShipMission_ShipFollower-TypeFrame') -- This border is ugly though, use the traits border instead
+		ElvUI335.SetAtlas(border, 'ShipMission_ShipFollower-TypeFrame') -- This border is ugly though, use the traits border instead
 		-- The landing page icons display inner borders
 		if followerTab.isLandingPage then
 			icon:SetTexCoords()
@@ -2100,7 +2104,7 @@ local ReplacedRoleTex = {
 local function HandleFollowerRole(roleIcon, atlas)
 	local newAtlas = ReplacedRoleTex[atlas]
 	if newAtlas then
-		roleIcon:SetAtlas(newAtlas)
+		ElvUI335.SetAtlas(roleIcon, newAtlas)
 	end
 end
 

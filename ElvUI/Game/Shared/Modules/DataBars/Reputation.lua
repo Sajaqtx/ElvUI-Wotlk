@@ -240,7 +240,7 @@ function DB:ReputationBar()
 	DB:CreateBarBubbles(Reputation)
 
 	Reputation.Reward = Reputation:CreateTexture()
-	Reputation.Reward:SetAtlas('ParagonReputation_Bag')
+	ElvUI335.SetAtlas(Reputation.Reward, 'ParagonReputation_Bag')
 	Reputation.Reward:Size(20)
 
 	Reputation.ShouldHide = function()

@@ -473,7 +473,9 @@ function M:UpdateLootRollFrames()
 		bar:Size(db.width, db.height)
 
 		bar.status:SetStatusBarTexture(texture)
-		bar.status.backdrop.Center:SetTexture(db.statusBarBGTexture and E.media.normTex or E.media.blankTex)
+		if bar.status.backdrop.Center then -- none on the native 3.3.5 backdrop
+			bar.status.backdrop.Center:SetTexture(db.statusBarBGTexture and E.media.normTex or E.media.blankTex)
+		end
 
 		bar.button:ClearAllPoints()
 		bar.button:Point('RIGHT', bar, 'LEFT', E.PixelMode and -1 or -2, 0)

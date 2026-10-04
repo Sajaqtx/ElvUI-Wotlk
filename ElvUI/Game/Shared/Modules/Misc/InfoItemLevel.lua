@@ -236,7 +236,7 @@ function M:UpdatePageStrings(i, iLevelDB, slot, slotInfo, which) -- `which` is u
 			end
 
 			essenceType:Point('BOTTOM', texture, 'TOP', 0, -9)
-			essenceType:SetAtlas(gsub(essence[2], '^tooltip%-(heartofazeroth)essence', '%1-list-selected'))
+			ElvUI335.SetAtlas(essenceType, gsub(essence[2], '^tooltip%-(heartofazeroth)essence', '%1-list-selected'))
 			essenceType:Size(13, 17)
 			essenceType:Show()
 
@@ -364,7 +364,7 @@ function M:CreateSlotStrings(frame, which)
 		frame.ItemLevelText = _G.PaperDollItemsFrame:CreateFontString(nil, 'ARTWORK')
 		frame.ItemLevelText:Point('BOTTOMLEFT', 6, 6)
 	elseif E.TBC or E.Wrath then
-		frame.ItemLevelText = _G.PaperDollItemsFrame:CreateFontString(nil, 'ARTWORK')
+		frame.ItemLevelText = (_G.PaperDollItemsFrame or _G.PaperDollFrame):CreateFontString(nil, 'ARTWORK')
 		frame.ItemLevelText:Point('BOTTOMLEFT', 20, 80)
 	else
 		frame.ItemLevelText = _G.CharacterStatsPane.ItemLevelFrame:CreateFontString(nil, 'ARTWORK')

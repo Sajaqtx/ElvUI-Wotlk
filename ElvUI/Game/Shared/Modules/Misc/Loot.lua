@@ -287,9 +287,9 @@ function M:LOOT_OPENED(_, autoloot)
 			if slot.ProfessionQualityOverlayFrame then
 				local info = itemLink and GetItemReagentQualityInfo(itemLink)
 				if info and info.iconInventory then
-					slot.ProfessionQualityOverlayFrame:SetAtlas(info.iconInventory, true)
+					ElvUI335.SetAtlas(slot.ProfessionQualityOverlayFrame, info.iconInventory, true)
 				else
-					slot.ProfessionQualityOverlayFrame:SetAtlas(nil)
+					ElvUI335.SetAtlas(slot.ProfessionQualityOverlayFrame, nil)
 				end
 			end
 

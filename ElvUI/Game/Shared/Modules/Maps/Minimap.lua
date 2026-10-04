@@ -625,7 +625,9 @@ function M:UpdateSettings()
 		Minimap.backdrop:Show()
 
 		if compass then
-			compass:SetScale(1)
+			if compass.SetScale then -- a texture on 3.3.5
+				compass:SetScale(1)
+			end
 			compass:Hide()
 
 			if not classicBorder then

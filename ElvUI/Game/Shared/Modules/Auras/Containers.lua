@@ -438,7 +438,11 @@ function E:Auras_UpdateButton(container, button)
 			statusbar:Show()
 
 			if container.isAuraBar then
-				statusbar.backdrop.Center:Hide()
+				if statusbar.backdrop.Center then
+					statusbar.backdrop.Center:Hide()
+				else -- the native 3.3.5 backdrop has no center texture
+					statusbar.backdrop:SetBackdropColor(0, 0, 0, 0)
+				end
 			end
 
 			A:Configure_Statusbar(button, statusbar, container.barDB)

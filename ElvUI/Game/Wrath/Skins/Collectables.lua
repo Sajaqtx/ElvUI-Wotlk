@@ -118,7 +118,7 @@ local function SkinJournalScrollButton(bu)
 
 		local parent = bu:GetParent():GetParent():GetParent()
 		if parent == _G.WardrobeCollectionFrame.SetsCollectionFrame then
-			bu.Favorite:SetAtlas('PetJournal-FavoritesIcon', true)
+			ElvUI335.SetAtlas(bu.Favorite, 'PetJournal-FavoritesIcon', true)
 			bu.Favorite:Point('TOPLEFT', bu.Icon, 'TOPLEFT', -8, 8)
 
 			hooksecurefunc(bu.SelectedTexture, 'SetShown', SelectedTextureSetShown)
@@ -155,7 +155,7 @@ local function SkinJournalScrollButton(bu)
 				end
 			elseif isMount then
 				bu.mountList = true
-				bu.factionIcon:SetAtlas(savedFactionAtlas)
+				ElvUI335.SetAtlas(bu.factionIcon, savedFactionAtlas)
 				bu.factionIcon:SetDrawLayer('OVERLAY')
 				bu.factionIcon:Point('TOPRIGHT', -1, -1)
 				bu.factionIcon:Point('BOTTOMRIGHT', -1, 1)
@@ -465,7 +465,7 @@ local function SkinTransmogFrames()
 		local pending = Frame.PendingTransmogFrame
 		if pending then
 			local Glowframe = pending.Glowframe
-			Glowframe:SetAtlas(nil)
+			ElvUI335.SetAtlas(Glowframe, nil)
 			Glowframe:CreateBackdrop(nil, nil, nil, nil, nil, nil, nil, nil, pending:GetFrameLevel())
 
 			if Glowframe.backdrop then

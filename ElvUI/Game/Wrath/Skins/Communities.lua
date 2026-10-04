@@ -36,7 +36,7 @@ local function HandleCommunitiesButton(button)
 	highlight:SetVertexColor(1, 1, 1, 0.3)
 	highlight:SetInside(button.backdrop)
 
-	button.Selection:SetAtlas(nil)
+	ElvUI335.SetAtlas(button.Selection, nil)
 	button.Selection:SetTexture(E.media.normTex)
 	button.Selection:SetInside(button.backdrop)
 

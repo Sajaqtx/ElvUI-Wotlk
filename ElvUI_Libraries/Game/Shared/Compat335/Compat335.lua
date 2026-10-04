@@ -86,6 +86,8 @@ local MODERN_TEMPLATES = {
 	DialogBorderTemplate = DIALOG_BACKDROP,
 	DialogBorderDarkTemplate = DIALOG_BACKDROP,
 	TooltipBackdropTemplate = false,
+	--the 3.3.5 template of that name is a backpack model, not the item button animation
+	ItemAnimTemplate = false,
 	--renamed: the 3.3.5 template of the same widget
 	MainMenuFrameButtonTemplate = "GameMenuButtonTemplate",
 }
@@ -109,7 +111,7 @@ Compat.stripModernTemplates = stripModernTemplates
 --3.3.5 templates only name their children ($parentScrollBar) where later ones also give them a parentKey (ScrollBar):
 --the frames ElvUI makes from a template get the key of each named child, where the key is free
 --(the action button's icon and cooldown have lower case keys on later clients)
-local LOWER_KEYS = {Icon = "icon", Cooldown = "cooldown"}
+local LOWER_KEYS = {Icon = "icon", IconTexture = "icon", Cooldown = "cooldown"}
 local function addParentKeys(frame, name, ...)
 	local length = #name
 	for i = 1, select("#", ...) do
@@ -134,7 +136,22 @@ function Compat.AddParentKeys(frame)
 	addParentKeys(frame, name, frame:GetRegions())
 	return frame
 end
+--the overlays of the later item button (10.0 ItemButton type, ItemButtonTemplate keys) the 3.3.5 one lacks:
+--hidden textures over the icon, so the code that colors or shows them has something to work on
+local function addItemButtonParts(button)
+	for _, key in ipairs({"IconBorder", "IconOverlay", "IconOverlay2", "searchOverlay", "ItemContextOverlay"}) do
+		if (button[key] == nil) then
+			local texture = button:CreateTexture(nil, "OVERLAY")
+			texture:SetAllPoints(button.icon or button)
+			texture:Hide()
+			button[key] = texture
+		end
+	end
+end
+Compat.AddItemButtonParts = addItemButtonParts
 rawset(env, "CreateFrame", function(frameType, name, parent, template, id)
+	local itemButton = (type(frameType) == "string" and frameType:lower() == "itembutton")
+	if (itemButton) then frameType = "Button" end
 	local kept, backdrop = stripModernTemplates(template)
 	local frame = CreateFrame(frameType, name, parent, kept, id)
 	if (backdrop and frame.SetBackdrop) then frame:SetBackdrop(backdrop) end
@@ -142,6 +159,7 @@ rawset(env, "CreateFrame", function(frameType, name, parent, template, id)
 		addParentKeys(frame, name, frame:GetChildren())
 		addParentKeys(frame, name, frame:GetRegions())
 	end
+	if (itemButton or (kept and kept:find("ItemButton"))) then addItemButtonParts(frame) end
 	return frame
 end)
 --what the Backdrop mixin adds to a frame on modern clients: the 3.3.5 frame already backs SetBackdrop natively
@@ -149,6 +167,27 @@ rawset(env, "BackdropTemplateMixin", {
 	OnBackdropLoaded = noop, OnBackdropSizeChanged = noop, SetupTextureCoordinates = noop,
 	ApplyBackdrop = noop, ClearBackdrop = function(self) self:SetBackdrop(nil) end,
 })
+
+---------------------------------------------------------------------------------------------------------------
+--> atlases: Rebuffed's Lua Texture:SetAtlas raises on a name its atlas table lacks (most later atlases). ElvUI's calls
+--  go through ElvUI335.SetAtlas (node outils/elvui335_atlas.js), which leaves the texture empty instead; the client
+--  method itself stays untouched. The names missing in the session are listed in ElvUI335.missingAtlases
+
+do
+	local missing = {}
+	Compat.missingAtlases = missing
+	function Compat.AtlasExists(atlas)
+		return type(atlas) == "string" and realG.AtlasUtil ~= nil and realG.AtlasUtil:AtlasExists(atlas)
+	end
+	function Compat.SetAtlas(region, atlas, ...)
+		if (atlas == nil or atlas == "" or Compat.AtlasExists(atlas)) then
+			if (atlas == "") then atlas = nil end
+			return region:SetAtlas(atlas, ...)
+		end
+		missing[atlas] = true
+		region:SetTexture(nil)
+	end
+end
 
 ---------------------------------------------------------------------------------------------------------------
 --> hooksecurefunc: a hook on a function 3.3.5 does not have (MarkNewActionHighlight, ChatFrameUtil.InsertLink...)

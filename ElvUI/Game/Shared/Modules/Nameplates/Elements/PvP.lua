@@ -5,7 +5,7 @@ local strlower = strlower
 
 function NP:PvPIndicator_PostUpdate(_, status)
 	if status and status ~= 'FFA' and (not self.Badge or not self.Badge:IsShown()) then
-		self:SetAtlas('bfa-landingbutton-'..strlower(status)..'-up')
+		ElvUI335.SetAtlas(self, 'bfa-landingbutton-'..strlower(status)..'-up')
 		self:SetTexCoord(0, 1, 0, 1)
 	end
 end

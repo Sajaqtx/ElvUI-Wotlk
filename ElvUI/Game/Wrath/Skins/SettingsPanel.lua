@@ -58,7 +58,7 @@ end
 
 local function UpdateHeaderExpand(self, expanded)
 	if self.collapseTex then
-		self.collapseTex:SetAtlas(expanded and 'Soulbinds_Collection_CategoryHeader_Collapse' or 'Soulbinds_Collection_CategoryHeader_Expand', true)
+		ElvUI335.SetAtlas(self.collapseTex, expanded and 'Soulbinds_Collection_CategoryHeader_Collapse' or 'Soulbinds_Collection_CategoryHeader_Expand', true)
 	end
 
 	UpdateKeybindButtons(self)
@@ -305,7 +305,7 @@ function S:SettingsPanel()
 	end
 
 	if _G.CompactUnitFrameProfilesSeparator then
-		_G.CompactUnitFrameProfilesSeparator:SetAtlas('Options_HorizontalDivider')
+		ElvUI335.SetAtlas(_G.CompactUnitFrameProfilesSeparator, 'Options_HorizontalDivider')
 	end
 
 	if _G.CompactUnitFrameProfilesGeneralOptionsFrameAutoActivateBG then

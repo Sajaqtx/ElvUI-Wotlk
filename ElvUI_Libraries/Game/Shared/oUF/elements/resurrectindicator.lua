@@ -87,7 +87,7 @@ local function Enable(self)
 
 		if(element:IsObjectType('Texture') and not element:GetTexture()) then
 			if oUF.isRetail then
-				element:SetAtlas(RESURRECT_ATLAS)
+				ElvUI335.SetAtlas(element, RESURRECT_ATLAS)
 			else
 				element:SetTexture(RESURRECT_ICON)
 			end

@@ -92,7 +92,7 @@ local function Update(self, event)
 		elseif element.useClassBase then -- BUG: UnitClassBase can't be trusted: https://github.com/Stanzilla/WoWUIBugs/issues/621
 			local _, className = UnitClass(unit)
 			if oUF:NotSecretValue(className) and className then
-				element:SetAtlas('classicon-' .. className)
+				ElvUI335.SetAtlas(element, 'classicon-' .. className)
 			end
 		elseif not element.customTexture then
 			SetPortraitTexture(element, unit)

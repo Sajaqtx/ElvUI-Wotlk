@@ -20,7 +20,7 @@ function UF:ToggleArenaPreparationInfo(frame, specID)
 	frame.Health.value:SetShown(visibility)
 	frame.Power.value:SetShown(visibility)
 	frame.Health.ClipFrame:SetShown(visibility)
-	frame.PvPClassificationIndicator:SetAtlas(nil)
+	ElvUI335.SetAtlas(frame.PvPClassificationIndicator, nil)
 	frame.Trinket.cd:Clear()
 
 	if not E.Classic then -- during `PostUpdateArenaPreparation` this means spec class and name exist

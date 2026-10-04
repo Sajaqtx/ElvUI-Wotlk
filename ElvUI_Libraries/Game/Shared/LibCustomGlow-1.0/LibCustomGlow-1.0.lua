@@ -787,13 +787,13 @@ lib.ProcGlowPool = ProcGlowPool
 local function InitProcGlow(f)
     f.ProcStart = f:CreateTexture(nil, "ARTWORK")
     f.ProcStart:SetBlendMode("ADD")
-    f.ProcStart:SetAtlas("UI-HUD-ActionBar-Proc-Start-Flipbook")
+    ElvUI335.SetAtlas(f.ProcStart, "UI-HUD-ActionBar-Proc-Start-Flipbook")
     f.ProcStart:SetAlpha(1)
     f.ProcStart:SetSize(150, 150)
     f.ProcStart:SetPoint("CENTER")
 
     f.ProcLoop = f:CreateTexture(nil, "ARTWORK")
-    f.ProcLoop:SetAtlas("UI-HUD-ActionBar-Proc-Loop-Flipbook")
+    ElvUI335.SetAtlas(f.ProcLoop, "UI-HUD-ActionBar-Proc-Loop-Flipbook")
     f.ProcLoop:SetAlpha(0)
     f.ProcLoop:SetAllPoints()
 

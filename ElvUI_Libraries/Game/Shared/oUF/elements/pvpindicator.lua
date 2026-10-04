@@ -84,7 +84,7 @@ local function Update(self, event, unit)
 		if(element.Badge and honorRewardInfo) then
 			element:SetTexture(honorRewardInfo.badgeFileDataID)
 			element:SetTexCoord(0, 1, 0, 1)
-			element.Badge:SetAtlas('honorsystem-portrait-' .. factionGroup, false)
+			ElvUI335.SetAtlas(element.Badge, 'honorsystem-portrait-' .. factionGroup, false)
 			element.Badge:Show()
 		else
 			element:SetTexture([[Interface\TargetingFrame\UI-PVP-]] .. status)
