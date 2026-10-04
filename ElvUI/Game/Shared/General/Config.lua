@@ -1547,6 +1547,7 @@ function E:ExecuteOptions(msg)
 		left.buttons = buttons
 
 		local slider = CreateFrame('Slider', nil, frame)
+		slider.buttons = buttons -- ElvUI Wotlk: before SetValue, the 3.3.5 slider may fire OnValueChanged on it
 		slider:SetThumbTexture(E.Media.Textures.White8x8)
 		slider:SetScript('OnMouseWheel', E.Config_SliderOnMouseWheel)
 		slider:SetScript('OnValueChanged', E.Config_SliderOnValueChanged)
@@ -1557,7 +1558,6 @@ function E:ExecuteOptions(msg)
 		slider:Width(192)
 		slider:Point('TOPLEFT', buttons, 'TOPLEFT', 0, 0)
 		slider:Point('BOTTOMRIGHT', left, 'BOTTOMRIGHT', unskinned and 3 or 0, unskinned and 10 or 1)
-		slider.buttons = buttons
 		left.slider = slider
 
 		local thumb = slider:GetThumbTexture()
