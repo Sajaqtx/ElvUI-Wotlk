@@ -3829,4 +3829,42 @@ function B:Initialize()
 	SetInsertItemsLeftToRight(db.reverseLoot)
 end
 
+if ElvUI335 then
+	-- ElvUI Wotlk: 3.3.5 opens the bags with OpenAllBags, which toggles the backpack and then each bag (ToggleBag),
+	-- and has no ToggleAllBags. As the 3.3.5 ElvUI did: the single bag frame follows the backpack, a bag toggle only
+	-- opens it, and closing the frame closes the Blizzard bags too (their state decides the next toggle)
+	function B:ToggleBag(bagID)
+		if bagID and B:GetContainerNumSlots(bagID) == 0 then return end -- a bag just put in a slot
+
+		if not B.BagFrame:IsShown() then
+			B:OpenBags()
+		end
+	end
+
+	function B:ToggleBackpack()
+		if IsBagOpen(BACKPACK_CONTAINER) then
+			B:OpenBags()
+		else
+			B:CloseAllBags()
+		end
+	end
+
+	B.ToggleAllBags = B.ToggleBackpack
+	B.OpenAllBags = B.ToggleBackpack
+
+	local LoadBags = B.Initialize
+	function B:Initialize()
+		LoadBags(self)
+
+		if B.BagFrame then
+			B.BagFrame:HookScript('OnHide', function()
+				CloseBackpack()
+				for i = 1, NUM_BAG_FRAMES do
+					CloseBag(i)
+				end
+			end)
+		end
+	end
+end
+
 E:RegisterModule(B:GetName())

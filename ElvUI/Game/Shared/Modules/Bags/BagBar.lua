@@ -236,7 +236,7 @@ end
 
 function B:BackpackButton_OnClick()
 	if IsModifiedClick('OPENALLBAGS') then
-		_G.ToggleAllBags() -- dont cache, see below
+		(_G.ToggleAllBags or _G.OpenAllBags)() -- dont cache, see below (3.3.5: OpenAllBags)
 	elseif not PutItemInBackpack() then
 		_G.ToggleBag(self.BagID) -- dont cache, bag module hooks
 	end

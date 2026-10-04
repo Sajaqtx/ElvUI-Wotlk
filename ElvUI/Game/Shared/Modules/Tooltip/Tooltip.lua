@@ -1054,6 +1054,10 @@ function TT:GameTooltip_OnTooltipSetSpell(data)
 				spellID = line and line.tooltipID
 			end
 		end
+	elseif ElvUI335 then -- 3.3.5 GetSpell answers the name and the rank ("Rank 3"): the ID from the spell link
+		local name, rank = self:GetSpell()
+		local link = name and (GetSpellLink((rank and rank ~= '' and format('%s(%s)', name, rank)) or name) or GetSpellLink(name))
+		spellID = link and tonumber(strmatch(link, 'spell:(%d+)'))
 	else
 		_, spellID = self:GetSpell()
 	end

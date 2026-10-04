@@ -400,13 +400,8 @@ if ElvUI335 then -- the 3.3.5 map: WorldMapDetailFrame, no scroll container, the
 			M:PositionCoords()
 		end
 
-		if E.global.general.smallerWorldMap then
-			_G.BlackoutWorld:SetTexture(nil)
-			hooksecurefunc('WorldMap_ToggleSizeUp', M.SetSmallWorldMap)
-			if not GetCVarBool('miniWorldMap') then
-				M:SetSmallWorldMap()
-			end
-		end
+		-- the smaller full map (reparented, other panels allowed) kept the map from opening in game on 3.3.5: the stock
+		-- map for now, its own windowed mode (miniWorldMap) still works (TODO_WOTLK.md)
 
 		WorldMapFrame:HookScript('OnShow', M.WorldMap_OnShow)
 		WorldMapFrame:HookScript('OnHide', M.WorldMap_OnHide)
