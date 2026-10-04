@@ -1036,7 +1036,13 @@ do
 			if(not nameplate.unitFrame) then
 				nameplate.style = self.style
 
-				nameplate.unitFrame = CreateFrame('Button', self.prefix .. nameplate:GetName(), nameplate, oUF.isRetail and 'PingableUnitFrameTemplate' or '')
+				local plateName = nameplate:GetName()
+				if(not plateName) then -- ElvUI Wotlk: the native 3.3.5 plates have no name
+					self.plateCount = (self.plateCount or 0) + 1
+					plateName = 'NamePlate' .. self.plateCount
+				end
+
+				nameplate.unitFrame = CreateFrame('Button', self.prefix .. plateName, nameplate, oUF.isRetail and 'PingableUnitFrameTemplate' or '')
 				nameplate.unitFrame:EnableMouse(false)
 				nameplate.unitFrame:SetAllPoints()
 				nameplate.unitFrame.isNameplate = true

@@ -176,6 +176,8 @@ function oUF:DisableBlizzard(unit)
 		local frame = GetNamePlateForUnit(unit)
 		if frame and frame.UnitFrame then
 			handleFrame(frame.UnitFrame, true)
+		elseif frame and ElvUI335 then -- the native 3.3.5 plate draws its own bars and texts
+			ElvUI335.HideNativePlate(frame)
 		end
 	end
 end

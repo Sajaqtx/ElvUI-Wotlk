@@ -1297,3 +1297,96 @@ do
 		frame.menu = Compat.ToggleUnitMenu
 	end
 end
+
+---------------------------------------------------------------------------------------------------------------
+--> nameplates: rebuffed.dll's C_NamePlate gives the native 3.3.5 plate (an unnamed WorldFrame child: health and cast
+--  bars, then the threat, border, cast bar border / shield / icon, highlight, name, level, boss, raid and elite
+--  regions). ElvUI's plate is a child of it: the native parts are emptied once, as the 3.3.5 ElvUI did (the client
+--  shows and hides them on its own, so they are made invisible rather than hidden)
+
+function Compat.HideNativePlate(plate)
+	if (plate.__elvNativeHidden) then return end
+	plate.__elvNativeHidden = true
+
+	for i = 1, select("#", plate:GetChildren()) do
+		local child = select(i, plate:GetChildren())
+		if (child:IsObjectType("StatusBar")) then
+			child:SetStatusBarTexture("")
+			child:SetAlpha(0)
+		end
+	end
+
+	for i = 1, select("#", plate:GetRegions()) do
+		local region = select(i, plate:GetRegions())
+		if (region:IsObjectType("Texture")) then
+			region:SetTexture("")
+			region:SetTexCoord(0, 0, 0, 0)
+		elseif (region:IsObjectType("FontString")) then
+			region:SetWidth(0.001)
+			region:SetAlpha(0)
+		end
+	end
+end
+
+---------------------------------------------------------------------------------------------------------------
+--> later functions ElvUI calls on its Wrath path, with their 3.3.5 answer
+
+--no battle pets nor game object units on 3.3.5
+define("UnitIsGameObject", returnFalse)
+define("UnitIsBattlePet", returnFalse)
+define("UnitIsBattlePetCompanion", returnFalse)
+define("UnitIsWildBattlePet", returnFalse)
+define("UnitBattlePetLevel", function() return 0 end)
+define("UnitBattlePetType", Compat.returnNil)
+
+--haste and hit: the rating part (3.3.5 has no separate talent / buff modifiers)
+define("UnitSpellHaste", function() return GetCombatRatingBonus(CR_HASTE_SPELL or 20) or 0 end)
+define("GetMeleeHaste", function() return GetCombatRatingBonus(CR_HASTE_MELEE or 18) or 0 end)
+define("GetRangedHaste", function() return GetCombatRatingBonus(CR_HASTE_RANGED or 19) or 0 end)
+define("GetHaste", function() return GetCombatRatingBonus(CR_HASTE_MELEE or 18) or 0 end)
+define("GetHitModifier", function() return 0 end)
+define("GetSpellHitModifier", function() return 0 end)
+define("IsDualWielding", function() return OffhandHasWeapon() and true or false end)
+
+--average item level (4.x): the equipped items' own levels, both hands for a two-hander (as the 4.x client counts it)
+define("GetAverageItemLevel", function()
+	local total, count = 0, 0
+	for slot = 1, 18 do
+		if (slot ~= 4) then -- the shirt does not count
+			local link = GetInventoryItemLink("player", slot)
+			local level, equipLoc
+			if (link) then
+				local _, _, _, itemLevel, _, _, _, _, itemEquipLoc = GetItemInfo(link)
+				level, equipLoc = itemLevel, itemEquipLoc
+			end
+			if (level) then
+				total, count = total + level, count + 1
+				if (slot == 16 and equipLoc == "INVTYPE_2HWEAPON" and not GetInventoryItemLink("player", 17)) then
+					total, count = total + level, count + 1
+				end
+			elseif (slot ~= 17 and slot ~= 18) then
+				count = count + 1 -- an empty slot counts as zero
+			end
+		end
+	end
+	local average = count > 0 and total / count or 0
+	return average, average, average
+end)
+
+--world PvP areas (4.x): Wintergrasp, the only one of 3.3.5
+define("GetNumWorldPVPAreas", function() return 1 end)
+define("GetWorldPVPAreaInfo", function(index)
+	if (index ~= 1) then return end
+	local name = (PVPBATTLEGROUND_WINTERGRASPTIMER or "Wintergrasp|n"):match("^(.-)|n") or "Wintergrasp"
+	local waitTime = GetWintergraspWaitTime()
+	return 1, name, waitTime == nil, CanQueueForWintergrasp and CanQueueForWintergrasp() or false, waitTime, UnitLevel("player") >= 75
+end)
+
+--mouse foci (11.0): the one 3.3.5 frame under the mouse
+define("GetMouseFoci", function() return {GetMouseFocus()} end)
+
+define("IsChatAFK", function() return UnitIsAFK("player") and true or false end)
+define("IsChatDND", function() return UnitIsDND("player") and true or false end)
+
+--the spell book button's slot (3.3.5 SpellBook_GetSpellID takes the button's ID)
+define("SpellBook_GetSpellBookSlot", function(button) return SpellBook_GetSpellID(button:GetID()) end)

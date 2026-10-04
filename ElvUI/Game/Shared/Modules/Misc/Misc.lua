@@ -163,10 +163,16 @@ do
 	local twwBW = 2673	-- 11.1.0, both factions, account wide
 	local cataBW = 1133	-- 4.0.3, horde only, not account wide
 	local bilgewater = E.Retail and GetFactionDataByID(twwBW)
-	function M:COMBAT_TEXT_UPDATE(_, messagetype)
+	function M:COMBAT_TEXT_UPDATE(_, messagetype, factionName, amount)
 		if messagetype ~= 'FACTION' or not E.db.general.autoTrackReputation then return end
 
-		local faction, rep = GetCurrentCombatTextEventInfo()
+		-- ElvUI Wotlk: the 3.3.5 event carries the faction name and the amount
+		local faction, rep
+		if ElvUI335 then
+			faction, rep = factionName, amount
+		else
+			faction, rep = GetCurrentCombatTextEventInfo()
+		end
 		if E:NotSecretValue(faction) and (faction and faction ~= 'Guild') and (rep and rep > 0) then
 			local data = E:GetWatchedFactionInfo()
 			if not (data and data.name) or faction ~= data.name then
@@ -194,7 +200,7 @@ do
 						end
 					else
 						local name, _, _, _, _, _, _, _, _, _, _, _, _, factionID = GetFactionInfo(i)
-						if name == faction and factionID and factionID ~= 0 then
+						if name == faction and (ElvUI335 or (factionID and factionID ~= 0)) then -- no faction ID on 3.3.5
 							SetWatchedFactionIndex(i)
 
 							break
