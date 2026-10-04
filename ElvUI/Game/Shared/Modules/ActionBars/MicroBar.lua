@@ -473,7 +473,9 @@ function AB:SetupMicroBar()
 	local PerformanceBar = _G.MainMenuMicroButton.PerformanceIndicator or _G.MainMenuMicroButton.MainMenuBarPerformanceBar or _G.MainMenuBarPerformanceBar
 	if PerformanceBar then
 		PerformanceBar:SetAlpha(0)
-		PerformanceBar:SetScale(0.00001)
+		if PerformanceBar.SetScale then -- a texture on 3.3.5
+			PerformanceBar:SetScale(0.00001)
+		end
 	end
 
 	AB:SecureHook('UpdateMicroButtons')

@@ -118,6 +118,8 @@ M.RightClickMenu = menuFrame
 M.RightClickMenuList = menuList
 
 function M:SetScale(frame, scale)
+	if not frame.SetScale then return end -- no scale on a 3.3.5 font string
+
 	frame:SetIgnoreParentScale(true)
 	frame:SetScale(scale * E.uiscale)
 end
@@ -869,7 +871,11 @@ function M:Initialize()
 	M:RegisterEvent('ZONE_CHANGED_INDOORS', 'Update_ZoneText')
 	M:RegisterEvent('ZONE_CHANGED', 'Update_ZoneText')
 
-	MinimapCluster.BorderTop:StripTextures()
+	if MinimapCluster.BorderTop then
+		MinimapCluster.BorderTop:StripTextures()
+	elseif _G.MinimapBorderTop then -- a texture on 3.3.5
+		_G.MinimapBorderTop:SetTexture()
+	end
 
 	if E.Retail then
 		-- hide the BlopRing on Minimap

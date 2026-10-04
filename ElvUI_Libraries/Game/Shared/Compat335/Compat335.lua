@@ -106,10 +106,42 @@ local function stripModernTemplates(template)
 	return #kept > 0 and table.concat(kept, ",") or nil, backdrop
 end
 Compat.stripModernTemplates = stripModernTemplates
+--3.3.5 templates only name their children ($parentScrollBar) where later ones also give them a parentKey (ScrollBar):
+--the frames ElvUI makes from a template get the key of each named child, where the key is free
+--(the action button's icon and cooldown have lower case keys on later clients)
+local LOWER_KEYS = {Icon = "icon", Cooldown = "cooldown"}
+local function addParentKeys(frame, name, ...)
+	local length = #name
+	for i = 1, select("#", ...) do
+		local child = select(i, ...)
+		local childName = child.GetName and child:GetName()
+		if (childName and #childName > length and childName:sub(1, length) == name) then
+			local key = childName:sub(length + 1)
+			if (key:match("^%u%w*$")) then
+				if (frame[key] == nil) then frame[key] = child end
+				local lower = LOWER_KEYS[key]
+				if (lower and frame[lower] == nil) then frame[lower] = child end
+			end
+		end
+	end
+end
+--the same keys on a stock frame ElvUI reaches by them (chat tabs...)
+function Compat.AddParentKeys(frame)
+	local name = frame and frame:GetName()
+	if (not name or frame.__elvParentKeys) then return frame end
+	frame.__elvParentKeys = true
+	addParentKeys(frame, name, frame:GetChildren())
+	addParentKeys(frame, name, frame:GetRegions())
+	return frame
+end
 rawset(env, "CreateFrame", function(frameType, name, parent, template, id)
 	local kept, backdrop = stripModernTemplates(template)
 	local frame = CreateFrame(frameType, name, parent, kept, id)
 	if (backdrop and frame.SetBackdrop) then frame:SetBackdrop(backdrop) end
+	if (kept and type(name) == "string") then
+		addParentKeys(frame, name, frame:GetChildren())
+		addParentKeys(frame, name, frame:GetRegions())
+	end
 	return frame
 end)
 --what the Backdrop mixin adds to a frame on modern clients: the 3.3.5 frame already backs SetBackdrop natively
@@ -335,13 +367,16 @@ do
 	for _, name in ipairs({"SetDrawSwipe", "SetDrawBling", "SetDrawEdge", "SetHideCountdownNumbers", "SetSwipeColor",
 		"SetSwipeTexture", "SetEdgeTexture", "SetBlingTexture", "SetUseCircularEdge", "SetCountdownFont",
 		"SetCountdownAbbrevThreshold", "SetEdgeScale", "SetRotation", "SetCountdownFormatter", "SetMinimumCountdownDuration",
-		"SetCooldownFromDurationObject", "SetCooldownDuration", "SetEdgeColor", "SetBlingColor"}) do
+		"SetEdgeColor", "SetBlingColor"}) do
 		add(name, noop, objectType("Cooldown"))
 	end
 	add("GetDrawSwipe", function() return true end, objectType("Cooldown"))
+	add("Clear", function(self) self:SetCooldown(0, 0) end, objectType("Cooldown"))
 	--models: the 3.3.5 model has no separate model alpha, the frame's alpha is the model's
 	add("SetModelAlpha", function(self, alpha) self:SetAlpha(alpha) end, function(o) return o.SetModel ~= nil end)
 	add("GetModelAlpha", function(self) return self:GetAlpha() end, function(o) return o.SetModel ~= nil end)
+	--no camera distance on the 3.3.5 model: it keeps its default framing
+	add("SetCamDistanceScale", noop, function(o) return o.SetModel ~= nil end)
 	--no mask textures on 3.3.5: a mask is a hidden texture, attaching it does nothing
 	add("CreateMaskTexture", function(self, ...)
 		local mask = self:CreateTexture(...)

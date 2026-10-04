@@ -1251,6 +1251,8 @@ function E:CropRatio(width, height, mult, left, right, top, bottom, factor)
 end
 
 function E:UpdateHouseFavor(data, event, info)
+	if ElvUI335 then return end -- no player housing
+
 	if event == 'TRACKED_HOUSE_CHANGED' or event == 'ELVUI_FORCE_UPDATE' then
 		local houseGUID = GetTrackedHouseGuid()
 		if houseGUID then

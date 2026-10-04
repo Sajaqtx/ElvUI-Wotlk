@@ -288,7 +288,7 @@ function B:LoadBagBar()
 
 	--_G.EventRegistry:UnregisterCallback('MainMenuBarManager.OnExpandChanged', _G.BagsBar.Layout, _G.BagsBar)
 
-	if _G.MainMenuBarBagManager.OnCursorChanged then
+	if _G.MainMenuBarBagManager and _G.MainMenuBarBagManager.OnCursorChanged then
 		_G.EventRegistry:UnregisterFrameEventAndCallback('CURSOR_CHANGED', _G.MainMenuBarBagManager.OnCursorChanged, _G.MainMenuBarBagManager)
 	end
 

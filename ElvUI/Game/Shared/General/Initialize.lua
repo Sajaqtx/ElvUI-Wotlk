@@ -721,7 +721,7 @@ function E:OnInitialize()
 
 	local playerGUID = UnitGUID('player')
 	local _, serverID = strsplit('-', playerGUID)
-	E.serverID = tonumber(serverID)
+	E.serverID = tonumber(serverID) or GetRealmID() -- the 3.3.5 guid has no server part
 	E.myguid = playerGUID
 
 	E:DisableAddons()

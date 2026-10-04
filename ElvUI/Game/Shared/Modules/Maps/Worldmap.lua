@@ -122,7 +122,7 @@ function M:PositionCoords()
 	end
 
 	CoordsHolder.playerCoords:ClearAllPoints()
-	CoordsHolder.playerCoords:Point(position, _G.WorldMapFrame.ScrollContainer, position, x + xOffset, y + yOffset)
+	CoordsHolder.playerCoords:Point(position, ElvUI335 and _G.WorldMapDetailFrame or _G.WorldMapFrame.ScrollContainer, position, x + xOffset, y + yOffset)
 	CoordsHolder.mouseCoords:ClearAllPoints()
 	CoordsHolder.mouseCoords:Point(position, CoordsHolder.playerCoords, INVERTED_POINTS[position], 0, y)
 end
@@ -339,6 +339,78 @@ function M:Initialize()
 	-- currently we dont need to touch this cvar because we have our own control for this currently
 	-- see the comment in `M:UpdateMapFade` about `durationSec` for more information
 	-- E:SetCVar('mapFade', E.global.general.fadeMapWhenMoving and 1 or 0)
+end
+
+if ElvUI335 then -- the 3.3.5 map: WorldMapDetailFrame, no scroll container, the windowed map is the miniWorldMap cvar
+	local GetCursorPosition = GetCursorPosition
+	local GetPlayerMapPosition = GetPlayerMapPosition
+
+	function M:UpdateCoords()
+		if not _G.WorldMapFrame:IsShown() then return end
+
+		local detail = _G.WorldMapDetailFrame
+		local mouseText = ''
+		if detail:IsMouseOver() then
+			local curX, curY = GetCursorPosition()
+			local scale = detail:GetEffectiveScale()
+			local x = (curX / scale - detail:GetLeft()) / detail:GetWidth()
+			local y = (detail:GetTop() - curY / scale) / detail:GetHeight()
+			if x >= 0 and y >= 0 and x <= 1 and y <= 1 then
+				mouseText = format('%s:   %.2f, %.2f', MOUSE_LABEL, x * 100, y * 100)
+			end
+		end
+		CoordsHolder.mouseCoords:SetText(mouseText)
+
+		-- relative to the map shown, the player's zone unless another one is browsed
+		local x, y = GetPlayerMapPosition('player')
+		if x and (x ~= 0 or y ~= 0) then
+			CoordsHolder.playerCoords:SetFormattedText('%s:   %.2f, %.2f', L["Player"], x * 100, y * 100)
+		else
+			CoordsHolder.playerCoords:SetFormattedText('%s:   %s', L["Player"], 'N/A')
+		end
+	end
+
+	function M:UpdateMapFade() -- self is frame
+		if E.global.general.fadeMapWhenMoving then
+			M:EnableMapFading(_G.WorldMapFrame)
+		else
+			M:StopMapFromFading()
+		end
+	end
+
+	-- the full size map as a window: no blackout, the other panels stay open
+	function M:SetSmallWorldMap()
+		local WorldMapFrame = _G.WorldMapFrame
+		if WorldMapFrame:GetParent() ~= _G.UIParent then
+			WorldMapFrame:SetParent(_G.UIParent)
+		end
+		WorldMapFrame:SetAttribute('UIPanelLayout-area', 'center')
+		WorldMapFrame:SetAttribute('UIPanelLayout-allowOtherPanels', true)
+		WorldMapFrame:EnableKeyboard(false)
+		_G.BlackoutWorld:Hide()
+	end
+
+	function M:Initialize()
+		self.Initialized = true
+
+		if not E.private.general.worldMap then return end
+
+		local WorldMapFrame = _G.WorldMapFrame
+		if E.global.general.WorldMapCoordinates.enable then
+			M:PositionCoords()
+		end
+
+		if E.global.general.smallerWorldMap then
+			_G.BlackoutWorld:SetTexture(nil)
+			hooksecurefunc('WorldMap_ToggleSizeUp', M.SetSmallWorldMap)
+			if not GetCVarBool('miniWorldMap') then
+				M:SetSmallWorldMap()
+			end
+		end
+
+		WorldMapFrame:HookScript('OnShow', M.WorldMap_OnShow)
+		WorldMapFrame:HookScript('OnHide', M.WorldMap_OnHide)
+	end
 end
 
 E:RegisterModule(M:GetName())

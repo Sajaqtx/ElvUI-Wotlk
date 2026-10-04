@@ -55,6 +55,10 @@ function TM:Update()
 		for totem in _G.TotemFrame.totemPool:EnumerateActive() do
 			TM:UpdateButton(TM.bar[priority[totem.layoutIndex]], totem)
 		end
+	elseif ElvUI335 then -- earth, fire, water, air: the slots in the order of the 3.3.5 totem frame
+		for i = 1, MAX_TOTEMS do
+			TM:UpdateButton(TM.bar[i], _G.TOTEM_PRIORITIES[i])
+		end
 	else
 		for i = 1, MAX_TOTEMS do
 			TM:UpdateButton(TM.bar[priority[i]], _G['TotemFrameTotem'..i] or classic[i])

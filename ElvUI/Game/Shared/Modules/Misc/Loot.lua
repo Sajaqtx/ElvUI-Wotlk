@@ -382,5 +382,7 @@ function M:LoadLoot()
 	tinsert(_G.UISpecialFrames, 'ElvLootFrame')
 
 	-- fix blizzard setpoint connection bs
-	hooksecurefunc(_G.MasterLooterFrame, 'Hide', _G.MasterLooterFrame.ClearAllPoints)
+	if _G.MasterLooterFrame then -- 3.3.5 has no master looter frame (a dropdown instead)
+		hooksecurefunc(_G.MasterLooterFrame, 'Hide', _G.MasterLooterFrame.ClearAllPoints)
+	end
 end

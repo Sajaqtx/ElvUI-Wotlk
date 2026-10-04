@@ -121,6 +121,18 @@ do	-- This code fixes C_Map.GetPlayerMapPosition memory leak.
 	end
 end
 
+if ElvUI335 then -- no UnitPosition: the position on the map shown, set to the player's zone while the map is closed
+	local GetPlayerMapPosition = GetPlayerMapPosition
+	function E:GetPlayerMapPos(mapID)
+		if not mapID then return end
+
+		local x, y = GetPlayerMapPosition('player')
+		if not x or (x == 0 and y == 0) then return end
+
+		return x, y
+	end
+end
+
 do	-- Code taken from LibTourist-3.0 and rewritten to fit our purpose
 	local localizedMapNames = {}
 	local ZoneIDToContinentName = {

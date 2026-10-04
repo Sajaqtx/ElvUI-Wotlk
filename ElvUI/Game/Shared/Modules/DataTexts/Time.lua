@@ -350,6 +350,8 @@ local function SortFunc(a,b) return a[1] < b[1] end
 
 local collectedImages = false
 local function CollectImages()
+	if ElvUI335 then return end -- no encounter journal on 3.3.5
+
 	local numTiers = (EJ_GetNumTiers() or 0)
 	if numTiers > 0 then
 		-- Loop through the expansions to collect the textures

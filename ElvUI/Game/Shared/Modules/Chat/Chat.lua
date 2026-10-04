@@ -1217,6 +1217,10 @@ end
 function CH:GetTab(chat)
 	if not chat.tab then
 		chat.tab = _G[format('ChatFrame%sTab', chat:GetID())]
+
+		if ElvUI335 then -- tab.Text, tab.Left... are only named children on 3.3.5
+			ElvUI335.AddParentKeys(chat.tab)
+		end
 	end
 
 	return chat.tab
