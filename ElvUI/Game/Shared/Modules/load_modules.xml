@@ -3,6 +3,7 @@
 	<Script file='Maps\Worldmap.lua'/>
 
 	<Script file='Auras\Auras.lua'/>
+	<Script file='Auras\Header335.lua'/> <!-- ElvUI Wotlk -->
 	<Script file='Auras\Containers.lua'/>
 
 	<Script file='Nameplates\Nameplates.lua'/> <!-- main file -->

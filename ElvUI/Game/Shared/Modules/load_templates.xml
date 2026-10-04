@@ -13,10 +13,10 @@
 	<!-- framelevel 4 for Masque support -->
 	<Button name='ElvUIAuraTemplate' inherits='ElvUIAuraIconTemplate' virtual='true' framelevel='4' registerForClicks='RightButtonUp, RightButtonDown'></Button>
 
-	<!-- aura template -->
-	<Button name='ElvUIAuraIconTemplate' inherits='SecureActionButtonTemplate, BackdropTemplate' virtual='true'>
+	<!-- aura template: ElvUI Wotlk, an insecure button (the 3.3.5 header is ElvUI's own, see Auras\Header335.lua),
+	     right click cancels the aura out of combat; no ping nor backdrop template on 3.3.5 -->
+	<Button name='ElvUIAuraIconTemplate' virtual='true'>
 		<Scripts><OnLoad>ElvUI[1]:GetModule('Auras'):CreateIcon(self)</OnLoad></Scripts>
-		<Attributes><Attribute name='type' value='cancelaura'/></Attributes>
 	</Button>
 
 	<!-- unitframe templates -->
@@ -40,9 +40,9 @@
 		</Frames>
 	</Button>
 
-	<Button name='ELVUI_UNITTARGET_PINGABLE' inherits='SecureUnitButtonTemplate, PingableUnitFrameTemplate' hidden='true' virtual='true'>
+	<Button name='ELVUI_UNITTARGET_PINGABLE' inherits='SecureUnitButtonTemplate' hidden='true' virtual='true'>
 		<Frames>
-			<Button name='$parentTarget' inherits='SecureUnitButtonTemplate, PingableUnitFrameTemplate'>
+			<Button name='$parentTarget' inherits='SecureUnitButtonTemplate'>
 				<Anchors>
 					<Anchor point='TOPLEFT' relativePoint='TOPRIGHT' relativeTo='$parent'>
 						<Offset>
@@ -80,9 +80,9 @@
 		</Frames>
 	</Button>
 
-	<Button name='ELVUI_UNITPET_PINGABLE' inherits='SecureUnitButtonTemplate, PingableUnitFrameTemplate' hidden='true' virtual='true'>
+	<Button name='ELVUI_UNITPET_PINGABLE' inherits='SecureUnitButtonTemplate' hidden='true' virtual='true'>
 		<Frames>
-			<Button name='$parentPet' inherits='SecureUnitButtonTemplate, PingableUnitFrameTemplate'>
+			<Button name='$parentPet' inherits='SecureUnitButtonTemplate'>
 				<Anchors>
 					<Anchor point='BOTTOM' relativePoint='TOP' relativeTo='$parent'>
 						<Offset>

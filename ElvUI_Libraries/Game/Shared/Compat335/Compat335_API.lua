@@ -727,6 +727,11 @@ define("UnregisterAttributeDriver", function(frame, attribute)
 	if (state) then return UnregisterStateDriver(frame, state) end
 end)
 --3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
+--3.3.5 returns three values per weapon (no enchant ID, no ranged slot): the later order, for ElvUI only
+rawset(env, "GetWeaponEnchantInfo", function()
+	local hasMain, mainExpiration, mainCharges, hasOff, offExpiration, offCharges = realG.GetWeaponEnchantInfo()
+	return hasMain, mainExpiration, mainCharges, nil, hasOff, offExpiration, offCharges, nil
+end)
 rawset(env, "GetPetActionInfo", function(index)
 	local name, _, texture, isToken, isActive, autoCastAllowed, autoCastEnabled = realG.GetPetActionInfo(index)
 	return name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, nil
