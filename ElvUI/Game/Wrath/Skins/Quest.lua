@@ -116,11 +116,11 @@ local function UpdateGreetingFrame()
 
 		local icon = _G['QuestTitleButton'..i..'QuestIcon']
 		if title.isActive == 1 then
-			icon:SetTexture(132048)
+			icon:SetTexture([[Interface\GossipFrame\ActiveQuestIcon]])
 			icon:SetDesaturation(1)
 			text:SetTextColor(.6, .6, .6)
 		else
-			icon:SetTexture(132049)
+			icon:SetTexture([[Interface\GossipFrame\AvailableQuestIcon]])
 			icon:SetDesaturation(0)
 			text:SetTextColor(1, .8, .1)
 		end

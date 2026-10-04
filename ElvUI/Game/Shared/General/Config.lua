@@ -1314,7 +1314,7 @@ function E:Config_CreateBottomButtons(frame, unskinned)
 
 			if unskinned then
 				local highlight = element:CreateTexture()
-				highlight:SetTexture(130757)
+				highlight:SetTexture([[Interface\Buttons\UI-Common-MouseHilight]])
 				highlight:SetBlendMode('ADD')
 				highlight:SetAllPoints()
 				highlight:Hide()
@@ -1447,7 +1447,7 @@ function E:ExecuteOptions(msg)
 				if unskinned and child.GetBackdrop then
 					local info = child:GetBackdrop()
 					if info and info.edgeFile == [[Interface\Tooltips\UI-Tooltip-Border]] then
-						child:SetBackdrop()
+						child:SetBackdrop(nil)
 					end
 				end
 
@@ -1455,7 +1455,7 @@ function E:ExecuteOptions(msg)
 				if point == 'BOTTOMRIGHT' then
 					for _, region in next, { child:GetRegions() } do
 						local texture = region:IsObjectType('Texture') and region:GetTexture()
-						if texture == 137057 then
+						if (texture == 137057 or ElvUI335.IsTexture(texture, [[Interface\Tooltips\UI-Tooltip-Border]])) then
 							if not child.resizeTexture then
 								region:SetTexture(E.Media.Textures.ArrowUp)
 								region:SetTexCoord(0, 1, 0, 1)
@@ -1593,7 +1593,7 @@ function E:ExecuteOptions(msg)
 		else
 			for _, region in next, { frame:GetRegions() } do
 				local texture = region:IsObjectType('Texture') and region:GetTexture()
-				if texture == 131080 then
+				if (texture == 131080 or ElvUI335.IsTexture(texture, [[Interface\DialogFrame\UI-DialogBox-Header]])) then
 					region:SetAlpha(0)
 				end
 			end

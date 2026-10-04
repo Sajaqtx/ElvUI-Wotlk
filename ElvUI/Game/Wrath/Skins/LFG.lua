@@ -96,7 +96,7 @@ end
 
 local hookedMiniCheckbox = {}
 local function LFDCheckboxMini_HookTexture(_, region)
-	if region:GetTexture() == 130751 then
+	if (region:GetTexture() == 130751 or ElvUI335.IsTexture(region:GetTexture(), [[Interface\Buttons\UI-CheckBox-Check]])) then
 		if E.private.skins.checkBoxSkin then
 			region:SetTexture(E.Media.Textures.Melli) -- set the initial texture
 			if hookedMiniCheckbox[region] then return end -- dont rehook

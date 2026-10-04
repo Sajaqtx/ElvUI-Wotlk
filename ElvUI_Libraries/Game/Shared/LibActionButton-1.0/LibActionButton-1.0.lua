@@ -430,18 +430,18 @@ function SetupSecureSnippets(button)
 
 		local updateReleaseCasting = self:GetAttribute("UpdateReleaseCasting")
 		if updateReleaseCasting then
-			self:RunAttribute("UpdateReleaseCasting", type, action)
+			control:RunFor(self, self:GetAttribute("UpdateReleaseCasting"), type, action)
 		end
 
 		local onStateChanged = self:GetAttribute("OnStateChanged")
 		if onStateChanged then
-			self:Run(onStateChanged, state, type, action)
+			control:RunFor(self, onStateChanged, state, type, action)
 		end
 	]])
 
 	-- this function is invoked by the header when the state changes
 	button:SetAttribute("_childupdate-state", [[
-		self:RunAttribute("UpdateState", message)
+		control:RunFor(self, self:GetAttribute("UpdateState"), message)
 		self:CallMethod("UpdateAction")
 	]])
 
@@ -479,12 +479,12 @@ function SetupSecureSnippets(button)
 			self:SetAttribute(format("labtype-%s", state), "empty")
 			self:SetAttribute(format("labaction-%s", state), nil)
 			-- update internal state
-			self:RunAttribute("UpdateState", state)
+			control:RunFor(self, self:GetAttribute("UpdateState"), state)
 			-- send a notification to the insecure code
 			self:CallMethod("ButtonContentsChanged", state, "empty", nil)
 		end
 		-- return the button contents for pickup
-		return self:RunAttribute("PickupButton", type, action)
+		return control:RunFor(self, self:GetAttribute("PickupButton"), type, action)
 	]])
 
 	button:SetAttribute("OnReceiveDrag", [[
@@ -520,40 +520,40 @@ function SetupSecureSnippets(button)
 			self:SetAttribute(format("labtype-%s", state), kind)
 			self:SetAttribute(format("labaction-%s", state), value)
 			-- update internal state
-			self:RunAttribute("UpdateState", state)
+			control:RunFor(self, self:GetAttribute("UpdateState"), state)
 			-- send a notification to the insecure code
 			self:CallMethod("ButtonContentsChanged", state, kind, value)
 		else
 			-- get the action for (pet-)action buttons
 			buttonAction = self:GetAttribute("action")
 		end
-		return self:RunAttribute("PickupButton", buttonType, buttonAction)
+		return control:RunFor(self, self:GetAttribute("PickupButton"), buttonType, buttonAction)
 	]])
 
 	button:SetScript("OnDragStart", nil)
 	-- Wrapped OnDragStart(self, button, kind, value, ...)
 	button.header:WrapScript(button, "OnDragStart", [[
-		return self:RunAttribute("OnDragStart")
+		return control:RunFor(self, self:GetAttribute("OnDragStart"))
 	]])
 	-- Wrap twice, because the post-script is not run when the pre-script causes a pickup (doh)
 	-- we also need some phony message, or it won't work =/
 	button.header:WrapScript(button, "OnDragStart", [[
 		return "message", "update"
 	]], [[
-		self:RunAttribute("UpdateState", self:GetAttribute("state"))
+		control:RunFor(self, self:GetAttribute("UpdateState"), self:GetAttribute("state"))
 	]])
 
 	button:SetScript("OnReceiveDrag", nil)
 	-- Wrapped OnReceiveDrag(self, button, kind, value, ...)
 	button.header:WrapScript(button, "OnReceiveDrag", [[
-		return self:RunAttribute("OnReceiveDrag", kind, value, ...)
+		return control:RunFor(self, self:GetAttribute("OnReceiveDrag"), kind, value, ...)
 	]])
 	-- Wrap twice, because the post-script is not run when the pre-script causes a pickup (doh)
 	-- we also need some phony message, or it won't work =/
 	button.header:WrapScript(button, "OnReceiveDrag", [[
 		return "message", "update"
 	]], [[
-		self:RunAttribute("UpdateState", self:GetAttribute("state"))
+		control:RunFor(self, self:GetAttribute("UpdateState"), self:GetAttribute("state"))
 	]])
 
 	if UseCustomFlyout then
@@ -618,7 +618,7 @@ function WrapOnClick(button, unwrapheader)
 	]], [[
 		local type, action = GetActionInfo(self:GetAttribute("action"))
 		if message ~= format("%s|%s", tostring(type), tostring(action)) then
-			self:RunAttribute("UpdateState", self:GetAttribute("state"))
+			control:RunFor(self, self:GetAttribute("UpdateState"), self:GetAttribute("state"))
 		end
 
 		-- re-enable ondown casting if needed

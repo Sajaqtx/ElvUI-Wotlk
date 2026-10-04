@@ -1838,7 +1838,7 @@ function S:HandleSliderFrame(frame, template, frameLevel)
 	local SIZE = 12
 
 	if frame.SetBackdrop then
-		frame:SetBackdrop()
+		frame:SetBackdrop(nil)
 	end
 
 	frame:StripTextures()
@@ -2267,9 +2267,9 @@ do -- Handle collapse
 		if skip or not texture then return end
 
 		if type(texture) == 'number' then
-			if texture == 130838 then -- Interface\Buttons\UI-PlusButton-UP
+			if (texture == 130838 or ElvUI335.IsTexture(texture, [[Interface\Buttons\UI-PlusButton-UP]])) then -- Interface\Buttons\UI-PlusButton-UP
 				button:SetNormalTexture(E.Media.Textures.PlusButton, true)
-			elseif texture == 130821 then -- Interface\Buttons\UI-MinusButton-UP
+			elseif (texture == 130821 or ElvUI335.IsTexture(texture, [[Interface\Buttons\UI-MinusButton-UP]])) then -- Interface\Buttons\UI-MinusButton-UP
 				button:SetNormalTexture(E.Media.Textures.MinusButton, true)
 			end
 		elseif strfind(texture, 'Plus') or strfind(texture, '[cC]losed') then
@@ -2480,7 +2480,7 @@ S.Unported335 = {
 	PetitionFrame = true,
 	-- load on demand Blizzard addons
 	Blizzard_AchievementUI = true, Blizzard_GuildBankUI = true, Blizzard_TalentUI = true, Blizzard_GlyphUI = true,
-	Blizzard_ItemSocketingUI = true, Blizzard_TradeSkillUI = true, Blizzard_TrainerUI = true,
+	Blizzard_ItemSocketingUI = true, Blizzard_TradeSkillUI = true, Blizzard_TrainerUI = true, Blizzard_TimeManager = true,
 }
 
 function S:AddCallback(name, func, position) -- arg1: name is 'given name'

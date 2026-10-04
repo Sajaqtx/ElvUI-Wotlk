@@ -7,13 +7,17 @@
 	the client's LibStub: the media registry (LibSharedMedia: the fonts and textures of other addons), the data
 	brokers (LibDataBroker: their minimap / data text feeds) and their CallbackHandler. A library ElvUI does not
 	embed (Masque, LibDBIcon...) is looked up in the shared LibStub.
+
+	The base Ace3 libraries (AceAddon, AceEvent, AceDB...) go to the shared LibStub when no other addon put one there
+	first, as the 3.3.5 ElvUI did: some addons count on them without embedding them (MerfinPlus). The interface ones
+	(AceGUI, AceConfig, their widgets) and ElvUI's own (LibActionButton...) always stay here.
 ]]
 
 local env = ElvUI335_ENV
 local realG = getmetatable(env).__index
 local shared = realG.LibStub
 
-local tonumber, strmatch, pairs, error, assert, type = tonumber, string.match, pairs, error, assert, type
+local tonumber, strmatch, pairs, ipairs, error, assert, type = tonumber, string.match, pairs, ipairs, error, assert, type
 
 local SHARED = {
 	["CallbackHandler-1.0"] = true,
@@ -21,10 +25,24 @@ local SHARED = {
 	["LibDataBroker-1.1"] = true,
 }
 
+--never shared: the option interface libraries (another addon's 3.3.5 dialogs on ElvUI's widgets break) and ElvUI's
+local PRIVATE = {"^AceGUI", "^AceConfig", "^AceDBOptions", "^LibActionButton", "^LibAceConfigHelper", "^LibElvUIPlugin"}
+local function AlwaysPrivate(major)
+	for _, pattern in ipairs(PRIVATE) do
+		if (major:find(pattern)) then return true end
+	end
+	return false
+end
+
 local LibStub = {libs = {}, minors = {}, minor = 2}
 
 function LibStub:NewLibrary(major, minor)
 	if (SHARED[major]) then return shared:NewLibrary(major, minor) end
+	--a base library no other addon provides yet: the shared one (and so ElvUI's too)
+	if (not AlwaysPrivate(major) and not self.libs[major] and not shared.libs[major]) then
+		SHARED[major] = true
+		return shared:NewLibrary(major, minor)
+	end
 
 	assert(type(major) == "string", "Bad argument #2 to `NewLibrary' (string expected)")
 	minor = assert(tonumber(strmatch(minor, "%d+")), "Minor version must either be a number or contain a number.")

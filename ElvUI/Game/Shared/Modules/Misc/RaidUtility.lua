@@ -345,7 +345,7 @@ do
 
 		button:SetAttribute('isclearbutton', i == 0)
 
-		if E.Classic then
+		if E.Classic or ElvUI335 then -- 3.3.5: no world markers nor raidtarget action type, the /tm macro
 			button:SetAttribute('type', 'macro')
 			button:SetAttribute('macrotext', tm)
 		else

@@ -37,7 +37,7 @@ local function CreateButton(frame, i)
 
 	local hover = button:CreateTexture(nil, 'OVERLAY')
 	hover:SetAllPoints()
-	hover:SetTexture(136810) -- Interface\QuestFrame\UI-QuestTitleHighlight
+	hover:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]]) -- Interface\QuestFrame\UI-QuestTitleHighlight
 	hover:SetBlendMode('ADD')
 	hover:Hide()
 	button.hoverTex = hover

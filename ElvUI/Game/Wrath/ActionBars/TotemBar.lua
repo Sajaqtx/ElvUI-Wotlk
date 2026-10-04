@@ -382,6 +382,14 @@ function AB:CreateTotemBar()
 	bar:Point('BOTTOM', E.UIParent, 0, 250)
 	bar.buttons = {}
 
+	if ElvUI335 then -- the 3.3.5 totem buttons only name their parts (HotKey, icon, cooldown...)
+		for _, name in next, { 'MultiCastSummonSpellButton', 'MultiCastRecallSpellButton' } do
+			ElvUI335.AddParentKeys(_G[name])
+		end
+		for i = 1, 12 do ElvUI335.AddParentKeys(_G['MultiCastActionButton'..i]) end
+		for i = 1, 4 do ElvUI335.AddParentKeys(_G['MultiCastSlotButton'..i]) end
+	end
+
 	local barFrame = _G.MultiCastActionBarFrame
 	barFrame:SetScript('OnUpdate', nil)
 	barFrame:SetScript('OnShow', nil)

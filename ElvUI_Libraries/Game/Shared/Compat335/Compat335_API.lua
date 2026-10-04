@@ -1526,3 +1526,68 @@ define("CreateAtlasMarkup", function(atlas, width, height, offsetX, offsetY)
 	return ("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t"):format(info.filename, height or 0, width or 0, offsetX or 0, offsetY or 0,
 		size, size, info.leftTexCoord * size, info.rightTexCoord * size, info.topTexCoord * size, info.bottomTexCoord * size)
 end)
+
+--3.3.5 GetTexture answers the file path, where later clients answer a file ID: ElvUI's ID comparisons also take
+--the path (case and slashes aside)
+function Compat.IsTexture(texture, filePath)
+	return type(texture) == "string" and (texture:gsub("/", "\\"):lower()) == filePath:lower()
+end
+
+---------------------------------------------------------------------------------------------------------------
+--> more later functions with a 3.3.5 answer (found in the third in-game test)
+
+--GetNetStats: 3.3.5 has one latency, later clients a home and a world one
+do
+	local GetNetStats = realG.GetNetStats
+	rawset(env, "GetNetStats", function()
+		local bandwidthIn, bandwidthOut, latency = GetNetStats()
+		return bandwidthIn, bandwidthOut, latency, latency
+	end)
+end
+
+--CombatLogGetCurrentEventInfo (8.0): the arguments of the COMBAT_LOG_EVENT_UNFILTERED being dispatched, in the
+--later layout (hideCaster after the event name, raid flags after each unit's flags). The compat's frame registers
+--the event first, so it records each one before ElvUI's handlers run
+do
+	local current, count = {}, 0
+	local recorder = CreateFrame("Frame")
+	recorder:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	recorder:SetScript("OnEvent", function(_, _, ...)
+		count = select("#", ...)
+		for i = 1, count do current[i] = select(i, ...) end
+		for i = count + 1, #current do current[i] = nil end
+	end)
+	rawset(env, "CombatLogGetCurrentEventInfo", function()
+		--3.3.5: timestamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...
+		return current[1], current[2], false, current[3], current[4], current[5], 0, current[6], current[7], current[8], 0,
+			unpack(current, 9, count)
+	end)
+end
+
+--class power display modifier (7.x): 3.3.5 shows the raw amount
+define("UnitPowerDisplayMod", function() return 1 end)
+--5+ spaces down to 4 (FrameXML 6.x)
+define("RemoveExtraSpaces", function(text) return text and (text:gsub("     +", "    ")) end)
+
+--the 7.x title font ElvUI's installers use
+if (not realG.GameFont_Gigantic) then
+	local font = CreateFont("GameFont_Gigantic")
+	font:SetFontObject(GameFontNormalHuge)
+	local file, _, flags = GameFontNormalHuge:GetFont()
+	font:SetFont(file, 32, flags)
+	font:SetTextColor(1, 0.82, 0)
+end
+
+--raid target markers: the 4.x /tm command, under a name of ElvUI's own (the macros of its marker buttons)
+do
+	rawset(env, "SLASH_TARGET_MARKER4", "/elvuitm")
+	SLASH_ELVUI335TM1 = "/elvuitm"
+	SlashCmdList.ELVUI335TM = function(msg)
+		local index = tonumber(msg)
+		if (index and UnitExists("target")) then SetRaidTarget("target", index) end
+	end
+end
+
+--totem orders (4.x names): 3.3.5 has TOTEM_PRIORITIES (earth, fire, water, air) for the shaman bar
+if (realG.SHAMAN_TOTEM_PRIORITIES == nil) then rawset(env, "SHAMAN_TOTEM_PRIORITIES", realG.TOTEM_PRIORITIES or {2, 1, 3, 4}) end
+if (realG.STANDARD_TOTEM_PRIORITIES == nil) then rawset(env, "STANDARD_TOTEM_PRIORITIES", {1, 2, 3, 4}) end

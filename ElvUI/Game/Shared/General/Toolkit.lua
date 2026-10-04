@@ -302,7 +302,7 @@ local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelM
 	E:ReplaceSetupTextureCoordinates(frame)
 
 	if template == 'NoBackdrop' then
-		frame:SetBackdrop()
+		frame:SetBackdrop(nil)
 	else
 		local edgeSize = E.twoPixelsPlease and 2 or 1
 

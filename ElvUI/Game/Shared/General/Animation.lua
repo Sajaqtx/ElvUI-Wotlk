@@ -115,7 +115,7 @@ function E:SetUpAnimGroup(obj, animType, ...)
 	elseif animType == 'Spinner' then
 		if not obj.Spinner then
 			local spinner = obj:CreateTexture()
-			spinner:SetTexture(443270) -- Interface\Common\StreamFrame
+			spinner:SetTexture([[Interface\Common\StreamFrame]]) -- Interface\Common\StreamFrame
 			spinner:SetPoint('CENTER')
 			spinner:SetAlpha(0.5)
 			obj.Spinner = spinner
@@ -123,7 +123,7 @@ function E:SetUpAnimGroup(obj, animType, ...)
 
 		if not obj.Circle then
 			local circle = obj:CreateTexture(nil, 'BORDER')
-			circle:SetTexture(443269) -- Interface\Common\StreamCircle
+			circle:SetTexture([[Interface\Common\StreamCircle]]) -- Interface\Common\StreamCircle
 			circle:SetPoint('CENTER')
 			obj.Circle = circle
 
@@ -139,7 +139,7 @@ function E:SetUpAnimGroup(obj, animType, ...)
 
 		if not obj.Spark then
 			local spark = obj:CreateTexture(nil, 'OVERLAY')
-			spark:SetTexture(457289) -- Interface\Common\StreamSpark
+			spark:SetTexture([[Interface\Common\StreamSpark]]) -- Interface\Common\StreamSpark
 			spark:SetPoint('CENTER')
 			obj.Spark = spark
 

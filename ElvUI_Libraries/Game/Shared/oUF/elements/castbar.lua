@@ -92,7 +92,7 @@ A default texture will be applied to the StatusBar and Texture widgets if they d
 local _, ns = ...
 local oUF = ns.oUF
 
-local FALLBACK_ICON = 136243 -- Interface\ICONS\Trade_Engineering
+local FALLBACK_ICON = [[Interface\ICONS\Trade_Engineering]] -- ElvUI Wotlk: a path, 3.3.5 has no file IDs
 local FAILED = _G.FAILED or 'Failed'
 local INTERRUPTED = _G.INTERRUPTED or 'Interrupted'
 

@@ -210,7 +210,7 @@ function S:CharacterFrame()
 
 		if not runeButton.runeIcon then -- make then icon
 			runeButton.runeIcon = runeButton:CreateTexture(nil, 'ARTWORK')
-			runeButton.runeIcon:SetTexture(134419) -- Interface\Icons\INV_Misc_Rune_06
+			runeButton.runeIcon:SetTexture([[Interface\Icons\INV_Misc_Rune_06]]) -- Interface\Icons\INV_Misc_Rune_06
 			runeButton.runeIcon:SetTexCoords()
 			runeButton.runeIcon:SetInside(runeButton)
 		end

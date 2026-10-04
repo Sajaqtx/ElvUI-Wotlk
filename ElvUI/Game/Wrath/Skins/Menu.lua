@@ -35,7 +35,7 @@ local function SkinFrameAttachments(frame)
 	local r, g, b = unpack(E.media.rgbvaluecolor)
 	for _, widget in next, frame.attachments do
 		if widget:IsObjectType('Texture') then
-			if widget:GetTexture() == 130940 then
+			if (widget:GetTexture() == 130940 or ElvUI335.IsTexture(widget:GetTexture(), [[Interface\ChatFrame\ChatFrameExpandArrow]])) then
 				widget:SetTexture(E.Media.Textures.ArrowUp)
 				widget:SetRotation(S.ArrowRotation.right)
 				widget:SetVertexColor(r, g, b)

@@ -135,7 +135,7 @@ local FILTER_FLAG_QUEST = (BagSlotFlags and BagSlotFlags.ClassQuestItems) or 32 
 local FILTER_FLAG_JUNKSELL = (BagSlotFlags and BagSlotFlags.ExcludeJunkSell) or 64 -- didnt exist
 local FILTER_FLAG_REAGENTS = (BagSlotFlags and BagSlotFlags.ClassReagents) or 128 -- didnt exist
 
-local DEFAULT_ICON = 136511
+local DEFAULT_ICON = [[Interface\PaperDoll\UI-PaperDoll-Slot-Bag]] -- ElvUI Wotlk: a path (3.3.5 has no file IDs)
 
 local READY_TEX = [[Interface\RaidFrame\ReadyCheck-Ready]]
 local NOT_READY_TEX = [[Interface\RaidFrame\ReadyCheck-NotReady]]
@@ -217,7 +217,7 @@ B.BAG_FILTER_ICONS = {
 	[FILTER_FLAG_TRADE_GOODS] = E.Media.Textures.FabricSilk,	-- Interface\ICONS\INV_Fabric_Silk_02
 	[FILTER_FLAG_JUNK] = E.Media.Textures.GoldCoins,			-- Interface\ICONS\INV_Misc_Coin_01
 	[FILTER_FLAG_QUEST] = E.Media.Textures.Scroll,				-- Interface\ICONS\INV_Scroll_03
-	[FILTER_FLAG_REAGENTS] = 132854								-- Interface\ICONS\INV_Enchant_DustArcane
+	[FILTER_FLAG_REAGENTS] = [[Interface\ICONS\INV_Enchant_DustArcane]]								-- Interface\ICONS\INV_Enchant_DustArcane
 }
 
 B.BindText = {
@@ -2088,7 +2088,7 @@ function B:ConstructContainerHolder(f, bagID, isBank, name, index)
 	end
 
 	holder.icon:SetTexCoords()
-	holder.icon:SetTexture(bagID == KEYRING_CONTAINER and 134237 or E.Media.Textures.Backpack) -- Interface\ICONS\INV_Misc_Key_03
+	holder.icon:SetTexture(bagID == KEYRING_CONTAINER and [[Interface\ICONS\INV_Misc_Key_03]] or E.Media.Textures.Backpack) -- Interface\ICONS\INV_Misc_Key_03
 	holder.icon:SetInside()
 
 	holder.IconBorder:SetAlpha(0)
@@ -2204,7 +2204,7 @@ function B:ConstructPurchaseButton(frame, text, template)
 	button:SetTemplate()
 	button:Point('RIGHT', frame.bagsButton, 'LEFT', -5, 0)
 
-	B:SetButtonTexture(button, 133784) -- Interface\ICONS\INV_Misc_Coin_01
+	B:SetButtonTexture(button, [[Interface\ICONS\INV_Misc_Coin_01]]) -- Interface\ICONS\INV_Misc_Coin_01
 	button:StyleButton(nil, true)
 
 	button.ttText = text
@@ -2536,7 +2536,7 @@ function B:ConstructContainerFrame(name, isBank)
 			f.depositButton:SetTemplate()
 			f.depositButton:Point('BOTTOMRIGHT', f.holderFrame, 'TOPRIGHT', 0, 3)
 			f.depositButton.ttText = L["Auto Deposit"]
-			B:SetButtonTexture(f.depositButton, 450905) -- Interface\ICONS\misc_arrowdown
+			B:SetButtonTexture(f.depositButton, [[Interface\ICONS\misc_arrowdown]]) -- Interface\ICONS\misc_arrowdown
 			f.depositButton:StyleButton(nil, true)
 			f.depositButton:SetScript('OnEnter', B.Tooltip_Show)
 			f.depositButton:SetScript('OnLeave', GameTooltip_Hide)
@@ -2579,7 +2579,7 @@ function B:ConstructContainerFrame(name, isBank)
 			f.keyButton = CreateFrame('Button', name..'KeyButton', f)
 			f.keyButton:Size(20)
 			f.keyButton:SetTemplate()
-			B:SetButtonTexture(f.keyButton, 134237) -- Interface\ICONS\INV_Misc_Key_03
+			B:SetButtonTexture(f.keyButton, [[Interface\ICONS\INV_Misc_Key_03]]) -- Interface\ICONS\INV_Misc_Key_03
 			f.keyButton:StyleButton(nil, true)
 			f.keyButton.ttText = BINDING_NAME_TOGGLEKEYRING
 			f.keyButton:SetScript('OnEnter', B.Tooltip_Show)
@@ -2591,7 +2591,7 @@ function B:ConstructContainerFrame(name, isBank)
 		f.vendorGraysButton = CreateFrame('Button', nil, f.holderFrame)
 		f.vendorGraysButton:Size(20)
 		f.vendorGraysButton:SetTemplate()
-		B:SetButtonTexture(f.vendorGraysButton, 133784) -- Interface\ICONS\INV_Misc_Coin_01
+		B:SetButtonTexture(f.vendorGraysButton, [[Interface\ICONS\INV_Misc_Coin_01]]) -- Interface\ICONS\INV_Misc_Coin_01
 		f.vendorGraysButton:StyleButton(nil, true)
 		f.vendorGraysButton.ttText = L["Vendor Grays"]
 		f.vendorGraysButton.ttValue = B.GetGraysValue
@@ -2741,7 +2741,7 @@ function B:ConstructContainerButton(f, bagID, slotID)
 		slot.keyringTexture = slot:CreateTexture(nil, 'BORDER')
 		slot.keyringTexture:SetAlpha(0.5)
 		slot.keyringTexture:SetInside(slot)
-		slot.keyringTexture:SetTexture(130980) -- Interface\ContainerFrame\KeyRing-Bag-Icon
+		slot.keyringTexture:SetTexture([[Interface\ContainerFrame\KeyRing-Bag-Icon]]) -- Interface\ContainerFrame\KeyRing-Bag-Icon
 		slot.keyringTexture:SetTexCoords()
 		slot.keyringTexture:SetDesaturated(true)
 	end
