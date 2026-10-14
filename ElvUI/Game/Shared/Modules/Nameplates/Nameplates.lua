@@ -140,7 +140,14 @@ end
 function NP:ToggleCVar(cvar, enabled)
 	if ElvUI335 and cvar == 'nameplateMotion' then -- ElvUI Wotlk: Rebuffed's stacking (rebuffed.dll)
 		cvar = 'nameplateStacking'
-		enabled = enabled or (NP.db and NP.db.clampToScreen) -- its clamp (upper border) only works with the stacking on
+
+		-- its clamp (upper border) only works with the stacking on: for overlapping plates with the clamp, the stacking stays
+		-- on with no spacing (no plate is ever pushed aside); the stacked plates get Rebuffed's spacing back
+		local clamp = NP.db and NP.db.clampToScreen
+		local overlap = clamp and not enabled
+		E:SetCVar('nameplateXSpace', overlap and 0 or 130)
+		E:SetCVar('nameplateYSpace', overlap and 0 or 20)
+		enabled = enabled or clamp
 	end
 
 	E:SetCVar(cvar, enabled and 1 or 0)
@@ -168,7 +175,7 @@ function NP:SetCVars()
 		NP:ToggleCVar('nameplateExtendWorldFrameHeight', db.clampToScreen)
 		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
-		if db.clampToScreen then NP:ToggleCVar('nameplateMotion', true) end -- the stacking the clamp needs
+		if db.clampToScreen then NP:EnviromentConditionals() end -- the stacking the clamp needs, spaced or not (overlap)
 	else
 		E:SetCVar('nameplateMaxDistance', db.loadDistance)
 	end
