@@ -1867,6 +1867,14 @@ function S:HandleSliderFrame(frame, template, frameLevel)
 		frame:CreateBackdrop(template, nil, nil, nil, nil, nil, nil, true, frameLevel)
 	end
 
+	-- ElvUI Wotlk: a slider skinned then moved (the options) keeps its backdrop above it on 3.3.5, over the thumb
+	if ElvUI335 and not frame.backdropLevel335 then
+		frame.backdropLevel335 = true
+		frame:HookScript('OnShow', function(slider)
+			if slider.backdrop then slider.backdrop:SetFrameLevel(max(0, slider:GetFrameLevel() - 1)) end
+		end)
+	end
+
 	local thumb = frame:GetThumbTexture()
 	thumb:SetVertexColor(1, .82, 0, 0.8)
 	thumb:Size(SIZE-2,SIZE-2)

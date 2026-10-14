@@ -785,6 +785,32 @@ rawset(env, "GetWeaponEnchantInfo", function()
 	return hasMain, mainExpiration, mainCharges, nil, hasOff, offExpiration, offCharges, nil
 end)
 --3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
+--> what the DataTexts use from later clients (for ElvUI only)
+--stat indexes and the resilience rating (3.3.5: the melee crit taken rating), labels, the base run speed (yards/s)
+for name, value in next, { LE_UNIT_STAT_STRENGTH = 1, LE_UNIT_STAT_AGILITY = 2, LE_UNIT_STAT_STAMINA = 3,
+	LE_UNIT_STAT_INTELLECT = 4, LE_UNIT_STAT_SPIRIT = 5, COMBAT_RATING_RESILIENCE_CRIT_TAKEN = rawget(realG, "CR_CRIT_TAKEN_MELEE") or 15,
+	STAT_HASTE = rawget(realG, "SPELL_HASTE") or "Haste", STAT_ENERGY_REGEN = "Energy Regen", BASE_MOVEMENT_SPEED = 7,
+	CR_CRIT_TOOLTIP = "Crit Rating %s (+%.2f%% crit chance)", STAT_HASTE_TOOLTIP = "Increases attack speed and spell casting speed.",
+	STAT_HASTE_BASE_TOOLTIP = "\n\nHaste Rating: %s (+%.2f%% Haste)" } do
+	if (rawget(realG, name) == nil) then rawset(env, name, value) end
+end
+define("GetSpellSubtext", function(spell) return (select(2, GetSpellInfo(spell))) end) -- the rank: GetSpellInfo's second value
+define("FormatShortDate", function(day, month, year)
+	if (year) then return format("%d/%d/%02d", day, month, year % 100) end
+	return format("%d/%d", day, month)
+end)
+define("ToggleAllBags", function() realG.OpenAllBags() end) -- 3.3.5 OpenAllBags toggles (ElvUI's bag follows it)
+define("ToggleQuestLog", function() ToggleFrame(realG.QuestLogFrame) end)
+define("ToggleGuildFrame", function() realG.ToggleFriendsFrame(3) end) -- the guild tab of the 3.3.5 friends frame
+define("GetFileStreamingStatus", function() return 0 end)
+define("GetBackgroundLoadingStatus", function() return 0 end)
+--3.3.5 gives the current speed only: the run, flight and swim speeds are the current one when moving, else the base
+rawset(env, "GetUnitSpeed", function(unit)
+	local current, run, flight, swim = realG.GetUnitSpeed(unit)
+	local moving = (current and current > 0) and current or 7
+	return current or 0, run or moving, flight or moving, swim or moving
+end)
+
 --3.3.5 loot slots: texture, name, count, quality, locked; the later order has a currency ID before the quality and the
 --quest fields after (for ElvUI only). LootSlotHasItem is the 3.3.5 LootSlotIsItem.
 rawset(env, "GetLootSlotInfo", function(slot)
@@ -822,7 +848,7 @@ for name, value in pairs({LE_EXPANSION_CLASSIC = 0, LE_EXPANSION_BURNING_CRUSADE
 	LE_EXPANSION_NORTHREND = 2, LE_EXPANSION_CATACLYSM = 3, LE_EXPANSION_MISTS_OF_PANDARIA = 4, LE_EXPANSION_WARLORDS_OF_DRAENOR = 5,
 	LE_EXPANSION_LEGION = 6, LE_EXPANSION_BATTLE_FOR_AZEROTH = 7, LE_EXPANSION_SHADOWLANDS = 8, LE_EXPANSION_DRAGONFLIGHT = 9,
 	LE_EXPANSION_WAR_WITHIN = 10, LE_EXPANSION_MIDNIGHT = 11, LE_EXPANSION_LEVEL_CURRENT = 2}) do
-	if (realG[name] == nil) then rawset(env, name, value) end
+	if (rawget(realG, name) == nil) then rawset(env, name, value) end
 end
 define("ClassicExpansionAtLeast", function(expansion) return (expansion or 0) <= 2 end)
 define("ClassicExpansionAtMost", function(expansion) return (expansion or 0) >= 2 end)

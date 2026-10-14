@@ -1037,6 +1037,13 @@ function CH:StyleChat(frame)
 		editbox.focusMid:SetAlpha(0)
 	end
 
+	if ElvUI335 then -- ElvUI Wotlk: the 3.3.5 focus textures, named only (ElvUI 6.10 removed them too)
+		for _, part in next, { 'FocusLeft', 'FocusMid', 'FocusRight' } do
+			local focus = _G[name..'EditBox'..part]
+			if focus then focus:Kill() end
+		end
+	end
+
 	CH:ClearTabTextures(name)
 	CH:PositionButtonFrame(frame)
 

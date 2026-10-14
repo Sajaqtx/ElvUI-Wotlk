@@ -291,6 +291,7 @@ local function OnClick(_, btn)
 	if E:AlertCombat() then return end
 
 	if btn == 'RightButton' then
+		if not _G.TimeManagerFrame and _G.TimeManager_LoadUI then _G.TimeManager_LoadUI() end -- ElvUI Wotlk: load on demand on 3.3.5
 		ToggleFrame(_G.TimeManagerFrame)
 	elseif E.Retail or E.Mists or E.Wrath then
 		_G.GameTimeFrame:Click()
