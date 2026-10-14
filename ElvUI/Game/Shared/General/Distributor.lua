@@ -535,11 +535,11 @@ function D:Decode(dataString)
 			return
 		end
 
-		profileData = format('%s%s', profileData, '}') --Add back the missing '}'
 		profileData = gsub(profileData, '\124\124', '\124') --Remove escape pipe characters
 
+		-- ElvUI Wotlk: the table export keeps its last '}' (ElvUI 6.10 and this version): added back only when missing
 		local success
-		local profileTable = loadstring(format('%s %s', 'return', profileData))
+		local profileTable = loadstring(format('%s %s', 'return', profileData)) or loadstring(format('%s %s}', 'return', profileData))
 		if profileTable then
 			success, profileData = pcall(profileTable)
 		end

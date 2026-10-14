@@ -5,8 +5,43 @@ local _G = _G
 local next = next
 local hooksecurefunc = hooksecurefunc
 
+-- ElvUI Wotlk: the 3.3.5 key binding frame (named buttons, no category list), skinned as ElvUI 6.10 did
+local function BindingUI335()
+	local KB = _G.KeyBindingFrame
+	KB:StripTextures()
+	KB:SetTemplate('Transparent')
+	KB:Size(596, 490)
+
+	for i = 1, _G.KEY_BINDINGS_DISPLAYED do
+		local key1, key2 = _G['KeyBindingFrameBinding'..i..'Key1Button'], _G['KeyBindingFrameBinding'..i..'Key2Button']
+		S:HandleButton(key1)
+		S:HandleButton(key2)
+		key2:Point('LEFT', key1, 'RIGHT', 1, 0)
+	end
+
+	local scrollBar = _G.KeyBindingFrameScrollFrameScrollBar
+	S:HandleScrollBar(scrollBar)
+	scrollBar:Point('TOPLEFT', _G.KeyBindingFrameScrollFrame, 'TOPRIGHT', 8, -21)
+	scrollBar:Point('BOTTOMLEFT', _G.KeyBindingFrameScrollFrame, 'BOTTOMRIGHT', 8, 17)
+
+	local character = _G.KeyBindingFrameCharacterButton
+	S:HandleCheckBox(character)
+	character:Point('TOPLEFT', KB, 'TOPRIGHT', -204, -12)
+
+	local default, cancel, okay, unbind = _G.KeyBindingFrameDefaultButton, _G.KeyBindingFrameCancelButton, _G.KeyBindingFrameOkayButton, _G.KeyBindingFrameUnbindButton
+	S:HandleButton(default)
+	S:HandleButton(cancel)
+	S:HandleButton(okay)
+	S:HandleButton(unbind)
+	default:Point('BOTTOMLEFT', 8, 8)
+	cancel:Point('BOTTOMRIGHT', -8, 8)
+	okay:Point('RIGHT', cancel, 'LEFT', -3, 0)
+	unbind:Point('RIGHT', okay, 'LEFT', -3, 0)
+end
+
 function S:Blizzard_BindingUI()
 	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.binding) then return end
+	if ElvUI335 then BindingUI335() return end
 
 	local KB = _G.KeyBindingFrame
 	for _, v in next, { 'defaultsButton', 'unbindButton', 'okayButton', 'cancelButton' } do

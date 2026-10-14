@@ -2,6 +2,9 @@ setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local S = E:GetModule('Skins')
 local ACD = E.Libs.AceConfigDialog
 
+-- ElvUI Wotlk: the 3.3.5 client has the old UIDropDownMenu, not the 11.0 DropdownButton
+local classicDropdown = E.Classic or ElvUI335
+
 local _G = _G
 local hooksecurefunc = hooksecurefunc
 local next, strsplit = next, strsplit
@@ -100,7 +103,7 @@ function E:ToggleMoveMode(which)
 
 		E.MoverPopupWindow:Show()
 
-		if E.Classic then
+		if classicDropdown then
 			_G.UIDropDownMenu_SetSelectedValue(E.MoverPopupDropdown, strupper(which))
 		end
 
@@ -223,7 +226,7 @@ do
 	end
 
 	function E:ConfigMode_Initialize(root)
-		if E.Classic then
+		if classicDropdown then
 			local info = _G.UIDropDownMenu_CreateInfo()
 			info.func = E.ConfigMode_OnClick
 
@@ -452,7 +455,7 @@ function E:CreateMoverPopup()
 		end
 	end)
 
-	local dropDown = CreateFrame(E.Classic and 'Frame' or 'DropdownButton', frameName..'DropDown', f, E.Classic and 'UIDropDownMenuTemplate' or 'WowStyle1DropdownTemplate')
+	local dropDown = CreateFrame(classicDropdown and 'Frame' or 'DropdownButton', frameName..'DropDown', f, classicDropdown and 'UIDropDownMenuTemplate' or 'WowStyle1DropdownTemplate')
 	dropDown:Point('BOTTOMRIGHT', lock, 'TOPRIGHT', 2, 0)
 	S:HandleDropDownBox(dropDown, 160)
 
@@ -465,7 +468,7 @@ function E:CreateMoverPopup()
 
 	f.dropDown = dropDown
 
-	if E.Classic then
+	if classicDropdown then
 		_G.UIDropDownMenu_Initialize(dropDown, E.ConfigMode_Initialize)
 	else
 		dropDown:SetupMenu(E.ConfigMode_Initialize)

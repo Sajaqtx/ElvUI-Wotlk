@@ -45,6 +45,20 @@ Sacs et infobulle des sorts : bons. Carte : s'ouvre.
       `C_AddOns.IsAddOnLoaded` rend maintenant un booléen. **(corrigé, à revérifier)**
 - [x] Carte sans skin ElvUI : skin de l'ElvUI 6.10 porté (cadres de la carte 3.3.5). **(corrigé, à revérifier)**
 
+## Test en jeu n°8 (2026-10-14, client de test)
+
+`/ec` et le skin de la carte : bons.
+
+- [x] Impossible de sortir du mode AFK : le modèle 3.3.5 n'a pas `SetAnimation` (c'est `SetSequence`), l'erreur
+      arrivait après avoir caché l'interface et avant de noter le mode AFK actif. Les deux corrigés. **(à revérifier)**
+- [x] Ancrages (movers) : la fenêtre du mode déplacement créait un menu déroulant 11.0 (`WowStyle1DropdownTemplate`)
+      et s'arrêtait avant la fenêtre d'ajustement (`MoverNudgeFrame`, 104 erreurs). Menu 3.3.5 maintenant. **(à revérifier)**
+- [x] Fenêtre des raccourcis clavier : skin de l'ElvUI 6.10 porté (cadres 3.3.5). **(à revérifier)**
+- [x] Import de profil au format « table Lua » (celui que l'ElvUI 6.10 sait exporter) : ElvUI v15 ajoutait une `}`
+      de trop. **(à revérifier)**
+- [ ] Profils entre comptes WoW (GOSAJAW -> SAANN) : chaque compte a son propre `ElvUI.lua`, passer par
+      l'export / import.
+
 ## Reprise après le test en jeu n°6 (2026-10-04)
 
 Ancien ElvUI remis en place ; la version testée est dans `Backport Wotlk\_retire du jeu (ElvUI Wotlk test 6)`.

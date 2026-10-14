@@ -109,6 +109,7 @@ function AFK:SetAFK(status)
 
 		afk:Show()
 		UIParent:Hide()
+		AFK.isAFK = true -- ElvUI Wotlk: set at once, a key must bring the interface back even if the rest fails
 
 		if IsInGuild() then
 			local guildName, guildRankName = GetGuildInfo('player')
