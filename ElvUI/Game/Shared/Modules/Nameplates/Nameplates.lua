@@ -140,6 +140,7 @@ end
 function NP:ToggleCVar(cvar, enabled)
 	if ElvUI335 and cvar == 'nameplateMotion' then -- ElvUI Wotlk: Rebuffed's stacking (rebuffed.dll)
 		cvar = 'nameplateStacking'
+		enabled = enabled or (NP.db and NP.db.clampToScreen) -- its clamp (upper border) only works with the stacking on
 	end
 
 	E:SetCVar(cvar, enabled and 1 or 0)
@@ -167,6 +168,7 @@ function NP:SetCVars()
 		NP:ToggleCVar('nameplateExtendWorldFrameHeight', db.clampToScreen)
 		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
+		if db.clampToScreen then NP:ToggleCVar('nameplateMotion', true) end -- the stacking the clamp needs
 	else
 		E:SetCVar('nameplateMaxDistance', db.loadDistance)
 	end
