@@ -2476,7 +2476,7 @@ S.Unported335 = {
 	BlizzardMiscFrames = true, SkinBattlefield = true, BlizzardOptions = true, DressUpFrame = true,
 	EditorManagerFrame = true, LootFrame = true, MailFrame = true, MerchantFrame = true, PVPReadyDialog = true,
 	BlizzardQuestFrames = true, SettingsPanel = true, SpellBookFrame = true, TabardFrame = true, TradeFrame = true,
-	WorldMapFrame = true, FriendsFrame = true, HelpFrame = true, LookingForGroupFrames = true, RaidInfoFrame = true,
+	FriendsFrame = true, HelpFrame = true, LookingForGroupFrames = true, RaidInfoFrame = true,
 	PetitionFrame = true,
 	-- load on demand Blizzard addons
 	Blizzard_AchievementUI = true, Blizzard_GuildBankUI = true, Blizzard_TalentUI = true, Blizzard_GlyphUI = true,

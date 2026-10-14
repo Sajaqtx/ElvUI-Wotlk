@@ -27,7 +27,7 @@ Référence pour les porter : l'ElvUI 6.10 de `Addons ressource\ElvUI\ElvUI 3.3.
 - [ ] Personnage (CharacterFrame), Grimoire (SpellBookFrame), Quêtes (BlizzardQuestFrames), Dialogue PNJ (GossipFrame)
 - [ ] Marchand, Courrier, Échange, Butin (LootFrame), Tabard, Cabine d'essayage, Charte de guilde
 - [ ] Amis (FriendsFrame), Recherche de groupe (LookingForGroupFrames), Raid (RaidInfoFrame), Champ de bataille, PvP
-- [ ] Carte du monde, Aide, Options Blizzard, Liste des addons, Fenêtres diverses (BlizzardMiscFrames : menu Échap...)
+- [ ] Aide, Options Blizzard, Liste des addons, Fenêtres diverses (BlizzardMiscFrames : menu Échap...)
 - [ ] Battle.net, Paramètres (SettingsPanel), Éditeur (EditorManagerFrame) : retail, sans doute à retirer
 
 ## Client de test (depuis le 2026-10-14)
@@ -35,6 +35,15 @@ Référence pour les porter : l'ElvUI 6.10 de `Addons ressource\ElvUI\ElvUI 3.3.
 Les tests se font dans une copie du jeu, `C:\Users\soula\Games\WoW 3.3.5 Test ElvUI` (raccourci « WoW 3.3.5 Test
 ElvUI » sur le bureau, connexion à la main). Le client de jeu habituel garde l'ElvUI Rebuffed 6.10 : plus besoin de
 sauvegarder puis remettre l'ancien ElvUI entre deux tests.
+
+## Test en jeu n°7 (2026-10-14, client de test)
+
+Sacs et infobulle des sorts : bons. Carte : s'ouvre.
+
+- [x] `/ec` ne s'ouvrait pas : en 3.3.5 `IsAddOnLoaded` rend `1`/`nil`, et avec DBM chargé l'option « Auto Hide »
+      du suivi d'objectifs recevait `hidden = 1`, refusé par AceConfig (qui rejette alors toutes les options).
+      `C_AddOns.IsAddOnLoaded` rend maintenant un booléen. **(corrigé, à revérifier)**
+- [x] Carte sans skin ElvUI : skin de l'ElvUI 6.10 porté (cadres de la carte 3.3.5). **(corrigé, à revérifier)**
 
 ## Reprise après le test en jeu n°6 (2026-10-04)
 
