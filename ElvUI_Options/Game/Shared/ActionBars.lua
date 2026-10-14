@@ -108,6 +108,7 @@ professionQuality.args.xOffset = ACH:Range(L["X-Offset"], nil, 4, { min = -24, m
 professionQuality.args.yOffset = ACH:Range(L["Y-Offset"], nil, 5, { min = -24, max = 24, step = 1 })
 SharedBarOptions.professionQuality = professionQuality
 
+SharedBarOptions.backdropGroup.args.backdropAlpha = ACH:Range(L["Backdrop Alpha"], L["The opacity of this bar's backdrop."], 0, { min = 0, max = 1, step = 0.01, isPercent = true })
 SharedBarOptions.backdropGroup.args.backdropSpacing = ACH:Range(L["Backdrop Spacing"], L["The spacing between the backdrop and the buttons."], 1, { min = 0, max = 10, step = 1 })
 SharedBarOptions.backdropGroup.args.heightMult = ACH:Range(L["Height Multiplier"], L["Multiply the backdrops height or width by this value. This is usefull if you wish to have more than one bar behind a backdrop."], 2, { min = 1, max = 5, step = 1 })
 SharedBarOptions.backdropGroup.args.widthMult = ACH:Range(L["Width Multiplier"], L["Multiply the backdrops height or width by this value. This is usefull if you wish to have more than one bar behind a backdrop."], 2, { min = 1, max = 5, step = 1 })
@@ -372,6 +373,13 @@ local function CreateBarOptions(num)
 	bar.args.buttonGroup.args.buttonHeight.hidden = function() return E.db.actionbar[barNumber].keepSizeRatio end
 
 	bar.args.backdropGroup.hidden = function() return not E.db.actionbar[barNumber].backdrop end
+	bar.args.backdropGroup.args.backdropAlpha.get = function()
+		local alpha = E.db.actionbar[barNumber].backdropAlpha
+		if alpha then return alpha end
+
+		local color = (E.db.actionbar.transparent and E.media.backdropfadecolor) or E.media.backdropcolor
+		return (E.db.actionbar.transparent and color[4]) or 1
+	end
 
 	bar.args.cooldownGroup.args.enable, bar.args.cooldownGroup.args.textGroup, bar.args.cooldownGroup.args.thresholdGroup = C:GetCooldownConfig('actionbar', E.db.cooldown.actionbar.override[barNumber], P.cooldown.actionbar.override[barNumber])
 
