@@ -30,6 +30,12 @@ Référence pour les porter : l'ElvUI 6.10 de `Addons ressource\ElvUI\ElvUI 3.3.
 - [ ] Carte du monde, Aide, Options Blizzard, Liste des addons, Fenêtres diverses (BlizzardMiscFrames : menu Échap...)
 - [ ] Battle.net, Paramètres (SettingsPanel), Éditeur (EditorManagerFrame) : retail, sans doute à retirer
 
+## Client de test (depuis le 2026-10-14)
+
+Les tests se font dans une copie du jeu, `C:\Users\soula\Games\WoW 3.3.5 Test ElvUI` (raccourci « WoW 3.3.5 Test
+ElvUI » sur le bureau, connexion à la main). Le client de jeu habituel garde l'ElvUI Rebuffed 6.10 : plus besoin de
+sauvegarder puis remettre l'ancien ElvUI entre deux tests.
+
 ## Reprise après le test en jeu n°6 (2026-10-04)
 
 Ancien ElvUI remis en place ; la version testée est dans `Backport Wotlk\_retire du jeu (ElvUI Wotlk test 6)`.
