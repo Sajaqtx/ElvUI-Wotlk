@@ -56,8 +56,8 @@ Sacs et infobulle des sorts : bons. Carte : s'ouvre.
 - [x] Fenêtre des raccourcis clavier : skin de l'ElvUI 6.10 porté (cadres 3.3.5). **(à revérifier)**
 - [x] Import de profil au format « table Lua » (celui que l'ElvUI 6.10 sait exporter) : ElvUI v15 ajoutait une `}`
       de trop. **(à revérifier)**
-- [ ] Profils entre comptes WoW (GOSAJAW -> SAANN) : chaque compte a son propre `ElvUI.lua`, passer par
-      l'export / import.
+- [x] Profils entre comptes WoW (GOSAJAW -> SAANN) : chaque compte a son propre `ElvUI.lua`, passer par
+      l'export / import au format table Lua (fonctionne en jeu ; le format texte de la 6.10 est refusé avec un message clair).
 
 ## Reprise après le test en jeu n°6 (2026-10-04)
 
