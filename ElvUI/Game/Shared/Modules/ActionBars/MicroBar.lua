@@ -521,7 +521,11 @@ function AB:SetupMicroBar()
 	end
 
 	if _G.PVPMicroButtonTexture then
-		_G.PVPMicroButtonTexture:SetAlpha(0)
+		if ElvUI335 then -- ElvUI Wotlk: PVPFrame.lua puts its alpha back (and under the button) on each press
+			_G.PVPMicroButtonTexture:Kill()
+		else
+			_G.PVPMicroButtonTexture:SetAlpha(0)
+		end
 	end
 
 	E:CreateMover(microBar, 'MicrobarMover', L["Micro Bar"], nil, nil, AB.MicroBar_PostDrag, 'ALL,ACTIONBARS', nil, 'actionbar,microbar')

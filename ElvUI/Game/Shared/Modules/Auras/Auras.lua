@@ -738,6 +738,11 @@ function A:Initialize()
 			_G.BuffFrame.numHideableBuffs = 0
 		end
 
+		-- ElvUI Wotlk: the 3.3.5 weapon enchant buttons are a frame of their own (ElvUI 6.10 hid it too)
+		if ElvUI335 and _G.TemporaryEnchantFrame then
+			_G.TemporaryEnchantFrame:Kill()
+		end
+
 		if _G.DebuffFrame then
 			_G.DebuffFrame:Kill()
 		end

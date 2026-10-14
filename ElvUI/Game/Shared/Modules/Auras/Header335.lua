@@ -17,6 +17,7 @@ local CreateFrame = CreateFrame
 local UnitAura = UnitAura
 local UnitHasVehicleUI = UnitHasVehicleUI
 local GetWeaponEnchantInfo = GetWeaponEnchantInfo
+local GetInventoryItemTexture = GetInventoryItemTexture
 local InCombatLockdown = InCombatLockdown
 local CancelUnitBuff = CancelUnitBuff
 local CancelItemTempEnchantment = CancelItemTempEnchantment
@@ -127,6 +128,11 @@ function A:Header335_Update(header)
 				child:SetAttribute('target-slot', slotID)
 				child:Show()
 
+				-- the weapon's icon now: ElvUI sets it with the time left, which 3.3.5 may not have yet (just applied, login)
+				if child.texture then
+					child.texture:SetTexture(GetInventoryItemTexture('player', slotID))
+				end
+
 				-- A.Visibility_OnUpdate reads the expiration of header.enchants[n] at hand n (1 main, 2 off hand)
 				if child.enchantIndex ~= hand then
 					header.enchants[child.enchantIndex] = nil
@@ -222,6 +228,14 @@ function A:Header335_OnUpdate(elapsed)
 		self.elapsedWeapons = 0
 
 		if self:GetAttribute('includeWeapons') then
+			-- the shown enchant buttons, refreshed by A.Visibility_OnUpdate (their time left may come after they show)
+			for hand = 1, 2 do
+				local child = self:GetAttribute('tempEnchant'..hand)
+				if child and child:IsShown() and self.enchants[hand] ~= child then
+					self.enchants[hand] = child
+				end
+			end
+
 			local hasMain, _, _, _, hasOff = GetWeaponEnchantInfo()
 			local weapons = (hasMain and 1 or 0) + (hasOff and 2 or 0)
 			if weapons ~= self.lastWeapons then
