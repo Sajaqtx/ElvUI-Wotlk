@@ -244,6 +244,34 @@ Cosmetic.chatBubblesGroup.args.chatBubbleName = ACH:Toggle(L["Chat Bubble Names"
 General.blizzardImprovements = ACH:Group(L["Blizzard Improvements"], nil, 40)
 local blizz = General.blizzardImprovements.args
 
+-- ElvUI Wotlk: the ElvUI_Enhanced character frame (Game\Wrath\Enhanced335)
+if ElvUI335 then
+	local CHAR = E:GetModule('Enhanced_CharacterFrame')
+	local function charGet(info) return E.db.enhanced.character[info[#info]] end
+	local function charDisabled() return not E.private.enhanced.character.enable end
+
+	blizz.characterFrame = ACH:Group(L["Character Frame"], nil, 5)
+	local character = blizz.characterFrame.args
+	character.enable = ACH:Toggle(L["Enhanced Character Frame"], L["The ElvUI Enhanced character frame: the stats panel at the side, titles and equipment manager tabs."], 1, nil, nil, nil, function() return E.private.enhanced.character.enable end, function(_, value) E.private.enhanced.character.enable = value E.ShowPopup = true end)
+	character.animations = ACH:Toggle(L["Smooth Animations"], nil, 2, nil, nil, nil, charGet, function(_, value) E.db.enhanced.character.animations = value E.ShowPopup = true end, charDisabled)
+
+	character.backgrounds = ACH:Group(L["Paperdoll Backgrounds"], nil, 3, nil, charGet, nil, charDisabled)
+	character.backgrounds.inline = true
+	local backgrounds = character.backgrounds.args
+	for i, info in ipairs({
+		{ 'characterBackground', 'desaturateCharacter', L["Character Background"], 'UpdateCharacterModelFrame' },
+		{ 'petBackground', 'desaturatePet', L["Pet Background"], 'UpdatePetModelFrame' },
+		{ 'inspectBackground', 'desaturateInspect', L["Inspect Background"], 'UpdateInspectModelFrame' },
+		{ 'companionBackground', 'desaturateCompanion', L["Companion Background"], 'UpdateCompanionModelFrame' },
+	}) do
+		local key, desaturate, name, update = info[1], info[2], info[3], info[4]
+		local function set(option, value) E.db.enhanced.character[option[#option]] = value CHAR[update](CHAR) end
+		backgrounds[key] = ACH:Toggle(name, nil, i * 3, nil, nil, nil, nil, set)
+		backgrounds[desaturate] = ACH:Toggle(L["Desaturate"], nil, i * 3 + 1, nil, nil, nil, nil, set, function() return charDisabled() or not E.db.enhanced.character[key] end)
+		backgrounds['spacer'..i] = ACH:Spacer(i * 3 + 2, 'full')
+	end
+end
+
 blizz.general = ACH:Group(L["General"], nil, 1)
 blizz.general.args.hideErrorFrame = ACH:Toggle(L["Hide Quest Progress and Error Text"], L["Hides the yellow quest progress text and red error text at the top of the screen while in combat."], 1)
 blizz.general.args.enhancedPvpMessages = ACH:Toggle(L["Enhanced PVP Messages"], L["Display battleground messages in the middle of the screen."], 2)

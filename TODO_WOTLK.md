@@ -29,6 +29,13 @@ Carte, inspection, raccourcis : branche 3.3.5 dans leur fichier Wrath.
 - [ ] Vérifier en jeu chaque fenêtre (rendu, positions) : personnage, grimoire, talents, quêtes, hauts faits, amis,
       PvP, recherche de donjon, aide, menu Échap, marchand, courrier, échange, métiers, hôtel des ventes...
 
+## Repris d'ElvUI_Enhanced (2026-10-14)
+
+- [x] Fiche personnage d'ElvUI_Enhanced, activée par défaut (`Game\Wrath\Enhanced335\CharacterFrame`, options : Général ->
+      Améliorations Blizzard -> Character Frame). **(à vérifier en jeu)**
+- [x] Boutons « AddOns » (liste des addons d'ElvUI_Enhanced) et « ElvUI » du menu Échap. **(à vérifier en jeu)**
+- [ ] Textes d'enchantement à côté des emplacements : viennent d'ElvUI_ProjectZidras (LibGetEnchant), pas encore repris.
+
 ## Client de test (depuis le 2026-10-14)
 
 Les tests se font dans une copie du jeu, `C:\Users\soula\Games\WoW 3.3.5 Test ElvUI` (raccourci « WoW 3.3.5 Test

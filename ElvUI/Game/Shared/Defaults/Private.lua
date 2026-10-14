@@ -216,3 +216,19 @@ V.actionbar = {
 		stanceBar = false,
 	}
 }
+
+-- ElvUI Wotlk: the ElvUI_Enhanced character frame (Game\Wrath\Enhanced335), on by default
+V.enhanced = {
+	character = {
+		enable = true,
+		collapsed = false,
+		player = {
+			orderName = '',
+			collapsedName = { ITEM_LEVEL = false, BASE_STATS = false, MELEE_COMBAT = false, RANGED_COMBAT = false, SPELL_COMBAT = false, DEFENSES = false, RESISTANCE = false },
+		},
+		pet = {
+			orderName = '',
+			collapsedName = { ITEM_LEVEL = false, BASE_STATS = false, MELEE_COMBAT = false, RANGED_COMBAT = false, SPELL_COMBAT = false, DEFENSES = false, RESISTANCE = false },
+		},
+	},
+}

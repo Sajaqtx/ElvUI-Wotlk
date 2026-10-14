@@ -40,6 +40,21 @@ for index = 1, E.filterMax do
 end
 
 --Core
+-- ElvUI Wotlk: the ElvUI_Enhanced character frame (Game\Wrath\Enhanced335)
+P.enhanced = {
+	character = {
+		animations = false,
+		characterBackground = false,
+		petBackground = false,
+		inspectBackground = false,
+		companionBackground = false,
+		desaturateCharacter = false,
+		desaturatePet = false,
+		desaturateInspect = false,
+		desaturateCompanion = false,
+	},
+}
+
 P.general = {
 	messageRedirect = _G.DEFAULT_CHAT_FRAME:GetName(),
 	smoothingAmount = 0.33, -- AMOUNT should match in general/smoothie file

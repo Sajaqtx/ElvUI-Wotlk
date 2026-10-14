@@ -1166,8 +1166,46 @@ function E:ScaleGameMenu()
 	GameMenuFrame:SetScale(E.db.general.gameMenuScale or 1)
 end
 
+-- ElvUI Wotlk: the 3.3.5 game menu has fixed buttons (no pool, no Layout); Macros (Ratings) > AddOns > ElvUI > Log Out,
+-- laid out after the Log Out button's own OnShow (it anchors itself under Macros or Ratings)
+local function PositionGameMenuButtons335()
+	local logout, button = _G.GameMenuButtonLogout, GameMenuFrame.ElvUI
+	local ratings = _G.GameMenuButtonRatings
+	local above = ratings:IsShown() and ratings or _G.GameMenuButtonMacros
+	local extra = 1
+
+	local addons = _G.ElvUI_AddonListButton
+	if addons then
+		addons:ClearAllPoints()
+		addons:Point('TOP', above, 'BOTTOM', 0, -1)
+		above = addons
+		extra = extra + 1
+	end
+
+	button:ClearAllPoints()
+	button:Point('TOP', above, 'BOTTOM', 0, -1)
+	logout:ClearAllPoints()
+	logout:Point('TOP', button, 'BOTTOM', 0, -16)
+
+	local buttonHeight = logout:GetHeight() + 1
+	local height = (IsMacClient() and 266 or 240) + extra * buttonHeight + 15 + (ratings:IsShown() and buttonHeight or 0)
+	GameMenuFrame:Height(height)
+end
+
 function E:SetupGameMenu()
 	if GameMenuFrame.ElvUI then return end
+
+	if ElvUI335 then
+		local button = CreateFrame('Button', 'ElvUI_GameMenuButton', GameMenuFrame, 'GameMenuButtonTemplate')
+		button:SetFormattedText('%sElvUI|r', E.media.hexvaluecolor)
+		button:SetScript('OnClick', E.ClickGameMenu)
+		button:Size(_G.GameMenuButtonLogout:GetWidth(), _G.GameMenuButtonLogout:GetHeight())
+		GameMenuFrame.ElvUI = button
+		GameMenuFrame.MenuButtons = {}
+
+		_G.GameMenuButtonLogout:HookScript('OnShow', PositionGameMenuButtons335)
+		return
+	end
 
 	local button = CreateFrame('Button', 'ElvUI_GameMenuButton', GameMenuFrame, 'MainMenuFrameButtonTemplate')
 	button:SetScript('OnClick', E.ClickGameMenu)

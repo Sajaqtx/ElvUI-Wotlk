@@ -137,4 +137,5 @@
 	<Script file='Wrath\Skins\Tutorial.lua'/>
 	<Script file='Wrath\Skins\WorldMap.lua'/>
 	<Include file='Wrath\Skins335\Load_Skins335.xml'/>
+	<Include file='Wrath\Enhanced335\Load_Enhanced335.xml'/>
 </Ui>

@@ -1,0 +1,5 @@
+<Ui xmlns='http://www.blizzard.com/wow/ui/'>
+	<Include file='CharacterFrame.xml'/>
+	<Script file='CharacterFrame.lua'/>
+	<Script file='AddonList.lua'/>
+</Ui>

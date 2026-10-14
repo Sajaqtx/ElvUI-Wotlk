@@ -28,7 +28,7 @@ S:AddCallback("Skin_Misc", function()
 		GameMenuButtonQuit,
 		GameMenuButtonContinue,
 
-		ElvUI_MenuButton
+		ElvUI_GameMenuButton -- ElvUI Wotlk: this version's name (ElvUI_MenuButton in 6.10)
 	}
 
 	for i = 1, #menuButtons do

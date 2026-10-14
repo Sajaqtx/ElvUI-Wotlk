@@ -1322,6 +1322,25 @@ function S:HandleRotateButton(frame, width, height, noSize)
 
 	frame:SetTemplate()
 
+	if ElvUI335 then -- ElvUI Wotlk: no rotate atlas on 3.3.5, the button's own arrow cropped as ElvUI 6.10 did
+		local normTex, pushTex, highlightTex = frame:GetNormalTexture(), frame:GetPushedTexture(), frame:GetHighlightTexture()
+		if normTex then
+			normTex:SetInside()
+			normTex:SetTexCoord(0.3, 0.29, 0.3, 0.65, 0.69, 0.29, 0.69, 0.65)
+		end
+		if pushTex then
+			pushTex:SetAllPoints(normTex)
+			pushTex:SetTexCoord(0.3, 0.29, 0.3, 0.65, 0.69, 0.29, 0.69, 0.65)
+		end
+		if highlightTex then
+			highlightTex:SetAllPoints(normTex)
+			highlightTex:SetTexture(1, 1, 1, 0.3)
+		end
+
+		frame.IsSkinned = true
+		return
+	end
+
 	local left = strfind(frame:GetDebugName(), 'Left')
 	local rotate = left and 'common-icon-rotateleft' or 'common-icon-rotateright'
 

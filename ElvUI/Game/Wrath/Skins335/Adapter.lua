@@ -111,6 +111,15 @@ function S610:HandleButtonHighlight(frame, r, g, b, a)
 	highlightTexture:SetVertexColor(r or 0.9, g or 0.9, b or 0.9, a or 0.35)
 end
 
+-- the arrow of a button skinned by HandleNextPrevButton turned to another direction
+function S610:SetNextPrevButtonDirection(frame, arrowDir)
+	local direction = S.ArrowRotation[arrowDir or 'down']
+
+	for _, texture in next, { frame:GetNormalTexture(), frame:GetDisabledTexture(), frame:GetPushedTexture() } do
+		texture:SetRotation(direction)
+	end
+end
+
 --> changes the panel attributes and hit rects wait out combat (the frames are protected)
 local uiPanelQueue, hitRectQueue = {}, {}
 local queueFrame = CreateFrame('Frame')
