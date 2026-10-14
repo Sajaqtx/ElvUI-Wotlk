@@ -73,7 +73,7 @@ Fonctionnent en jeu : plaques de nom, cadres joueur / cible / cible de la cible,
 
 - [x] La carte du monde ne s'ouvre pas : la « petite carte » la rattachait à UIParent, que la carte plein écran
       3.3.5 masque. Carte Blizzard d'origine pour l'instant (+ coordonnées ElvUI). **(corrigé, à revérifier)**
-- [ ] Refaire la « petite carte » d'ElvUI à la manière 3.3.5 (sans reparenter la carte).
+- [x] Carte plein écran trop grande : la « petite carte » de l'ElvUI 6.10 portée (la carte devient un panneau centré de UIParent, réglage « Smaller World Map Scale »). **(à revérifier)**
 - [x] Les sacs s'ouvraient un par un : un seul sac qui suit le sac à dos Blizzard, comme l'ElvUI 6.10. **(corrigé, à revérifier)**
 - [x] `Tooltip.lua:1062` (ID du sort dans l'infobulle) : en 3.3.5 `GetSpell` donne le rang, l'ID vient du lien
       du sort. **(corrigé, à revérifier)**

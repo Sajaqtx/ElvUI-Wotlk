@@ -378,16 +378,83 @@ if ElvUI335 then -- the 3.3.5 map: WorldMapDetailFrame, no scroll container, the
 		end
 	end
 
-	-- the full size map as a window: no blackout, the other panels stay open
-	function M:SetSmallWorldMap()
-		local WorldMapFrame = _G.WorldMapFrame
-		if WorldMapFrame:GetParent() ~= _G.UIParent then
-			WorldMapFrame:SetParent(_G.UIParent)
+	-- the smaller map, as ElvUI 6.10 did it: the full size map becomes a centered panel of UIParent. A panel of the
+	-- 'full' area hides UIParent, so the area is changed each time Blizzard sets the full size (ToggleMapFramerate).
+	function M:ToggleMapFramerate()
+		local size = _G.WORLDMAP_SETTINGS.size
+		if size == _G.WORLDMAP_FULLMAP_SIZE or size == _G.WORLDMAP_QUESTLIST_SIZE then
+			local WorldMapFrame = _G.WorldMapFrame
+			WorldMapFrame:SetAttribute('UIPanelLayout-area', 'center')
+			WorldMapFrame:SetAttribute('UIPanelLayout-allowOtherPanels', true)
+			WorldMapFrame:SetScale(E.global.general.smallerWorldMapScale or 1)
 		end
-		WorldMapFrame:SetAttribute('UIPanelLayout-area', 'center')
-		WorldMapFrame:SetAttribute('UIPanelLayout-allowOtherPanels', true)
+	end
+
+	-- the quest areas (a protected frame in combat): off the map during combat, back after, as ElvUI 6.10 did
+	function M:PLAYER_REGEN_DISABLED()
+		local blob = _G.WorldMapBlobFrame
+		M.blobWasVisible = _G.WorldMapFrame:IsShown() and blob:IsShown()
+		blob:SetParent(nil)
+		blob:ClearAllPoints()
+		blob:SetPoint('TOP', _G.UIParent, 'BOTTOM')
+		blob:Hide()
+		blob.Hide = function() M.blobWasVisible = nil end
+		blob.Show = function() M.blobWasVisible = true end
+		blob.SetFrameLevel = E.noop
+		blob.SetScale = E.noop
+		M.blobNewScale = nil
+	end
+
+	function M:PLAYER_REGEN_ENABLED()
+		local blob, detail = _G.WorldMapBlobFrame, _G.WorldMapDetailFrame
+		blob.SetFrameLevel, blob.SetScale, blob.Hide, blob.Show = nil, nil, nil, nil
+
+		local frameLevel = detail:GetFrameLevel() + 1
+		blob:SetParent(_G.WorldMapFrame)
+		blob:ClearAllPoints()
+		blob:SetPoint('TOPLEFT', detail)
+		blob:SetScale(M.blobNewScale or _G.WORLDMAP_SETTINGS.size)
+		blob:SetFrameLevel(frameLevel)
+		blob:SetFrameLevel(frameLevel) -- twice: above the default limit (256)
+
+		if M.blobWasVisible then blob:Show() end
+
+		local selected = _G.WORLDMAP_SETTINGS.selectedQuest
+		if selected then
+			blob:DrawQuestBlob(selected.questId, false)
+		end
+		if M.blobWasVisible then
+			_G.WorldMapBlobFrame_CalculateHitTranslations()
+			if selected and not selected.completed then
+				blob:DrawQuestBlob(selected.questId, true)
+			end
+		end
+	end
+
+	function M:SetSmallerWorldMap()
+		local WorldMapFrame = _G.WorldMapFrame
+		_G.BlackoutWorld:SetTexture(nil)
+
+		WorldMapFrame:SetParent(_G.UIParent)
+		WorldMapFrame:EnableMouse(false)
 		WorldMapFrame:EnableKeyboard(false)
-		_G.BlackoutWorld:Hide()
+
+		if not GetCVarBool('miniWorldMap') then
+			ShowUIPanel(WorldMapFrame)
+			M:ToggleMapFramerate()
+			HideUIPanel(WorldMapFrame)
+		end
+
+		M:SecureHook('ToggleMapFramerate')
+		hooksecurefunc(_G.WorldMapDetailFrame, 'SetScale', function(_, scale) M.blobNewScale = scale end)
+		_G.DropDownList1:HookScript('OnShow', function(list)
+			if list:GetScale() ~= _G.UIParent:GetScale() then
+				list:SetScale(_G.UIParent:GetScale())
+			end
+		end)
+
+		M:RegisterEvent('PLAYER_REGEN_ENABLED')
+		M:RegisterEvent('PLAYER_REGEN_DISABLED')
 	end
 
 	function M:Initialize()
@@ -400,8 +467,9 @@ if ElvUI335 then -- the 3.3.5 map: WorldMapDetailFrame, no scroll container, the
 			M:PositionCoords()
 		end
 
-		-- the smaller full map (reparented, other panels allowed) kept the map from opening in game on 3.3.5: the stock
-		-- map for now, its own windowed mode (miniWorldMap) still works (TODO_WOTLK.md)
+		if E.global.general.smallerWorldMap then
+			M:SetSmallerWorldMap()
+		end
 
 		WorldMapFrame:HookScript('OnShow', M.WorldMap_OnShow)
 		WorldMapFrame:HookScript('OnHide', M.WorldMap_OnHide)
