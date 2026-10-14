@@ -1867,12 +1867,25 @@ function S:HandleSliderFrame(frame, template, frameLevel)
 		frame:CreateBackdrop(template, nil, nil, nil, nil, nil, nil, true, frameLevel)
 	end
 
-	-- ElvUI Wotlk: a slider skinned then moved (the options) keeps its backdrop above it on 3.3.5, over the thumb
+	-- ElvUI Wotlk: on 3.3.5 a slider's backdrop keeps its frame level when the slider or its widget is moved (the options
+	-- reuse their widgets in other containers) and ends over the thumb: put back under the slider then
 	if ElvUI335 and not frame.backdropLevel335 then
 		frame.backdropLevel335 = true
-		frame:HookScript('OnShow', function(slider)
-			if slider.backdrop then slider.backdrop:SetFrameLevel(max(0, slider:GetFrameLevel() - 1)) end
-		end)
+
+		local function LowerBackdrop()
+			if frame.backdrop then frame.backdrop:SetFrameLevel(max(0, frame:GetFrameLevel() - 1)) end
+		end
+
+		frame:HookScript('OnShow', LowerBackdrop)
+		hooksecurefunc(frame, 'SetParent', LowerBackdrop)
+		hooksecurefunc(frame, 'SetFrameLevel', LowerBackdrop)
+
+		local parent = frame:GetParent()
+		if parent and parent ~= UIParent and parent ~= E.UIParent then -- the widget frame holding it
+			parent:HookScript('OnShow', LowerBackdrop)
+			hooksecurefunc(parent, 'SetParent', LowerBackdrop)
+			hooksecurefunc(parent, 'SetFrameLevel', LowerBackdrop)
+		end
 	end
 
 	local thumb = frame:GetThumbTexture()
