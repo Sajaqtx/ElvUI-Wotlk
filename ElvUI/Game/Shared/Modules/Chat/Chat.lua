@@ -936,11 +936,18 @@ function CH:UpdateEditboxFont(chatFrame)
 end
 
 function CH:PositionButtonFrame(chat)
-	if not chat.buttonFrame then return end
+	-- ElvUI Wotlk: the 3.3.5 one is only named (ChatFrame1ButtonFrame: the scroll buttons), no buttonFrame key
+	local buttonFrame = chat.buttonFrame or (ElvUI335 and _G[chat:GetName()..'ButtonFrame'])
+	if not buttonFrame then return end
 
-	chat.buttonFrame:ClearAllPoints()
-	chat.buttonFrame:SetPoint('TOP', chat, 'BOTTOM', 0, -90000)
-	chat.buttonFrame:SetClipsChildren(true)
+	if ElvUI335 then -- the scroll buttons of the 3.3.5 chat, removed as ElvUI 6.10 did (no SetClipsChildren to hide them away)
+		buttonFrame:Kill()
+		return
+	end
+
+	buttonFrame:ClearAllPoints()
+	buttonFrame:SetPoint('TOP', chat, 'BOTTOM', 0, -90000)
+	buttonFrame:SetClipsChildren(true)
 end
 
 do
@@ -2736,6 +2743,12 @@ function CH:SetupChat()
 
 	if E.Retail then
 		_G.QuickJoinToastButton:Hide()
+	end
+
+	-- ElvUI Wotlk: the 3.3.5 chat menu bubble and friends button beside the chat (ElvUI 6.10 removed them too)
+	if ElvUI335 then
+		if _G.ChatFrameMenuButton then _G.ChatFrameMenuButton:Kill() end
+		if _G.FriendsMicroButton then _G.FriendsMicroButton:Kill() end
 	end
 
 	if not CH.HookSecured then

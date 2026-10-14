@@ -39,4 +39,5 @@
 	<Script file='Trade.lua'/>
 	<Script file='Tradeskill.lua'/>
 	<Script file='Trainer.lua'/>
+	<Script file='WatchFrame.lua'/>
 </Ui>
