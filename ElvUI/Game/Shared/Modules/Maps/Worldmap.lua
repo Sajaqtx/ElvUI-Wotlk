@@ -431,13 +431,23 @@ if ElvUI335 then -- the 3.3.5 map: WorldMapDetailFrame, no scroll container, the
 		end
 	end
 
+	-- the map back on UIParent: also after the size up button (WorldMap_ToggleSizeUp unparents it, area 'full')
+	function M:WorldMap_ToggleSizeUp()
+		if _G.WORLDMAP_SETTINGS.size == _G.WORLDMAP_WINDOWED_SIZE then return end -- the windowed map is Blizzard's
+
+		local WorldMapFrame = _G.WorldMapFrame
+		WorldMapFrame:SetParent(_G.UIParent)
+		WorldMapFrame:EnableMouse(false)
+		WorldMapFrame:EnableKeyboard(false)
+		M:ToggleMapFramerate()
+	end
+
 	function M:SetSmallerWorldMap()
 		local WorldMapFrame = _G.WorldMapFrame
 		_G.BlackoutWorld:SetTexture(nil)
 
-		WorldMapFrame:SetParent(_G.UIParent)
-		WorldMapFrame:EnableMouse(false)
-		WorldMapFrame:EnableKeyboard(false)
+		M:WorldMap_ToggleSizeUp()
+		M:SecureHook('WorldMap_ToggleSizeUp')
 
 		if not GetCVarBool('miniWorldMap') then
 			ShowUIPanel(WorldMapFrame)

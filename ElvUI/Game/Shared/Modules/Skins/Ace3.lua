@@ -156,6 +156,12 @@ function S:Ace3_SkinCheckBox(widget, check, checkbg, highlight)
 
 		checkbg.SetTexture = E.noop
 		highlight.SetTexture = E.noop
+
+		-- ElvUI Wotlk: the widget is skinned under UIParent then moved into the options; on 3.3.5 its children follow
+		-- its frame level and the backdrop ends above the check mark. On the backdrop, as ElvUI 6.10 had it.
+		if ElvUI335 then
+			check:SetParent(checkbg.backdrop)
+		end
 	end
 end
 
