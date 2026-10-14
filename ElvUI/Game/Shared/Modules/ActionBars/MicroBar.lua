@@ -326,7 +326,7 @@ do
 		for _, name in next, AB.MICRO_BUTTONS do
 			local button = _G[name]
 			if button and button:IsShown() then
-				local order = sorting[name]
+				local order = not ElvUI335 and sorting[name] -- ElvUI Wotlk: the list is already in the 3.3.5 bar's order
 				if order then
 					tinsert(unsorted, order, name)
 				else

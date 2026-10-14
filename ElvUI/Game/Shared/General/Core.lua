@@ -1080,8 +1080,9 @@ do
 	local PLAYER_NAME = format('%s-%s', E.myname, E:ShortenRealm(E.myrealm))
 	local function SendRecieve(_, event, prefix, message, _, senderOne, senderTwo)
 		if event == 'CHAT_MSG_ADDON' then
-			local sender = strfind(senderOne, '-') and senderOne or senderTwo
-			if sender == PLAYER_NAME then
+			-- ElvUI Wotlk: 3.3.5 gives the sender's name alone (no realm, no second sender)
+			local sender = (ElvUI335 and senderOne) or (strfind(senderOne, '-') and senderOne or senderTwo)
+			if not sender or sender == PLAYER_NAME or sender == E.myname then
 				return
 			elseif prefix == 'ELVUI_VERSIONCHK' then
 				local ver, msg, inCombat = E.version, tonumber(message), InCombatLockdown()

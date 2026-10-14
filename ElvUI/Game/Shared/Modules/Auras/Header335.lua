@@ -178,6 +178,25 @@ function A:Header335_Update(header)
 
 	HideChildren(header, 'child', shown + 1)
 
+	-- what the player buff header shows, for the in game tests (ElvDB.debug335_auras, read from the SavedVariables)
+	if unit == 'player' and filter == 'HELPFUL' and ElvDB then
+		local record = {}
+		local hasMain, mainExpiration, _, _, hasOff, offExpiration = GetWeaponEnchantInfo()
+		record.weapons = format('main %s %s, off %s %s', tostring(hasMain), tostring(mainExpiration), tostring(hasOff), tostring(offExpiration))
+		for _, key in next, { 'tempEnchant', 'child' } do
+			for i = 1, (key == 'tempEnchant' and 2 or shown) do
+				local child = header:GetAttribute(key..i)
+				if child and child:IsShown() then
+					local texture = child.texture and child.texture:GetTexture()
+					local name = key == 'child' and UnitAura(unit, child:GetID(), filter) or nil
+					record[#record + 1] = format('%s%d id %s enchantIndex %s texture %s name %s', key, i, tostring(child:GetID()),
+						tostring(child.enchantIndex), tostring(texture), tostring(name))
+				end
+			end
+		end
+		ElvDB.debug335_auras = record
+	end
+
 	header:SetWidth(max(header:GetAttribute('minWidth') or 1, 1))
 	header:SetHeight(max(header:GetAttribute('minHeight') or 1, 1))
 end

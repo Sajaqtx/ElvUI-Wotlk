@@ -287,7 +287,7 @@ function E:CreateMoverPopup()
 	local frameName = 'ElvUIMoverPopupWindow'
 	local f = CreateFrame('Frame', frameName, UIParent)
 	f:SetFrameStrata('DIALOG')
-	f:SetFrameLevel(1000)
+	f:SetFrameLevel(ElvUI335 and 99 or 1000) -- ElvUI Wotlk: 3.3.5 caps frame levels (ElvUI 6.10's values)
 	f:SetToplevel(true)
 	f:EnableMouse(true)
 	f:SetMovable(true)
@@ -457,7 +457,7 @@ function E:CreateMoverPopup()
 
 	local dropDown = CreateFrame(classicDropdown and 'Frame' or 'DropdownButton', frameName..'DropDown', f, classicDropdown and 'UIDropDownMenuTemplate' or 'WowStyle1DropdownTemplate')
 	dropDown:Point('BOTTOMRIGHT', lock, 'TOPRIGHT', 2, 0)
-	S:HandleDropDownBox(dropDown, 160)
+	S:HandleDropDownBox(dropDown, 160, nil, ElvUI335) -- ElvUI Wotlk: the 3.3.5 UIDropDownMenu (separate button, text to place)
 
 	dropDown.text = dropDown:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
 	dropDown.text:Point('RIGHT', dropDown.backdrop, 'LEFT', -2, 0)
@@ -481,7 +481,7 @@ function E:CreateMoverPopup()
 	nudgeFrame:SetTemplate('Transparent')
 	nudgeFrame:CreateShadow(5)
 	nudgeFrame.shadow:SetBackdropBorderColor(r, g, b, 0.9)
-	nudgeFrame:SetFrameLevel(500)
+	nudgeFrame:SetFrameLevel(ElvUI335 and 100 or 500) -- ElvUI Wotlk: 3.3.5 caps frame levels (ElvUI 6.10's values)
 	nudgeFrame:EnableMouse(true)
 	nudgeFrame:SetClampedToScreen(true)
 	nudgeFrame:SetPropagateKeyboardInput(true)
@@ -1474,7 +1474,7 @@ function E:ExecuteOptions(msg)
 
 					child:Size(24)
 					child:Point('BOTTOMRIGHT', 1, -1)
-					child:SetFrameLevel(200)
+					child:SetFrameLevel(ElvUI335 and (frame:GetFrameLevel() + 10) or 200) -- ElvUI Wotlk: 3.3.5 caps frame levels
 
 					frame.resizeArrow = child
 				end
@@ -1487,7 +1487,7 @@ function E:ExecuteOptions(msg)
 
 		local close = CreateFrame('Button', nil, frame, 'UIPanelCloseButton')
 		close:SetScript('OnClick', E.Config_CloseClicked)
-		close:SetFrameLevel(1000)
+		close:SetFrameLevel(ElvUI335 and (frame:GetFrameLevel() + 20) or 1000) -- ElvUI Wotlk: 3.3.5 caps frame levels
 		close:Point('TOPRIGHT', unskinned and -12 or 1, unskinned and -12 or 2)
 		close:Size(unskinned and 30 or 32)
 		close.originalClose = frame.originalClose
@@ -1570,7 +1570,7 @@ function E:ExecuteOptions(msg)
 		left.slider.thumb = thumb
 
 		local thumbHolder = CreateFrame('Frame', nil, left)
-		thumbHolder:SetFrameLevel(200)
+		thumbHolder:SetFrameLevel(ElvUI335 and (left:GetFrameLevel() + 10) or 200) -- ElvUI Wotlk: 3.3.5 caps frame levels
 		thumbHolder:SetAllPoints(thumb)
 		thumb.holder = thumbHolder
 
