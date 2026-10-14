@@ -785,6 +785,13 @@ rawset(env, "GetWeaponEnchantInfo", function()
 	return hasMain, mainExpiration, mainCharges, nil, hasOff, offExpiration, offCharges, nil
 end)
 --3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
+--3.3.5 loot slots: texture, name, count, quality, locked; the later order has a currency ID before the quality and the
+--quest fields after (for ElvUI only). LootSlotHasItem is the 3.3.5 LootSlotIsItem.
+rawset(env, "GetLootSlotInfo", function(slot)
+	local texture, item, count, quality, locked = realG.GetLootSlotInfo(slot)
+	return texture, item, count, nil, quality, locked, false, nil, false
+end)
+define("LootSlotHasItem", function(slot) return realG.LootSlotIsItem(slot) and true or false end)
 rawset(env, "GetPetActionInfo", function(index)
 	local name, _, texture, isToken, isActive, autoCastAllowed, autoCastEnabled = realG.GetPetActionInfo(index)
 	return name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, nil

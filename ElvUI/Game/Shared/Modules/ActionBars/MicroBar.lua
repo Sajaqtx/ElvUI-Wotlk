@@ -35,6 +35,14 @@ AB.MICRO_BUTTONS = {
 	'PVPMicroButton' -- no offset required
 }
 
+-- ElvUI Wotlk: the micro buttons of the 3.3.5 client of Rebuffed, in ElvUI 6.10's order (Paragon, Collections and Store are
+-- Rebuffed's, they have an icon of their own over the button art)
+if ElvUI335 then
+	AB.MICRO_BUTTONS = { 'CharacterMicroButton', 'SpellbookMicroButton', 'TalentMicroButton', 'AchievementMicroButton', 'QuestLogMicroButton',
+		'ParagonMicroButton', 'SocialsMicroButton', 'PVPMicroButton', 'LFDMicroButton', 'CollectionsMicroButton', 'StoreMicroButton',
+		'MainMenuMicroButton', 'HelpMicroButton' }
+end
+
 do
 	local meep = 12.125
 	AB.MICRO_OFFSETS = {
@@ -252,6 +260,17 @@ function AB:HandleMicroButton(button, name)
 	end
 
 	AB:UpdateMicroButtonTexture(name)
+
+	-- ElvUI Wotlk: the icons Rebuffed puts over its own buttons, anchored for the stock micro bar (as ElvUI 6.10 did)
+	if ElvUI335 then
+		local icon = _G[name..'Icon']
+		if icon and (name == 'CollectionsMicroButton' or name == 'StoreMicroButton') then
+			icon:ClearAllPoints()
+			icon:SetPoint('CENTER', button, 'CENTER')
+		elseif icon and name == 'ParagonMicroButton' then
+			icon:SetInside(button)
+		end
+	end
 end
 
 function AB:UpdateMicroBarVisibility()

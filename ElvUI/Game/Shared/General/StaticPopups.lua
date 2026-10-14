@@ -1161,7 +1161,8 @@ function E:StaticPopup_ButtonOnClick()
 	local id = self:GetID()
 	local parent = self:GetParent()
 
-	E.StaticPopup_OnClick(parent:GetParent(), id)
+	-- ElvUI Wotlk: the 3.3.5 popup template has its buttons on the popup itself (no ButtonContainer)
+	E.StaticPopup_OnClick(parent.which and parent or parent:GetParent(), id)
 end
 
 function E:StaticPopup_CheckButtonOnClick()

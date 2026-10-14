@@ -109,17 +109,19 @@ function A:Header335_Update(header)
 	local slot = 0
 
 	-- weapon enchants first, as the later header does with includeWeapons
-	local enchants = 0
+	local enchants, usedHands = 0, {}
 	if header:GetAttribute('includeWeapons') and filter == 'HELPFUL' and unit == 'player' then
 		local hasMain, _, _, _, hasOff = GetWeaponEnchantInfo()
 		local template = header:GetAttribute('weaponTemplate')
 
+		-- one button per hand: ElvUI reads the hand from the button name (TempEnchant1 main hand, TempEnchant2 off hand)
 		for hand = 1, 2 do
 			local slotID = (hand == 1 and hasMain and MAIN_HAND_SLOT) or (hand == 2 and hasOff and OFF_HAND_SLOT)
 			if slotID and slot < maxCount then
 				enchants, slot = enchants + 1, slot + 1
+				usedHands[hand] = true
 
-				local child = GetChild(header, 'tempEnchant', enchants, template)
+				local child = GetChild(header, 'tempEnchant', hand, template)
 				child:SetID(slotID)
 				PlaceChild(header, child, slot)
 				child:SetAttribute('target-slot', slotID)
@@ -135,7 +137,10 @@ function A:Header335_Update(header)
 		end
 	end
 
-	HideChildren(header, 'tempEnchant', enchants + 1)
+	for hand = 1, 2 do
+		local child = not usedHands[hand] and header:GetAttribute('tempEnchant'..hand)
+		if child then child:Hide() end
+	end
 
 	wipe(auraList)
 	for index = 1, MAX_AURAS do

@@ -1500,6 +1500,15 @@ function B:Container_OnEvent(event, ...)
 				B:UpdateBagSlots(self, id)
 			else
 				B:DelayedContainer(self, event, id)
+
+				-- ElvUI Wotlk: 3.3.5 has no BAG_UPDATE_DELAYED (sent once the burst of BAG_UPDATE is over): the next frame
+				if ElvUI335 and not self.delayedFlush335 then
+					self.delayedFlush335 = true
+					E:Delay(0, function()
+						self.delayedFlush335 = nil
+						B:UpdateDelayedContainer(self)
+					end)
+				end
 			end
 		end
 	elseif event == 'BAG_UPDATE_DELAYED' then

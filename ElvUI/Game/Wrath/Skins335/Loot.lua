@@ -116,7 +116,7 @@ S:AddCallback("Skin_Loot", function()
 
 		if slot <= numLootItems then
 			if index <= numLootToShow and (LootSlotIsItem(slot) or LootSlotIsCoin(slot)) then
-				local texture, _, _, quality, _, isQuestItem, questId, isActive = GetLootSlotInfo(slot)
+				local texture, _, _, _, quality, _, isQuestItem, questId, isActive = GetLootSlotInfo(slot) -- ElvUI Wotlk: the later order (Compat335_API)
 
 				if texture then
 					local button = _G["LootButton"..index]
