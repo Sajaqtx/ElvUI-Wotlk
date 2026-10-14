@@ -158,7 +158,7 @@ local function OnColorSelect(frame, r, g, b)
 	if not frame:IsVisible() then
 		DelayCall()
 	elseif not delayFunc then
-		delayFunc = ColorPickerFrame.swatchFunc
+		delayFunc = (ElvUI335 and ColorPickerFrame.func) or ColorPickerFrame.swatchFunc -- ElvUI Wotlk: 3.3.5 pickers set func
 		E:Delay(delayWait, DelayCall)
 	end
 end
@@ -167,6 +167,7 @@ function BL:EnhanceColorPicker()
 	if E.OtherAddons.ColorPickerPlus then return end
 
 	ColorPickerFrame.swatchFunc = E.noop -- REMOVE THIS LATER IF WE CAN? errors on Footer.OkayButton
+	if ElvUI335 and not ColorPickerFrame.func then ColorPickerFrame.func = E.noop end -- ElvUI Wotlk: the 3.3.5 OK button calls func
 
 	local Header = ColorPickerFrame.Header or _G.ColorPickerFrameHeader
 	Header:StripTextures()

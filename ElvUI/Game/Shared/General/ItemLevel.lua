@@ -145,7 +145,8 @@ end
 
 -- Credit ls & Acidweb
 function E:CalculateAverageItemLevel(iLevelDB, unit)
-	local total, spec = 0, not E.Classic and GetInspectSpecialization(unit)
+	-- ElvUI Wotlk: Rebuffed has no GetInspectSpecialization, the inspected gear is enough
+	local total, spec = 0, (ElvUI335 and 1) or (not E.Classic and GetInspectSpecialization(unit))
 	if E:IsSecretValue(spec) or (not spec or spec == 0) then return end
 
 	-- Armor

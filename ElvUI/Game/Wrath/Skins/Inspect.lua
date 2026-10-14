@@ -65,8 +65,112 @@ local function UpdateGlyph(frame)
 	end
 end
 
+-- ElvUI Wotlk: the 3.3.5 inspect frame (paper doll, PvP teams, talent tree in the frame), skinned as ElvUI 6.10 did
+local INSPECT_SLOTS = { 'HeadSlot', 'NeckSlot', 'ShoulderSlot', 'BackSlot', 'ChestSlot', 'ShirtSlot', 'TabardSlot', 'WristSlot',
+	'HandsSlot', 'WaistSlot', 'LegsSlot', 'FeetSlot', 'Finger0Slot', 'Finger1Slot', 'Trinket0Slot', 'Trinket1Slot',
+	'MainHandSlot', 'SecondaryHandSlot', 'RangedSlot' }
+
+local function InspectUI335()
+	local InspectFrame = _G.InspectFrame
+	InspectFrame:StripTextures(true)
+	InspectFrame:CreateBackdrop('Transparent')
+	InspectFrame.backdrop:Point('TOPLEFT', 11, -12)
+	InspectFrame.backdrop:Point('BOTTOMRIGHT', -32, 76)
+
+	_G.InspectPVPFrameHonor:SetHitRectInsets(0, 120, 0, 0)
+	_G.InspectPVPFrameArena:SetHitRectInsets(0, 120, 0, 0)
+
+	S:HandleCloseButton(_G.InspectFrameCloseButton, InspectFrame.backdrop)
+	for i = 1, 3 do
+		S:HandleTab(_G['InspectFrameTab'..i])
+	end
+
+	_G.InspectPaperDollFrame:StripTextures()
+	for _, slot in next, INSPECT_SLOTS do
+		local frame, icon = _G['Inspect'..slot], _G['Inspect'..slot..'IconTexture']
+		frame:StripTextures()
+		frame:OffsetFrameLevel(2)
+		frame:CreateBackdrop()
+		frame.backdrop:SetAllPoints()
+		frame:StyleButton()
+		icon:SetTexCoord(unpack(E.TexCoords))
+		icon:SetInside()
+	end
+	hooksecurefunc('InspectPaperDollItemSlotButton_Update', Update_InspectPaperDollItemSlotButton)
+
+	S:HandleRotateButton(_G.InspectModelRotateLeftButton)
+	S:HandleRotateButton(_G.InspectModelRotateRightButton)
+
+	_G.InspectPVPFrame:StripTextures()
+	for i = 1, _G.MAX_ARENA_TEAMS do
+		local team = _G['InspectPVPTeam'..i]
+		team:StripTextures()
+		team:CreateBackdrop('Transparent')
+		team.backdrop:Point('TOPLEFT', 9, -6)
+		team.backdrop:Point('BOTTOMRIGHT', -24, -5)
+	end
+
+	_G.InspectTalentFrame:StripTextures()
+	S:HandleCloseButton(_G.InspectTalentFrameCloseButton, InspectFrame.backdrop)
+
+	for i = 1, _G.MAX_TALENT_TABS do
+		local headerTab = _G['InspectTalentFrameTab'..i]
+		headerTab:StripTextures()
+		headerTab:CreateBackdrop(nil, true)
+		headerTab.backdrop:Point('TOPLEFT', 2, -7)
+		headerTab.backdrop:Point('BOTTOMRIGHT', 1, -1)
+		headerTab:Width(i == 2 and 101 or 102)
+		headerTab.SetWidth = E.noop
+		headerTab:HookScript('OnEnter', FrameBackdrop_OnEnter)
+		headerTab:HookScript('OnLeave', FrameBackdrop_OnLeave)
+	end
+
+	for i = 1, _G.MAX_NUM_TALENTS do
+		local talent = _G['InspectTalentFrameTalent'..i]
+		if talent then
+			local icon, rank = _G['InspectTalentFrameTalent'..i..'IconTexture'], _G['InspectTalentFrameTalent'..i..'Rank']
+			talent:StripTextures()
+			talent:SetTemplate()
+			talent:StyleButton()
+			icon:SetInside()
+			icon:SetTexCoord(unpack(E.TexCoords))
+			icon:SetDrawLayer('ARTWORK')
+			rank:FontTemplate(nil, 12, 'OUTLINE')
+		end
+	end
+
+	_G.InspectHeadSlot:Point('TOPLEFT', 19, -76)
+	_G.InspectHandsSlot:Point('TOPLEFT', 307, -76)
+	_G.InspectMainHandSlot:Point('TOPLEFT', _G.InspectPaperDollFrame, 'BOTTOMLEFT', 121, 131)
+
+	_G.InspectModelFrame:Size(237, 324)
+	_G.InspectModelFrame:Point('TOPLEFT', 63, -76)
+	_G.InspectModelRotateLeftButton:Point('TOPLEFT', 4, -4)
+	_G.InspectModelRotateRightButton:Point('TOPLEFT', _G.InspectModelRotateLeftButton, 'TOPRIGHT', 3, 0)
+
+	local talentScroll = _G.InspectTalentFrameScrollFrame
+	talentScroll:StripTextures()
+	talentScroll:CreateBackdrop('Transparent')
+	talentScroll.backdrop:Point('TOPLEFT', -1, 1)
+	talentScroll.backdrop:Point('BOTTOMRIGHT', 5, -4)
+	talentScroll:Width(298)
+	talentScroll:Point('TOPRIGHT', -66, -77)
+	_G.InspectTalentFramePointsBar:StripTextures()
+
+	_G.InspectFrameTab1:Point('CENTER', InspectFrame, 'BOTTOMLEFT', 54, 62)
+	_G.InspectFrameTab2:Point('LEFT', _G.InspectFrameTab1, 'RIGHT', -15, 0)
+	_G.InspectFrameTab3:Point('LEFT', _G.InspectFrameTab2, 'RIGHT', -15, 0)
+	_G.InspectTalentFrameBackgroundTopLeft:Point('TOPLEFT', 21, -77)
+	_G.InspectTalentFrameTab1:Point('TOPLEFT', 17, -40)
+
+	S:HandleScrollBar(_G.InspectTalentFrameScrollFrameScrollBar)
+	_G.InspectTalentFrameScrollFrameScrollBar:Point('TOPLEFT', talentScroll, 'TOPRIGHT', 8, -18)
+	_G.InspectTalentFrameScrollFrameScrollBar:Point('BOTTOMLEFT', talentScroll, 'BOTTOMRIGHT', 8, 15)
+end
+
 function S:Blizzard_InspectUI()
 	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.inspect) then return end
+	if ElvUI335 then InspectUI335() return end
 
 	local InspectFrame = _G.InspectFrame
 	S:HandleFrame(InspectFrame)

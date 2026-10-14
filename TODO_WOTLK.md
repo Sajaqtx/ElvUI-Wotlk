@@ -59,6 +59,13 @@ Sacs et infobulle des sorts : bons. Carte : s'ouvre.
 - [x] Profils entre comptes WoW (GOSAJAW -> SAANN) : chaque compte a son propre `ElvUI.lua`, passer par
       l'export / import au format table Lua (fonctionne en jeu ; le format texte de la 6.10 est refusé avec un message clair).
 
+## Test en jeu n°9 (2026-10-14)
+
+- [x] Infobulle en inspectant : `GetInspectSpecialization` absent de Rebuffed (niveau d'objet calculé sans). **(à revérifier)**
+- [x] Bouton OK du sélecteur de couleur : la 3.3.5 appelle `ColorPickerFrame.func` (ElvUI ne remplissait que `swatchFunc`). **(à revérifier)**
+- [x] Options des plaques : lecture d'une cvar absente de la 3.3.5. **(à revérifier)**
+- [x] Fenêtre d'inspection : skin de l'ElvUI 6.10 porté, niveau d'objet placé sur `InspectPaperDollFrame`. **(à revérifier)**
+
 ## Reprise après le test en jeu n°6 (2026-10-04)
 
 Ancien ElvUI remis en place ; la version testée est dans `Backport Wotlk\_retire du jeu (ElvUI Wotlk test 6)`.

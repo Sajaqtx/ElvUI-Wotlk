@@ -477,7 +477,7 @@ do
 		elseif key == 'useClassColorNames' then
 			return E.db.nameplates.classColorNames
 		elseif cvarRanges[key] then
-			return tonumber(GetCVar(key)) or 0
+			return tonumber((GetCVar(key))) or 0 -- ElvUI Wotlk: a cvar 3.3.5 lacks returns nothing
 		else
 			return GetCVarBool(key)
 		end

@@ -78,6 +78,8 @@ local function ColorSwatch_OnClick(frame)
 			ColorCallback(self, r, g, b, alpha)
 		end
 
+		ColorPickerFrame.func = ElvUI335 and ColorPickerFrame.swatchFunc or ColorPickerFrame.func -- ElvUI Wotlk: the 3.3.5 picker calls func
+
 		ColorPickerFrame.hasOpacity = self.HasAlpha
 		ColorPickerFrame.opacityFunc = function()
 			local r, g, b = ColorPickerFrame:GetColorRGB()
@@ -120,6 +122,7 @@ local function ColorSwatch_OnClick(frame)
 		ColorPickerFrame.cancelFunc = function()
 			ColorPickerFrame.swatchFunc = nil
 			ColorPickerFrame.opacityFunc = nil
+			if ElvUI335 then ColorPickerFrame.func = function() end end
 
 			ColorCallback(self, r, g, b, a, true)
 		end
