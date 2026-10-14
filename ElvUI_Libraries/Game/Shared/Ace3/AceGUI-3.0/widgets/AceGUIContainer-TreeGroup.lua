@@ -490,6 +490,10 @@ local methods = {
 				end
 			end
 
+			if ElvUI335 then -- ElvUI Wotlk: a reused tree keeps the buttons it made at its old level, under its new frame
+				button:SetFrameLevel(treeframe:GetFrameLevel()+1)
+			end
+
 			UpdateButton(button, line, status.selected == line.uniquevalue, line.hasChildren, groupstatus[line.uniquevalue] )
 			button:Show()
 			buttonnum = buttonnum + 1

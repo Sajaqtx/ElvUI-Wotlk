@@ -59,6 +59,8 @@ function E:CooldownText(cooldown, secondary, hide)
 	end
 
 	cooldown:SetHideCountdownNumbers(hide)
+	cooldown.hideNumbers335 = hide -- ElvUI Wotlk: read by the 3.3.5 timer
+	if hide and cooldown.timer335 then cooldown.timer335:Hide() end
 	cooldown:SetCountdownAbbrevThreshold(db.threshold)
 	cooldown:SetMinimumCountdownDuration(db.minDuration) -- minimum duration above which text will be shown
 
@@ -227,6 +229,85 @@ function E:CooldownSettings(which)
 	end
 end
 
+-- ElvUI Wotlk: a 3.3.5 cooldown draws no countdown numbers (SetHideCountdownNumbers, SetCountdownFormatter... are
+-- later): a text of ElvUI's own, as ElvUI 6.10 had, with this version's settings (font, position, thresholds, colors)
+local Cooldown335_Setup
+if ElvUI335 then
+	local GetTime, floor, ceil, format = GetTime, floor, ceil, format
+	local HOUR, DAY = 3600, 86400
+
+	local function TimeText(db, remaining)
+		local opt = db.thresholdText
+		local colors = opt.colors
+		if remaining < 60 then
+			if opt.expireThreshold ~= -1 and remaining < (opt.expireThreshold or 4) then
+				return format('%.1f', remaining), colors.expiring, 0.05
+			end
+
+			local long = opt.secondsThreshold ~= -1 and remaining >= (opt.secondsThreshold or 11)
+			return format('%d', db.roundup and ceil(remaining) or floor(remaining)), long and colors.minutes or colors.seconds, 0.1
+		elseif remaining < HOUR then
+			return format('%dm', ceil(remaining / 60)), colors.minutes, 1
+		elseif remaining < DAY then
+			return format('%dh', ceil(remaining / HOUR)), colors.hours, 10
+		end
+
+		return format('%dd', ceil(remaining / DAY)), colors.days, 60
+	end
+
+	local function Timer_OnUpdate(timer, elapsed)
+		timer.nextUpdate = timer.nextUpdate - elapsed
+		if timer.nextUpdate > 0 then return end
+
+		local cooldown = timer.cooldown
+		local db = E:CooldownData(cooldown)
+		local remaining = timer.endTime - GetTime()
+		if not db or remaining <= 0 then
+			timer:Hide()
+			return
+		end
+
+		local text, color, nextUpdate = TimeText(db, remaining)
+		cooldown.Text:SetText(text)
+		if color then
+			cooldown.Text:SetTextColor(color.r, color.g, color.b)
+		end
+
+		timer.nextUpdate = nextUpdate
+	end
+
+	local function Cooldown_OnSetCooldown(cooldown, start, duration)
+		local timer = cooldown.timer335
+		local db = E:CooldownData(cooldown)
+		if not db or cooldown.hideNumbers335 or not (start and duration) or start <= 0 or duration <= 0
+		or (duration * 1000) < (db.minDuration or 0) then
+			timer:Hide()
+			return
+		end
+
+		timer.endTime = start + duration
+		timer.nextUpdate = 0
+		timer:Show()
+	end
+
+	function Cooldown335_Setup(cooldown)
+		if cooldown.timer335 then return end
+
+		local timer = CreateFrame('Frame', nil, cooldown)
+		timer:SetAllPoints()
+		timer:SetFrameLevel(cooldown:GetFrameLevel() + 3)
+		timer:SetScript('OnUpdate', Timer_OnUpdate)
+		timer:Hide()
+		timer.cooldown = cooldown
+		cooldown.timer335 = timer
+
+		cooldown.Text = timer:CreateFontString(nil, 'OVERLAY')
+		cooldown.Text:FontTemplate()
+
+		hooksecurefunc(cooldown, 'SetCooldown', Cooldown_OnSetCooldown)
+	end
+end
+
 function E:RegisterCooldown(cooldown, which, override, subgroup)
 	if not which then which = 'global' end
 	local db = E.db.cooldown.enable and E.db.cooldown[which]
@@ -273,6 +354,7 @@ function E:RegisterCooldown(cooldown, which, override, subgroup)
 		end
 	end
 
+	if Cooldown335_Setup then Cooldown335_Setup(cooldown) end -- ElvUI Wotlk: the text and timer of our own
 	E:CooldownInitialize(cooldown) -- extract the blizzard cooldown region
 	E:CooldownUpdate(cooldown) -- init set for the settings
 end

@@ -1094,6 +1094,21 @@ function NP:Initialize()
 		AuraRelay335:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
 	end
 
+	-- ElvUI Wotlk: a profile imported from ElvUI 6.10 has its text styles (CURRENT_PERCENT...) where this version
+	-- reads tags, shown as they are on the plates: their tags
+	if ElvUI335 then
+		local STYLE_TAGS = { CURRENT = '[health:current]', CURRENT_MAX = '[health:current-max]', PERCENT = '[health:percent]',
+			CURRENT_PERCENT = '[health:current-percent]', CURRENT_MAX_PERCENT = '[health:current-max-percent]',
+			DEFICIT = '[health:deficit]' }
+		for _, unitDB in next, NP.db.units do
+			local text = type(unitDB) == 'table' and unitDB.health and unitDB.health.text
+			local tag = text and STYLE_TAGS[text.format]
+			if tag then
+				text.format = tag
+			end
+		end
+	end
+
 	NP.thinBorders = NP.db.thinBorders
 	NP.SPACING = (NP.thinBorders or E.twoPixelsPlease) and 0 or 1
 	NP.BORDER = (NP.thinBorders and not E.twoPixelsPlease) and 1 or 2
