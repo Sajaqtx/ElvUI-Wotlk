@@ -1032,9 +1032,67 @@ function NP:SetStatusBarColor(bar, r, g, b, a)
 	end
 end
 
+-- ElvUI Wotlk: the 3.3.5 client sends UNIT_AURA for target, focus, mouseover... not for the plate units rebuffed.dll
+-- adds (nameplateN): a plate saw its auras only when it was set up again (retarget). Relayed here: UNIT_AURA of another
+-- name of the plate's unit, and the combat log auras of its GUID (the plates not targeted), redrawn on the next frame.
+local AuraRelay335
+if ElvUI335 then
+	local strfind = strfind
+	local UnitIsUnit = UnitIsUnit
+	local dirty = {}
+	local AURA_EVENTS = { SPELL_AURA_APPLIED = true, SPELL_AURA_REMOVED = true, SPELL_AURA_REFRESH = true,
+		SPELL_AURA_APPLIED_DOSE = true, SPELL_AURA_REMOVED_DOSE = true, SPELL_AURA_BROKEN = true, SPELL_AURA_BROKEN_SPELL = true }
+
+	AuraRelay335 = CreateFrame('Frame')
+	AuraRelay335:Hide()
+
+	local function Mark(plate)
+		dirty[plate] = true
+		AuraRelay335:Show()
+	end
+
+	AuraRelay335:SetScript('OnEvent', function(_, event, ...)
+		if event == 'UNIT_AURA' then
+			local unit = ...
+			if not unit or strfind(unit, '^nameplate') then return end
+
+			for plate in next, NP.Plates do
+				if plate.__unit and plate:IsShown() and UnitIsUnit(plate.__unit, unit) then
+					Mark(plate)
+				end
+			end
+		else -- COMBAT_LOG_EVENT_UNFILTERED, the 3.3.5 arguments: timestamp, event, source GUID / name / flags, dest GUID
+			local _, subEvent, _, _, _, destGUID = ...
+			local plate = AURA_EVENTS[subEvent] and destGUID and NP.PlateGUID[destGUID]
+			if plate then
+				Mark(plate)
+			end
+		end
+	end)
+
+	AuraRelay335:SetScript('OnUpdate', function(relay)
+		relay:Hide()
+
+		for plate in next, dirty do
+			dirty[plate] = nil
+
+			local unit = plate.__unit
+			local element = plate.Debuffs or plate.Buffs or plate.Auras
+			if unit and element and element.UpdateAuras then
+				element.UpdateAuras(plate, 'UNIT_AURA', unit)
+			end
+		end
+	end)
+end
+
 function NP:Initialize()
 	if not E.private.nameplates.enable then return end
 	NP.Initialized = true
+
+	if AuraRelay335 then
+		AuraRelay335:RegisterEvent('UNIT_AURA')
+		AuraRelay335:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+	end
 
 	NP.thinBorders = NP.db.thinBorders
 	NP.SPACING = (NP.thinBorders or E.twoPixelsPlease) and 0 or 1
