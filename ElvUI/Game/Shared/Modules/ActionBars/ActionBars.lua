@@ -2020,7 +2020,7 @@ do
 			if _G.MacroFrame.Update then
 				AB:SecureHook(_G.MacroFrame, 'Update', MacroSelectorScrollUpdate)
 			else
-				for i = 1, MAX_ACCOUNT_MACROS do
+				for i = 1, MAX_ACCOUNT_MACROS or _G.MAX_ACCOUNT_MACROS do -- ElvUI Wotlk: 3.3.5 defines it in Blizzard_MacroUI
 					_G['MacroButton'..i]:HookScript('OnEnter', OnEnter)
 				end
 			end

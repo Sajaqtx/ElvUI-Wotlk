@@ -347,7 +347,7 @@ end
 fill("C_AddOns", {
 	GetAddOnMetadata = realG.GetAddOnMetadata,
 	--3.3.5 returns 1 or nil: ElvUI puts the result in option tables, where AceConfig wants a boolean
-	IsAddOnLoaded = function(addon) return realG.IsAddOnLoaded(addon) and true or false end,
+	IsAddOnLoaded = function(addon) local loaded = realG.IsAddOnLoaded(addon) and true or false return loaded, loaded end, -- loaded or loading, loaded
 	LoadAddOn = realG.LoadAddOn,
 	GetNumAddOns = realG.GetNumAddOns,
 	EnableAddOn = realG.EnableAddOn,

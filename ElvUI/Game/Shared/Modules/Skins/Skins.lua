@@ -2469,18 +2469,22 @@ end
 -- nonAddonsToLoad:
 --- this is used for loading skins when our skin init function executes.
 --- please add a given name, non-given-name is specific for elvui core addon.
--- ElvUI Wotlk: the Wrath Classic skins not ported to the 3.3.5 frames yet (they stop half way through on them):
--- those frames keep the stock look until each skin is ported (TODO_WOTLK.md at the root of ELVUI WOTLK)
+-- ElvUI Wotlk: the Wrath Classic skins of windows built otherwise on 3.3.5 (they stop half way through on them). The
+-- ElvUI 6.10 skins of those windows, written for the 3.3.5 frames, replace them (Game\Wrath\Skins335), and the
+-- windows of later clients have no skin to run (Battle.net, Settings, Editor...)
 S.Unported335 = {
 	AddonList = true, BattleNetFrames = true, CharacterFrame = true, GossipFrame = true, GuildRegistrarFrame = true,
 	BlizzardMiscFrames = true, SkinBattlefield = true, BlizzardOptions = true, DressUpFrame = true,
 	EditorManagerFrame = true, LootFrame = true, MailFrame = true, MerchantFrame = true, PVPReadyDialog = true,
 	BlizzardQuestFrames = true, SettingsPanel = true, SpellBookFrame = true, TabardFrame = true, TradeFrame = true,
 	FriendsFrame = true, HelpFrame = true, LookingForGroupFrames = true, RaidInfoFrame = true,
-	PetitionFrame = true,
+	PetitionFrame = true, PetStableFrame = true, TaxiFrame = true, SkinArena = true, SkinArenaRegistrar = true,
+	SkinWorldStateScore = true,
 	-- load on demand Blizzard addons
 	Blizzard_AchievementUI = true, Blizzard_GuildBankUI = true, Blizzard_TalentUI = true, Blizzard_GlyphUI = true,
 	Blizzard_ItemSocketingUI = true, Blizzard_TradeSkillUI = true, Blizzard_TrainerUI = true, Blizzard_TimeManager = true,
+	Blizzard_BarbershopUI = true, Blizzard_Calendar = true, Blizzard_MacroUI = true, Blizzard_RaidUI = true,
+	Blizzard_AuctionHouseUI = true, Blizzard_BattlefieldMap = true, Blizzard_PVPUI = true,
 }
 
 function S:AddCallback(name, func, position) -- arg1: name is 'given name'

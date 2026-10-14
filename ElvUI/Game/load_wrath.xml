@@ -136,4 +136,5 @@
 	<Script file='Wrath\Skins\Transmog.lua'/>
 	<Script file='Wrath\Skins\Tutorial.lua'/>
 	<Script file='Wrath\Skins\WorldMap.lua'/>
+	<Include file='Wrath\Skins335\Load_Skins335.xml'/>
 </Ui>

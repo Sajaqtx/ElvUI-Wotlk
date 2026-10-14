@@ -19,16 +19,15 @@ ElvUI v15.26 (saveur Wrath) sur le client 3.3.5 Frostmourne Rebuffed. Tout ce qu
 - Les fonctions de rebuffed.dll (C_NamePlate, spécialisations...) avec leurs vraies valeurs.
 - Pagination des barres en véhicule / possession / forme, barre de familier, totems.
 
-## Skins pas encore portés aux cadres 3.3.5
+## Skins des fenêtres Blizzard (2026-10-14)
 
-Ces fenêtres gardent l'aspect Blizzard d'origine (liste `S.Unported335` dans `Modules\Skins\Skins.lua`).
-Référence pour les porter : l'ElvUI 6.10 de `Addons ressource\ElvUI\ElvUI 3.3.5\ElvUI\Modules\Skins\Blizzard`.
+Les skins de l'ElvUI 6.10, écrits pour les cadres 3.3.5, sont importés dans `ElvUI\Game\Wrath\Skins335` (39 fenêtres,
+import : `outils\elvui335_skins610.js`, puis corrigés à la main). `Skins335\Adapter.lua` traduit les appels 6.10 vers
+les fonctions de cette version. Les skins Wrath des mêmes fenêtres sont coupés en 3.3.5 (`S.Unported335`).
+Carte, inspection, raccourcis : branche 3.3.5 dans leur fichier Wrath.
 
-- [ ] Personnage (CharacterFrame), Grimoire (SpellBookFrame), Quêtes (BlizzardQuestFrames), Dialogue PNJ (GossipFrame)
-- [ ] Marchand, Courrier, Échange, Butin (LootFrame), Tabard, Cabine d'essayage, Charte de guilde
-- [ ] Amis (FriendsFrame), Recherche de groupe (LookingForGroupFrames), Raid (RaidInfoFrame), Champ de bataille, PvP
-- [ ] Aide, Options Blizzard, Liste des addons, Fenêtres diverses (BlizzardMiscFrames : menu Échap...)
-- [ ] Battle.net, Paramètres (SettingsPanel), Éditeur (EditorManagerFrame) : retail, sans doute à retirer
+- [ ] Vérifier en jeu chaque fenêtre (rendu, positions) : personnage, grimoire, talents, quêtes, hauts faits, amis,
+      PvP, recherche de donjon, aide, menu Échap, marchand, courrier, échange, métiers, hôtel des ventes...
 
 ## Client de test (depuis le 2026-10-14)
 
