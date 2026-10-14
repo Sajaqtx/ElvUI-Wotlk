@@ -856,6 +856,7 @@ local NP_QuestIcon = {
 --NamePlate
 P.nameplates = {
 	clampToScreen = false,
+	clampBorder = 30, -- ElvUI Wotlk: nameplateUpperBorder of rebuffed.dll (its default)
 	fadeIn = true,
 	font = 'PT Sans Narrow',
 	fontOutline = 'OUTLINE',

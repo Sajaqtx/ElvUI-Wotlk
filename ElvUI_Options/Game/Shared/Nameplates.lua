@@ -408,6 +408,8 @@ NamePlates.generalGroup.args.showEnemyCombat = ACH:Select(L["Enemy Combat Toggle
 NamePlates.generalGroup.args.showFriendlyCombat = ACH:Select(L["Friendly Combat Toggle"], L["Control friendly nameplates toggling on or off when in combat."], 3, { DISABLED = L["Disable"], TOGGLE_ON = L["Toggle On While In Combat"], TOGGLE_OFF = L["Toggle Off While In Combat"] }, nil, nil, nil, function(info, value) E.db.nameplates[info[#info]] = value NP:PLAYER_REGEN_ENABLED() end)
 NamePlates.generalGroup.args.spacer1 = ACH:Spacer(5)
 NamePlates.generalGroup.args.clampToScreen = ACH:Toggle(L["Clamp Nameplates"], L["Clamp nameplates to the top of the screen when outside of view."], 7)
+-- ElvUI Wotlk: the top screen border of rebuffed.dll's clamp (nameplateUpperBorder)
+NamePlates.generalGroup.args.clampBorder = ACH:Range(L["Clamp Border"], L["Distance from the top of the screen the clamped nameplates stay under."], 7.5, { min = 0, max = 300, step = 1 }, nil, nil, nil, function() return not E.db.nameplates.clampToScreen end, not ElvUI335)
 NamePlates.generalGroup.args.highlight = ACH:Toggle(L["Hover Highlight"], nil, 8)
 NamePlates.generalGroup.args.fadeIn = ACH:Toggle(L["Alpha Fading"], nil, 9)
 NamePlates.generalGroup.args.spacer2 = ACH:Spacer(10, 'full')

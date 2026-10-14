@@ -138,6 +138,10 @@ function NP:CVarReset()
 end
 
 function NP:ToggleCVar(cvar, enabled)
+	if ElvUI335 and cvar == 'nameplateMotion' then -- ElvUI Wotlk: Rebuffed's stacking (rebuffed.dll)
+		cvar = 'nameplateStacking'
+	end
+
 	E:SetCVar(cvar, enabled and 1 or 0)
 end
 
@@ -156,6 +160,13 @@ function NP:SetCVars()
 
 	if E.Retail then
 		E:SetCVar('nameplateShowFriendlyRealmName', 0)
+	elseif ElvUI335 then
+		-- ElvUI Wotlk: the nameplate CVars of rebuffed.dll: the distance, and the clamp (the plates whose place is above the
+		-- view stay under the top screen border: the world frame extended for them, the border for all of them)
+		E:SetCVar('nameplateDistance', db.loadDistance)
+		NP:ToggleCVar('nameplateExtendWorldFrameHeight', db.clampToScreen)
+		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
+		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
 	else
 		E:SetCVar('nameplateMaxDistance', db.loadDistance)
 	end
