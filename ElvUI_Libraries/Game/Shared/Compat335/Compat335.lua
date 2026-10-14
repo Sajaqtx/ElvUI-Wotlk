@@ -595,10 +595,13 @@ do
 		local handler = handlers[self]
 		if (not handler) then return end
 		local d = direct[self]
-		if (d and d[event] and Passes(self, event, (...))) then
+		local a = aliased[self] and aliased[self][event]
+		if (d and d[event]) then
+			if (Passes(self, event, (...))) then handler(self, event, ...) end
+		elseif (not a) then
+			--registered with the frame's own RegisterEvent (the client method, not ours): it reaches the frame as is
 			handler(self, event, ...)
 		end
-		local a = aliased[self] and aliased[self][event]
 		if (a) then
 			for modern in pairs(a) do
 				if (Passes(self, modern, (...))) then
