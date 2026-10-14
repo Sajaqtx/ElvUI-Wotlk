@@ -318,11 +318,6 @@ function AB:PositionAndSizeBar(barName)
 	AB:FadeBarBlings(bar, bar.mouseover and 0 or db.alpha)
 
 	bar.backdrop:SetShown(db.backdrop)
-
-	-- the opacity of this bar's backdrop alone (Backdrop Alpha), else the backdrop color's own
-	bar.backdrop.customBackdropAlpha = db.backdropAlpha
-	local backdropColor = (AB.db.transparent and E.media.backdropfadecolor) or E.media.backdropcolor
-	bar.backdrop:SetBackdropColor(backdropColor[1], backdropColor[2], backdropColor[3], db.backdropAlpha or (AB.db.transparent and backdropColor[4]) or 1)
 	bar.backdrop:SetFrameStrata(db.frameStrata or 'LOW')
 	bar.backdrop:SetFrameLevel(db.frameLevel - 1)
 	bar.backdrop:ClearAllPoints()
