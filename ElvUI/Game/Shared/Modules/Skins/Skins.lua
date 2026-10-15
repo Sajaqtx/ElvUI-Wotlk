@@ -1845,34 +1845,24 @@ function S:HandleSliderFrame(frame, template, frameLevel)
 	frame:StripTextures()
 	frame:SetThumbTexture(E.Media.Textures.Melli)
 
-	if not frame.backdrop then
+	-- ElvUI Wotlk: the backdrop on the slider itself, as ElvUI 6.10 did. A backdrop frame of its own (CreateBackdrop) has to
+	-- stay under the slider by its frame level, which 3.3.5 does not keep (the options reuse their widgets in other
+	-- containers): it ended over the thumb. The thumb, a region of the slider, always draws over the slider's backdrop
+	if ElvUI335 then
+		if not frame.template then
+			frame:SetTemplate(template)
+		end
+	elseif not frame.backdrop then
 		frame:CreateBackdrop(template, nil, nil, nil, nil, nil, nil, true, frameLevel)
-	end
-
-	-- ElvUI Wotlk: on 3.3.5 a slider's backdrop keeps its frame level when the slider or its widget is moved (the options
-	-- reuse their widgets in other containers) and ends over the thumb: put back under the slider then
-	if ElvUI335 and not frame.backdropLevel335 then
-		frame.backdropLevel335 = true
-
-		local function LowerBackdrop()
-			if frame.backdrop then frame.backdrop:SetFrameLevel(max(0, frame:GetFrameLevel() - 1)) end
-		end
-
-		frame:HookScript('OnShow', LowerBackdrop)
-		hooksecurefunc(frame, 'SetParent', LowerBackdrop)
-		hooksecurefunc(frame, 'SetFrameLevel', LowerBackdrop)
-
-		local parent = frame:GetParent()
-		if parent and parent ~= UIParent and parent ~= E.UIParent then -- the widget frame holding it
-			parent:HookScript('OnShow', LowerBackdrop)
-			hooksecurefunc(parent, 'SetParent', LowerBackdrop)
-			hooksecurefunc(parent, 'SetFrameLevel', LowerBackdrop)
-		end
 	end
 
 	local thumb = frame:GetThumbTexture()
 	thumb:SetVertexColor(1, .82, 0, 0.8)
 	thumb:Size(SIZE-2,SIZE-2)
+
+	if ElvUI335 then
+		thumb:SetDrawLayer('OVERLAY')
+	end
 
 	if orientation == 'VERTICAL' then
 		frame:Width(SIZE)
