@@ -490,6 +490,8 @@ do
 	--no camera distance on the 3.3.5 model: it keeps its default framing
 	add("SetCamDistanceScale", noop, function(o) return o.SetModel ~= nil end)
 	--the 3.3.5 model plays an animation with SetSequence (the same ids: 67 wave, 69 dance...)
+	--11.x FontString:ClearText (AceGUI's Heading on release)
+	add("ClearText", function(self) self:SetText("") end, objectType("FontString"))
 	add("SetAnimation", function(self, id) self:SetSequence(id or 0) end, function(o) return o.SetSequence ~= nil end)
 	--7.0 absolute animation values on the 3.3.5 relative ones: an alpha change, a scale factor (from the region's
 	--alpha and scale when the animation starts, which is what the start value is in ElvUI's animations)

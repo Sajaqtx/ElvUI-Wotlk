@@ -32,7 +32,7 @@ if not AceGUI then return end -- No upgrade needed
 
 -- Lua APIs
 local tinsert, wipe = table.insert, table.wipe
-local select, pairs, next, type = select, pairs, next, type
+local select, pairs, ipairs, next, type, max = select, pairs, ipairs, next, type, max
 local error, assert = error, assert
 local setmetatable, rawget = setmetatable, rawget
 local math_max, math_min, math_ceil = math.max, math.min, math.ceil
@@ -282,11 +282,37 @@ end
 do
 	local WidgetBase = AceGUI.WidgetBase
 
+	-- ElvUI Wotlk: a 3.3.5 frame keeps its level when it is reparented, and so do its children: a widget moved into a
+	-- container from the pool stays under the container's frames (an inline group's border hides a slider's thumb)
+	-- or far over them. The widget is put one level over its container, everything in it moved by the same amount so
+	-- their order inside the widget is kept
+	-- (the levels are all read before any is set: a SetFrameLevel hook can move a child, a slider's backdrop)
+	local function ReadLevels335(frame, list)
+		list[#list + 1] = frame
+		list[frame] = frame:GetFrameLevel()
+		for i = 1, frame:GetNumChildren() do
+			ReadLevels335(select(i, frame:GetChildren()), list)
+		end
+		return list
+	end
+
+	local function ShiftLevels335(frame, delta)
+		local list = ReadLevels335(frame, {})
+		for _, f in ipairs(list) do
+			f:SetFrameLevel(max(0, list[f] + delta))
+		end
+	end
+
 	WidgetBase.SetParent = function(self, parent)
 		local frame = self.frame
 		frame:SetParent(nil)
 		frame:SetParent(parent.content)
 		self.parent = parent
+
+		if ElvUI335 then
+			local delta = parent.content:GetFrameLevel() + 1 - frame:GetFrameLevel()
+			if delta ~= 0 then ShiftLevels335(frame, delta) end
+		end
 	end
 
 	WidgetBase.SetCallback = function(self, name, func)

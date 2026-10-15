@@ -2,7 +2,7 @@ setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local M = E:GetModule('Misc')
 local CH = E:GetModule('Chat')
 
-local format, wipe, pairs, select = format, wipe, pairs, select
+local format, wipe, pairs, select, abs = format, wipe, pairs, select, abs
 local strmatch, strlower, gmatch, gsub = strmatch, strlower, gmatch, gsub
 
 local Ambiguate = Ambiguate
@@ -138,7 +138,12 @@ function M:BubbleFont335(frame)
 	end
 
 	if text and E.private.general.replaceBubbleFont then
-		text:FontTemplate(E.Libs.LSM:Fetch('font', E.private.general.chatBubbleFont), E.private.general.chatBubbleFontSize, E.private.general.chatBubbleFontOutline)
+		-- set again only when the client changed it (a bubble reused for a new line)
+		local font, size = E.Libs.LSM:Fetch('font', E.private.general.chatBubbleFont), E.private.general.chatBubbleFontSize
+		local current, currentSize = text:GetFont()
+		if current ~= font or not currentSize or abs(currentSize - size) > 0.1 then
+			text:FontTemplate(font, size, E.private.general.chatBubbleFontOutline)
+		end
 	end
 
 	return text
@@ -194,11 +199,7 @@ local function ChatBubbleFont335_OnUpdate(eventFrame, elapsed)
 	eventFrame.lastupdate = 0
 
 	for _, frame in pairs(C_ChatBubbles_GetAllChatBubbles()) do
-		if not frame.FontElvUI335 then
-			frame.FontElvUI335 = true
-			M:BubbleFont335(frame)
-			frame:HookScript('OnShow', BubbleFont335_OnShow)
-		end
+		M:BubbleFont335(frame)
 	end
 end
 
@@ -221,6 +222,8 @@ local function ChatBubble_OnUpdate(eventFrame, elapsed)
 		if ElvUI335 then
 			if not frame.IsSkinnedElvUI then
 				M:SkinBubble335(frame)
+			else
+				M:BubbleFont335(frame)
 			end
 		end
 

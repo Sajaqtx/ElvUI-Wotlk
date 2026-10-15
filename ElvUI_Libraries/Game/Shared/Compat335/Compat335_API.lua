@@ -1191,6 +1191,7 @@ end
 do
 	local seen, bubbles = 0, {}
 	local function IsBubble(frame)
+		if (frame.isChatBubble) then return true end -- a bubble ChatBubbleSkin skinned first (its fill emptied)
 		if (frame:GetName()) then return false end
 		for i = 1, frame:GetNumRegions() do
 			local region = select(i, frame:GetRegions())

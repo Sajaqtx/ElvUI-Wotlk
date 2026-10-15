@@ -30,7 +30,7 @@ local methods = {
 
 	["SetText"] = function(self, text)
 		self.label:SetText(text or "")
-		if issecretvalue(text) or (text and text ~= "") then
+		if (issecretvalue and issecretvalue(text)) or (text and text ~= "") then
 			self.left:SetPoint("RIGHT", self.label, "LEFT", -5, 0)
 			self.right:Show()
 		else
