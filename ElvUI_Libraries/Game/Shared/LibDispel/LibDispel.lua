@@ -15,8 +15,8 @@ local Mixin = Mixin
 local ColorMixin = ColorMixin
 local CopyTable = CopyTable
 local CreateFrame = CreateFrame
-local IsSpellInSpellBook = C_SpellBook.IsSpellInSpellBook or IsSpellKnownOrOverridesKnown
-local IsSpellKnown = C_SpellBook.IsSpellKnown or IsPlayerSpell
+local IsSpellInSpellBook = C_SpellBook.IsSpellInSpellBook
+local IsSpellKnown = C_SpellBook.IsSpellKnown
 
 local TBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local Cata = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
@@ -24,6 +24,7 @@ local Wrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 local Mists = WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC
 local Retail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local Classic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local Forever = WOW_PROJECT_ID == WOW_PROJECT_CAMELOT
 
 local function CopyColor(color)
 	-- some addons might replace these tables
@@ -63,8 +64,6 @@ local function GetList(name, data)
 	return list
 end
 
-local BadList = GetList('BadList') -- Spells that backfire when dispelled
-local BlockList = GetList('BlockList') -- Spells blocked from AuraHighlight
 local DispelList = GetList('DispelList') -- List of types the player can dispel
 local DebuffColors = GetList('DebuffTypeColor', _G.DebuffTypeColor)
 
@@ -75,35 +74,10 @@ SetList(DebuffColors, 'Disease', _G.DEBUFF_TYPE_DISEASE_COLOR or { r = 0.6, g = 
 SetList(DebuffColors, 'Poison', _G.DEBUFF_TYPE_POISON_COLOR or { r = 0, g = 0.6, b = 0, a = 1 })
 SetList(DebuffColors, 'Bleed',  _G.DEBUFF_TYPE_BLEED_COLOR or { r = 0.6, g = 0, b = 0.1, a = 1 })
 SetList(DebuffColors, 'Enrage', { r = 0.95, g = 0.37, b = 0.96, a = 1 })
-SetList(DebuffColors, 'BadDispel', { r = 0.05, g = 0.85, b = 0.94, a = 1 })
 SetList(DebuffColors, 'Stealable', { r = 0.93, g = 0.91, b = 0.55, a = 1 })
-
-if Retail then
-	-- Bad to dispel spells
-	BadList[34914] = "Vampiric Touch"		-- horrifies
-	BadList[233490] = "Unstable Affliction"	-- silences
-
-	-- Block spells from AuraHighlight
-	BlockList[140546] = "Fully Mutated"
-	BlockList[136184] = "Thick Bones"
-	BlockList[136186] = "Clear Mind"
-	BlockList[136182] = "Improved Synapses"
-	BlockList[136180] = "Keen Eyesight"
-	BlockList[105171] = "Deep Corruption"
-	BlockList[108220] = "Deep Corruption"
-	BlockList[116095] = "Disable" -- slow
-end
 
 function lib:GetDebuffTypeColor()
 	return DebuffColors
-end
-
-function lib:GetBadList()
-	return BadList
-end
-
-function lib:GetBlockList()
-	return BlockList
 end
 
 function lib:GetMyDispelTypes()
@@ -124,7 +98,7 @@ do
 		[89808] = "Singe"
 	}
 
-	local vanilla = Classic or TBC or Wrath
+	local vanilla = Classic or TBC or Wrath or Forever
 	if vanilla then
 		WarlockPetSpells[19505] = "Devour Magic Rank 1"
 		WarlockPetSpells[19731] = "Devour Magic Rank 2"
@@ -149,13 +123,25 @@ do
 		end
 	end
 
+	local ranksUpdate
 	local function UpdateDispels(_, event, arg1)
-		if event == 'CHARACTER_POINTS_CHANGED' and (not arg1 or arg1 > 0) then
-			return -- Not interested in gained points from leveling
+		if event == 'CHARACTER_POINTS_CHANGED' then
+			if not arg1 or arg1 > 0 then
+				return -- Not interested in gained points from leveling
+			end
+		elseif event == 'SPELLS_CHANGED' then
+			if ranksUpdate then
+				ranksUpdate = nil
+
+				return
+			end
 		end
 
-		-- this will fix a problem where spells dont show as existing because they are 'hidden'
-		local undoRanks = (vanilla and GetCVar('ShowAllSpellRanks') ~= '1') and SetCVar('ShowAllSpellRanks', '1')
+		local ranksUndo -- this will fix a problem where spells dont show as existing because they are 'hidden'
+		if vanilla and GetCVar('ShowAllSpellRanks') ~= '1' then
+			ranksUpdate = true -- keep this out of an infinite loop
+			ranksUndo = SetCVar('ShowAllSpellRanks', '1')
+		end
 
 		if event == 'UNIT_PET' then
 			DispelList.Magic = CheckPetSpells()
@@ -216,7 +202,7 @@ do
 
 		lib:ListUpdated()
 
-		if undoRanks then
+		if ranksUndo then
 			SetCVar('ShowAllSpellRanks', '0')
 		end
 	end

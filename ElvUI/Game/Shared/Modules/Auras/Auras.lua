@@ -15,6 +15,7 @@ local GetAuraDuration = C_UnitAuras.GetAuraDuration
 local GetInventoryItemQuality = GetInventoryItemQuality
 local GetInventoryItemTexture = GetInventoryItemTexture
 local GetWeaponEnchantInfo = GetWeaponEnchantInfo
+local GetTemporaryEnchantmentInfo = C_PaperDollInfo.GetTemporaryEnchantmentInfo
 local RegisterAttributeDriver = RegisterAttributeDriver
 local SecureHandlerSetFrameRef = SecureHandlerSetFrameRef
 local RegisterStateDriver = RegisterStateDriver
@@ -25,6 +26,7 @@ local UIParent = UIParent
 local GetTime = GetTime
 
 local StatusBarInterpolation = Enum.StatusBarInterpolation
+local INVSLOT_MAINHAND, INVSLOT_OFFHAND, INVSLOT_RANGED = INVSLOT_MAINHAND, INVSLOT_OFFHAND, INVSLOT_RANGED
 
 local Masque = E.Masque
 local MasqueGroupBuffs = Masque and Masque:Group('ElvUI', 'Buffs')
@@ -124,7 +126,7 @@ end
 
 function A:UpdateStatusBar(button)
 	local db = A.db[button.auraType]
-	if E.Retail and not button.enchantIndex then
+	if E.Modern and not button.enchantIndex then
 		local color = db.barColorGradient and button.auraDuration and button.auraDuration:EvaluateRemainingPercent(E.Curves.Color.Default)
 		if color then
 			A:SetStatusBarColor(button.statusBar, color.r, color.g, color.b)
@@ -251,7 +253,7 @@ function A:UpdateIcon(button, index)
 	end
 
 	if button.statusBar then
-		if E.Retail then
+		if E.Modern then
 			button.statusBar.smoothing = (db.smoothbars and StatusBarInterpolation.ExponentialEaseOut) or StatusBarInterpolation.Immediate or nil
 		else
 			E:SetSmoothing(button.statusBar, db.smoothbars)
@@ -307,7 +309,7 @@ function A:UpdateAura(button, index)
 	local colorDebuffs, color = button.filter == 'HARMFUL' and A.db.colorDebuffs
 	if not colorDebuffs then -- quick exit
 		color = E.db.general.bordercolor
-	elseif E.Retail then
+	elseif E.Modern then
 		local curve = GetAuraDispelTypeColor and E.Curves.Color.Auras.debuffs
 		color = (curve and GetAuraDispelTypeColor(unitToken, data.auraInstanceID, curve)) or E.db.general.bordercolor
 	else
@@ -317,12 +319,22 @@ function A:UpdateAura(button, index)
 	button:SetBackdropBorderColor(color.r, color.g, color.b)
 	button.statusBar.backdrop:SetBackdropBorderColor(color.r, color.g, color.b)
 
-	if E.Retail then
+	if E.Modern then
 		A:UpdateButton(button, duration, expiration, modRate)
 	elseif duration and expiration then
 		A:SetAuraTime(button, expiration, duration, modRate)
 	else
 		A:ClearAuraTime(button)
+	end
+end
+
+function A:GetEnchantExpirations()
+	if GetTemporaryEnchantmentInfo then
+		local main, offhand, ranged = GetTemporaryEnchantmentInfo(INVSLOT_MAINHAND), GetTemporaryEnchantmentInfo(INVSLOT_OFFHAND), GetTemporaryEnchantmentInfo(INVSLOT_RANGED)
+		return main and main.remainingTimeMs, offhand and offhand.remainingTimeMs, ranged and ranged.remainingTimeMs
+	else
+		local _, main, _, _, _, offhand, _, _, _, ranged = GetWeaponEnchantInfo()
+		return main, offhand, ranged
 	end
 end
 
@@ -384,7 +396,7 @@ function A:UpdateButton(button, duration, expiration, modRate)
 
 	A:UpdateTime(button, duration, expiration, modRate)
 
-	if E.Retail and not button.enchantIndex then -- midnight auras
+	if E.Modern and not button.enchantIndex then -- midnight auras
 		local auraDuration = button.unit and GetAuraDuration(button.unit, button.auraInstanceID)
 		button.auraDuration = auraDuration or nil
 
@@ -406,7 +418,7 @@ function A:UpdateButton(button, duration, expiration, modRate)
 		end
 
 		button.statusBar:SetAlpha(showBar or 0)
-	elseif not E.Retail or button.enchantIndex then
+	elseif not E.Modern or button.enchantIndex then
 		local hasCooldown = duration > 0
 		local barShown = db.barShow and (hasCooldown or (db.barNoDuration and duration == 0))
 		button.statusBar:SetAlpha(barShown and 1 or 0)
@@ -437,7 +449,7 @@ function A:UpdateTime(button, duration, expiration, modRate)
 
 	if button.timeLeft < 0.1 then
 		A:ClearAuraTime(button)
-	elseif not E.Retail and duration > 0 then
+	elseif not E.Modern and duration > 0 then
 		A:UpdateFlash(button)
 	end
 end
@@ -528,7 +540,7 @@ function A:Visibility_OnUpdate(elapsed)
 	if header.elapsedEnchants and header.elapsedEnchants > 0.5 then
 		local index, enchant = next(header.enchants)
 		if index then
-			local _, main, _, _, _, offhand, _, _, _, ranged = GetWeaponEnchantInfo()
+			local main, offhand, ranged = A:GetEnchantExpirations()
 			while enchant do
 				A:UpdateTempEnchant(enchant, enchant:GetID(), (index == 1 and main) or (index == 2 and offhand) or (index == 3 and ranged))
 
@@ -563,7 +575,7 @@ function A:UpdateHeader(header)
 
 	local minWidth, minHeight, xOffset, yOffset, wrapXOffset, wrapYOffset
 
-	if E.Retail then
+	if E.Modern then
 		header.barDB = db
 		header.width = width
 		header.height = height
@@ -572,6 +584,7 @@ function A:UpdateHeader(header)
 		header.lineSpacing = db.verticalSpacing
 		header.keepSizeRatio = db.keepSizeRatio
 		header.growthDirection = db.growthDirection
+		header.smoothbars = db.smoothbars
 		header.useStatusbar = db.barShow
 		header.barColor = db.barColor
 		header.numAuras = db.wrapAfter
@@ -626,6 +639,7 @@ function A:UpdateHeader(header)
 			wrapYOffset = 0
 		end
 
+		header:SetAttribute('_ignore', true) -- hold the header update, the last attribute below runs it once
 		header:SetAttribute('config-width', width)
 		header:SetAttribute('config-height', height)
 		header:SetAttribute('template', 'ElvUIAuraTemplate')
@@ -637,12 +651,12 @@ function A:UpdateHeader(header)
 		header:SetAttribute('wrapAfter', db.wrapAfter)
 		header:SetAttribute('point', DIRECTION_TO_POINT[db.growthDirection])
 		header:SetAttribute('initialConfigFunction', A.AttributeInitialConfig)
-
 		header:SetAttribute('minWidth', minWidth)
 		header:SetAttribute('minHeight', minHeight)
 		header:SetAttribute('xOffset', xOffset)
 		header:SetAttribute('yOffset', yOffset)
 		header:SetAttribute('wrapXOffset', wrapXOffset)
+		header:SetAttribute('_ignore', nil)
 		header:SetAttribute('wrapYOffset', wrapYOffset)
 
 		header:ForEachChild(A.UpdateChild, db)
@@ -707,14 +721,17 @@ function A:CreateAuraHeader(filter)
 	header.visibility:SetScript('OnEvent', A.Visibility_OnEvent) -- dont put this on the main frame
 	header.visibility.frame = header
 
-	if E.Retail then
+	if E.Modern then
 		header.visibility:RegisterEvent('WEAPON_ENCHANT_CHANGED')
 	end
 
 	RegisterAttributeDriver(header, 'unit', '[vehicleui] vehicle; player')
-	SecureHandlerSetFrameRef(header.visibility, 'AuraHeader', header)
-	RegisterStateDriver(header.visibility, 'customVisibility', '[petbattle] 0;1')
-	header.visibility:SetAttribute('_onstate-customVisibility', A.AttributeCustomVisibility)
+
+	if E.Mists then -- only client with this header that has pet battles
+		SecureHandlerSetFrameRef(header.visibility, 'AuraHeader', header)
+		RegisterStateDriver(header.visibility, 'customVisibility', '[petbattle] 0;1')
+		header.visibility:SetAttribute('_onstate-customVisibility', A.AttributeCustomVisibility)
+	end
 
 	if filter == 'HELPFUL' then
 		header:SetAttribute('consolidateDuration', -1)
@@ -734,7 +751,7 @@ function A:Initialize()
 	if E.private.auras.disableBlizzard then
 		_G.BuffFrame:Kill()
 
-		if E.Retail then -- edit mode error
+		if E.Modern then -- edit mode error
 			_G.BuffFrame.numHideableBuffs = 0
 		end
 
@@ -753,8 +770,9 @@ function A:Initialize()
 	local mapOffsetX = 6 + E.Border
 
 	if E.private.auras.buffsHeader then
-		if E.Retail then
+		if E.Modern then
 			local buff = E:Auras_Create(E.UIParent, nil, 'ElvUIPlayerBuffs')
+			buff.allowEnable = true
 			buff.auraType = 'buffs'
 			buff.unit = 'player'
 			buff.filters = {}
@@ -777,15 +795,16 @@ function A:Initialize()
 
 		A:UpdateHeader(A.BuffFrame)
 
-		if E.Retail then -- keep below UpdateHeader
+		if E.Modern then -- keep below UpdateHeader
 			E:Auras_AddEnchantments(A.BuffFrame)
 			A.BuffFrame.hasEnchantments = true
 		end
 	end
 
 	if E.private.auras.debuffsHeader then
-		if E.Retail then
+		if E.Modern then
 			local debuff = E:Auras_Create(E.UIParent, nil, 'ElvUIPlayerDebuffs')
+			debuff.allowEnable = true
 			debuff.auraType = 'debuffs'
 			debuff.unit = 'player'
 			debuff.filters = {}
