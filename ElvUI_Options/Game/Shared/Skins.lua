@@ -142,6 +142,27 @@ elseif E.Classic then
 	toggles.battlefield = L["Battlefield"]
 end
 
+-- ElvUI Wotlk: the windows of the 3.3.5 client and their skins (ElvUI 6.10's, GameWrathSkins335): no toggle for
+-- the windows of later clients, one for each 3.3.5 window skinned
+if ElvUI335 then
+	wipe(toggles)
+	for key, label in next, {
+		achievement = L["ACHIEVEMENTS"], alertframes = L["Alert Frames"], arena = L["Arena"], arenaRegistrar = L["Arena Registrar"],
+		auctionhouse = L["Auction Frame"], bags = L["Bags"], barber = L["BARBERSHOP"], bgmap = L["BG Map"], bgscore = L["BG Score"],
+		binding = L["KEY_BINDINGS"], blizzardOptions = L["Interface Options"], calendar = L["Calendar Frame"], character = L["Character Frame"],
+		debug = L["Debug Tools"], dressingroom = L["DRESSUP_FRAME"], friends = format('%s & %s', L["Friends"], L["Guild"]), gbank = L["Guild Bank"],
+		gmChat = L["GM Chat"], gossip = L["Gossip Frame"], guildregistrar = L["Guild Registrar"], help = L["Help Frame"], inspect = L["Inspect"],
+		lfg = L["LFG_TITLE"], loot = L["Loot Frame"], macro = L["MACROS"], mail = L["Mail Frame"], merchant = L["Merchant Frame"],
+		mirrorTimers = L["Mirror Timers"], misc = L["Misc Frames"], objectiveTracker = L["OBJECTIVES_TRACKER_LABEL"], petition = L["Petition Frame"],
+		pvp = L["PvP Frames"], quest = L["Quest Frames"], raid = L["Raid Frame"], socket = L["Socket Frame"], spellbook = L["SPELLBOOK"],
+		stable = L["Stable"], tabard = L["Tabard Frame"], talent = L["TALENTS"], taxi = L["FLIGHT_MAP"], timemanager = L["TIMEMANAGER_TITLE"],
+		tooltip = L["Tooltip"], trade = L["TRADE"], tradeskill = L["TRADESKILLS"], trainer = L["Trainer Frame"], tutorials = L["Tutorials"],
+		worldmap = L["WORLD_MAP"],
+	} do
+		toggles[key] = label
+	end
+end
+
 local function ToggleSkins(value)
 	E.ShowPopup = true
 
