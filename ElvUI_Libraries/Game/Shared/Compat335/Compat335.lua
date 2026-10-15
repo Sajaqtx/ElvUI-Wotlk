@@ -443,6 +443,16 @@ do
 
 	add("IsForbidden", returnFalse)
 	add("HasSecretValues", returnFalse) -- 12.x secret values: none on 3.3.5
+	--a texture's own scale (later clients): its size scaled from the one it had (the nameplate target arrows)
+	local isTexture = objectType("Texture")
+	add("SetScale", function(self, scale)
+		scale = scale or 1
+		if (not self.__baseWidth335) then self.__baseWidth335, self.__baseHeight335 = self:GetWidth(), self:GetHeight() end
+		self.__scale335 = scale
+		self:SetWidth(self.__baseWidth335 * scale)
+		self:SetHeight(self.__baseHeight335 * scale)
+	end, isTexture)
+	add("GetScale", function(self) return self.__scale335 or 1 end, isTexture)
 	--11.x: the frame is the one under the mouse (3.3.5 GetMouseFocus)
 	add("IsMouseMotionFocus", function(self) return realG.GetMouseFocus() == self end, isFrame)
 	add("SetIgnoreParentAlpha", noop, isRegionOrFrame)

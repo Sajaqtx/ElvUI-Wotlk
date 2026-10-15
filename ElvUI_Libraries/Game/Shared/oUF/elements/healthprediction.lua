@@ -66,6 +66,21 @@ local UnitDamageAbsorbClampMode = Enum.UnitDamageAbsorbClampMode
 local UnitIncomingHealClampMode = Enum.UnitIncomingHealClampMode
 local UnitHealAbsorbClampMode = Enum.UnitHealAbsorbClampMode
 
+-- ElvUI Wotlk: a 3.3.5 status bar at 0 draws its texture at full size (a texture of no width is not "empty" there), and a
+-- bar anchored to its end lands a whole bar further (the nameplates chain them: heals, others' heals, absorbs). An empty
+-- bar is hidden and kept at a value too small to draw, so that its end stays where it starts
+local function SetBarValue(bar, value, maxHealth)
+	if ElvUI335 then bar:SetMinMaxValues(0, maxHealth or 1) end
+
+	if ElvUI335 and not ((value or 0) > 0) then
+		bar:SetValue((maxHealth or 1) * 1e-6)
+		bar:Hide()
+	elseif (value or 0) > 0 or not ElvUI335 then
+		bar:SetValue(value)
+		bar:Show()
+	end
+end
+
 local function UpdateSize(self, event, unit)
 	local element = self.HealthPrediction
 
@@ -223,34 +238,30 @@ local function Update(self, event, unit)
 
 		if(element.healingPlayer) then
 			element.healingPlayer:SetMinMaxValues(0, maxHealth)
-			element.healingPlayer:SetValue(myIncomingHeal)
-			element.healingPlayer:Show()
+			SetBarValue(element.healingPlayer, myIncomingHeal, maxHealth)
 		end
 
 		if(element.healingOther) then
 			element.healingOther:SetMinMaxValues(0, maxHealth)
-			element.healingOther:SetValue(otherIncomingHeal)
-			element.healingOther:Show()
+			SetBarValue(element.healingOther, otherIncomingHeal, maxHealth)
 		end
 
 		-- dont refresh and show an empty bar on every health event, absorbs are always 0 below Mists
 		if element.damageAbsorb then
 			if (absorb > 0 or element.damageAbsorb:GetValue() > 0) then
 				element.damageAbsorb:SetMinMaxValues(0, maxHealth)
-				element.damageAbsorb:SetValue(absorb)
-				element.damageAbsorb:Show()
+				SetBarValue(element.damageAbsorb, absorb, maxHealth)
 			else
-				element.damageAbsorb:Hide()
+				SetBarValue(element.damageAbsorb, 0, maxHealth)
 			end
 		end
 
 		if element.healAbsorb then
 			if (healAbsorb > 0 or element.healAbsorb:GetValue() > 0) then
 				element.healAbsorb:SetMinMaxValues(0, maxHealth)
-				element.healAbsorb:SetValue(healAbsorb)
-				element.healAbsorb:Show()
+				SetBarValue(element.healAbsorb, healAbsorb, maxHealth)
 			else
-				element.healAbsorb:Hide()
+				SetBarValue(element.healAbsorb, 0, maxHealth)
 			end
 		end
 
