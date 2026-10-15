@@ -142,11 +142,16 @@ function NP:ToggleCVar(cvar, enabled)
 		cvar = 'nameplateStacking'
 
 		-- its clamp (upper border) only works with the stacking on: for overlapping plates with the clamp, the stacking stays
-		-- on with no spacing (no plate is ever pushed aside); the stacked plates get Rebuffed's spacing back
-		local clamp = NP.db and NP.db.clampToScreen
+		-- on with no spacing (no plate is ever pushed aside). The stacked plates are spaced as on MoP: the plate size times
+		-- Overlap Horizontal / Vertical (nameplateOverlapH / V there), in Rebuffed's spacing CVars
+		local db = NP.db
+		local clamp = db and db.clampToScreen
 		local overlap = clamp and not enabled
-		E:SetCVar('nameplateXSpace', overlap and 0 or 130)
-		E:SetCVar('nameplateYSpace', overlap and 0 or 20)
+		local size = db and db.clickSize
+		local xSpace = floor((size and size.enemyWidth or 150) * (db and db.overlapH or 0.8) + 0.5)
+		local ySpace = floor((size and size.enemyHeight or 30) * (db and db.overlapV or 1.1) + 0.5)
+		E:SetCVar('nameplateXSpace', overlap and 0 or xSpace)
+		E:SetCVar('nameplateYSpace', overlap and 0 or ySpace)
 		enabled = enabled or clamp
 	end
 
@@ -176,7 +181,7 @@ function NP:SetCVars()
 		NP:ToggleCVar('nameplateExtendWorldFrameHeight', db.clampToScreen)
 		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
-		if db.clampToScreen then NP:EnviromentConditionals() end -- the stacking the clamp needs, spaced or not (overlap)
+		NP:EnviromentConditionals() -- the stacking and its spacing (Overlap H / V), the one the clamp needs
 	else
 		E:SetCVar('nameplateMaxDistance', db.loadDistance)
 	end
