@@ -131,7 +131,12 @@ local function BuildGuildTable()
 		local name, rank, rankIndex, level, _, zone, note, officerNote, connected, memberstatus, className, _, _, isMobile, _, _, guid = GetGuildRosterInfo(i)
 		if not name then return end
 
-		local statusInfo = isMobile and mobilestatus[memberstatus] or onlinestatus[memberstatus]
+		-- ElvUI Wotlk: the 3.3.5 status is a string ("<AFK>", "<DND>", ""), later ones a number (0, 1 AFK, 2 DND)
+		if ElvUI335 and type(memberstatus) ~= 'number' then
+			memberstatus = (memberstatus == CHAT_FLAG_DND and 2) or ((memberstatus and memberstatus ~= '') and 1) or 0
+		end
+
+		local statusInfo = (isMobile and mobilestatus[memberstatus] or onlinestatus[memberstatus]) or ''
 		zone = (isMobile and not connected) and REMOTE_CHAT or zone
 
 		if connected or isMobile then
