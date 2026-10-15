@@ -1,15 +1,20 @@
 setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local NP = E:GetModule('NamePlates')
 
-local hooksecurefunc = hooksecurefunc
 local UnitClass = UnitClass
 
 local classIcon = [[Interface\WorldStateFrame\Icons-Classes]]
 
-function NP:Update_PortraitBackdrop()
-	if self.backdrop then
-		self.backdrop:SetShown(self:IsShown())
-	end
+function NP:Portrait_BackdropShow()
+	if not self.backdrop then return end
+
+	self.backdrop:Show()
+end
+
+function NP:Portrait_BackdropHide()
+	if not self.backdrop then return end
+
+	self.backdrop:Hide()
 end
 
 function NP:Portrait_PostUpdate(unit, hasStateChanged)
@@ -41,14 +46,16 @@ end
 function NP:Construct_Portrait(nameplate)
 	local Portrait = nameplate.RaisedElement:CreateTexture(nameplate.frameName..'Portrait', 'OVERLAY', nil, 2)
 	Portrait:CreateBackdrop(nil, nil, nil, nil, nil, true, true)
+	Portrait.backdrop:Hide()
+
 	Portrait:SetTexCoord(.18, .82, .18, .82)
 	Portrait:SetSize(28, 28)
 	Portrait:Hide()
 
-	Portrait.PostUpdate = NP.Portrait_PostUpdate
+	Portrait:HookScript('OnShow', NP.Portrait_BackdropShow)
+	Portrait:HookScript('OnHide', NP.Portrait_BackdropHide)
 
-	hooksecurefunc(Portrait, 'Hide', NP.Update_PortraitBackdrop)
-	hooksecurefunc(Portrait, 'Show', NP.Update_PortraitBackdrop)
+	Portrait.PostUpdate = NP.Portrait_PostUpdate
 
 	return Portrait
 end

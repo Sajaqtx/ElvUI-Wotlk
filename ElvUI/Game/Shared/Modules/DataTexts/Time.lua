@@ -293,7 +293,7 @@ local function OnClick(_, btn)
 	if btn == 'RightButton' then
 		if not _G.TimeManagerFrame and _G.TimeManager_LoadUI then _G.TimeManager_LoadUI() end -- ElvUI Wotlk: load on demand on 3.3.5
 		ToggleFrame(_G.TimeManagerFrame)
-	elseif E.Retail or E.Mists or E.Wrath then
+	elseif E.Modern or E.Mists or E.Wrath then
 		_G.GameTimeFrame:Click()
 	end
 end
@@ -330,7 +330,7 @@ local function GetInstanceImages(index, raid)
 			collectedIDs[instanceID] = name
 		end
 
-		local overrideImage = not E.Retail and ICON_EJ[buttonImage]
+		local overrideImage = not E.Modern and ICON_EJ[buttonImage]
 		local overrideName = InstanceNameByID[instanceID] or name
 		instanceIconByName[overrideName] = overrideImage and format(OVERRIDE_ICON, overrideImage) or buttonImage
 
@@ -462,7 +462,7 @@ local function OnEnter()
 		local addedLine = false
 		local worldbossLockoutList = {}
 
-		if E.Retail then
+		if E.Modern then
 			for i = 1, GetNumSavedWorldBosses() do
 				local name, _, reset = GetSavedWorldBossInfo(i)
 				tinsert(worldbossLockoutList, { format(BOSSNAME_TWW, name), reset })
@@ -512,12 +512,12 @@ local function OnEnter()
 end
 
 local function OnEvent(panel, event)
-	if event == 'ELVUI_FORCE_UPDATE' or event == 'BOSS_KILL' then
-		RequestRaidInfo()
-
+	if event == 'ELVUI_FORCE_UPDATE' then
 		if not collectedImages then
 			CollectImages()
 		end
+	elseif event == 'BOSS_KILL' then
+		RequestRaidInfo()
 	elseif event == 'LOADING_SCREEN_ENABLED' then
 		if enteredFrame then
 			OnLeave()

@@ -2,7 +2,7 @@ setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local DT = E:GetModule('DataTexts')
 
 local strjoin = strjoin
-local UnitDefense = UnitDefense
+local UnitDefense = UnitDefense or UnitDefenseSkill
 
 local DEFENSE = DEFENSE
 local STAT_CATEGORY_DEFENSE = STAT_CATEGORY_DEFENSE

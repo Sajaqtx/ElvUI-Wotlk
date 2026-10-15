@@ -86,7 +86,7 @@ local function Enable(self)
 		self:RegisterEvent('INCOMING_RESURRECT_CHANGED', Path)
 
 		if(element:IsObjectType('Texture') and not element:GetTexture()) then
-			if oUF.isRetail then
+			if oUF.isModern then
 				ElvUI335.SetAtlas(element, RESURRECT_ATLAS)
 			else
 				element:SetTexture(RESURRECT_ICON)

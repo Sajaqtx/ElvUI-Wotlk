@@ -98,7 +98,7 @@ function DB:ThreatBar_Toggle()
 	local bar = DB.StatusBars.Threat
 	bar.db = DB.db.threat
 
-	if E.Retail then
+	if E.Modern then
 		bar.smoothing = (bar.db.smoothbars and StatusBarInterpolation.ExponentialEaseOut) or StatusBarInterpolation.Immediate or nil
 	else
 		E:SetSmoothing(bar, bar.db.smoothbars)
@@ -107,26 +107,27 @@ function DB:ThreatBar_Toggle()
 	if bar.db.enable then
 		E:EnableMover(bar.holder.mover.name)
 
-		DB:RegisterEvent('PLAYER_TARGET_CHANGED', 'ThreatBar_Update')
-		DB:RegisterEvent('UNIT_THREAT_LIST_UPDATE', 'ThreatBar_Update')
-		ElvUI335.RegisterEvent(DB, 'GROUP_ROSTER_UPDATE', 'ThreatBar_Update')
-		DB:RegisterEvent('UNIT_FLAGS', 'ThreatBar_Update')
-		DB:RegisterEvent('UNIT_PET', 'ThreatBar_Update')
+		ElvUI335.RegisterEvent(bar, 'GROUP_ROSTER_UPDATE')
+		bar:RegisterEvent('PLAYER_TARGET_CHANGED')
+		bar:RegisterUnitEvent('UNIT_THREAT_LIST_UPDATE', 'pet', 'player', 'target')
+		bar:RegisterUnitEvent('UNIT_FLAGS', 'player', 'target')
+		bar:RegisterUnitEvent('UNIT_PET', 'player') -- fires with the owner unit
 
 		DB:ThreatBar_Update()
 	else
 		E:DisableMover(bar.holder.mover.name)
 
-		DB:UnregisterEvent('PLAYER_TARGET_CHANGED')
-		DB:UnregisterEvent('UNIT_THREAT_LIST_UPDATE')
-		ElvUI335.UnregisterEvent(DB, 'GROUP_ROSTER_UPDATE')
-		DB:UnregisterEvent('UNIT_FLAGS')
-		DB:UnregisterEvent('UNIT_PET')
+		ElvUI335.UnregisterEvent(bar, 'PLAYER_TARGET_CHANGED')
+		ElvUI335.UnregisterEvent(bar, 'UNIT_THREAT_LIST_UPDATE')
+		ElvUI335.UnregisterEvent(bar, 'GROUP_ROSTER_UPDATE')
+		ElvUI335.UnregisterEvent(bar, 'UNIT_FLAGS')
+		ElvUI335.UnregisterEvent(bar, 'UNIT_PET')
 	end
 end
 
 function DB:ThreatBar()
 	local Threat = DB:CreateBar('ElvUI_ThreatBar', 'Threat', DB.ThreatBar_Update, nil, nil, {'TOPRIGHT', E.UIParent, 'TOPRIGHT', -3, -245})
+	Threat:SetScript('OnEvent', DB.ThreatBar_Update) -- bar.Update set by CreateBar
 	Threat:SetMinMaxValues(0, 100)
 	Threat.list = {}
 

@@ -200,7 +200,7 @@ local methods = {
 		end
 	end,
 
-	["SetMaxLetters"] = function (self, num)
+	["SetMaxLetters"] = function(self, num)
 		self.editbox:SetMaxLetters(num or 0)
 	end,
 
