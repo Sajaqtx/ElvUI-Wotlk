@@ -91,9 +91,7 @@ end
 do
 	local AutoHider
 	function BL:ObjectiveTracker_AutoHide()
-		if E.OtherAddons.BigWigs or E.OtherAddons.DBM then return end
-
-		local tracker = _G.WatchFrame
+		local tracker = _G.WatchFrame -- ElvUI Wotlk: with DBM / BigWigs too (the option says so)
 		if not tracker then return end
 
 		if not AutoHider then

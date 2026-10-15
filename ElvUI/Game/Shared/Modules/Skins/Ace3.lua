@@ -181,6 +181,25 @@ function S:Ace3_SkinTab(tab)
 end
 
 function S:Ace3_SkinEditBox(editbox, button)
+	-- ElvUI Wotlk: the backdrop on the edit box itself, as for the sliders (Skins.lua HandleSliderFrame): a backdrop frame of
+	-- its own covered the text of the reused option widgets on 3.3.5
+	if ElvUI335 then
+		if not editbox.skinned335 then
+			editbox.skinned335 = true
+
+			S:HandleBlizzardRegions(editbox)
+			editbox:SetTemplate()
+
+			S:HandleButton(button)
+			button:Point('RIGHT', editbox, 'RIGHT', -2, 0)
+
+			hooksecurefunc(editbox, 'SetTextInsets', S.Ace3_EditBoxSetTextInsets)
+			hooksecurefunc(editbox, 'SetPoint', S.Ace3_EditBoxSetPoint)
+		end
+
+		return
+	end
+
 	if not editbox.backdrop then
 		S:HandleEditBox(editbox)
 		S:HandleButton(button)

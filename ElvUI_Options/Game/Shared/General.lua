@@ -70,13 +70,14 @@ GenGen.smoothingAmount = ACH:Range(L["Smoothing Amount"], L["Controls the speed 
 GenGen.locale = ACH:Select(L["LANGUAGE"], nil, 6, { deDE = 'Deutsch', enUS = 'English', esMX = 'Español', frFR = 'Français', ptBR = 'Português', ruRU = 'Русский', trTR ='Turkce', zhCN = '简体中文', zhTW = '繁體中文', koKR = '한국어', itIT = 'Italiano' }, nil, nil, function() return E.global.general.locale or 'enUS' end, function(_, value) E.global.general.locale = value E.ShowPopup = true end)
 GenGen.messageRedirect = ACH:Select(L["Chat Output"], L["This selects the Chat Frame to use as the output of ElvUI messages."], 7, function() return GetChatWindowInfo() end)
 GenGen.numberPrefixStyle = ACH:Select(L["Unit Prefix Style"], L["The unit prefixes you want to use when values are shortened in ElvUI. This is mostly used on UnitFrames."], 8, { CHINESE = '万, 亿, 兆', TCHINESE = '萬, 億, 兆', KOREAN = '만, 억, 조', ENGLISH = 'K, M, B', GERMAN = 'Tsd, Mio, Mrd', METRIC = 'k, M, G' }, nil, nil, nil, function(info, value) E.db.general[info[#info]] = value E:BuildPrefixValues() E:BuildAbbreviateConfigs() E:UpdateAll() end)
--- ElvUI Wotlk: the 3.3.5 fonts of a western client have no Cyrillic, Chinese or Korean glyphs (shown as "?"): their names in Latin
+-- ElvUI Wotlk: the 3.3.5 fonts of a western client have no Cyrillic, Chinese or Korean glyphs: those languages and unit
+-- prefixes cannot be read there (shown as "?"), so they are not offered
 if ElvUI335 then
 	local values = GenGen.locale.values
-	values.ruRU, values.zhCN, values.zhTW, values.koKR = 'Russkiy (Russian)', 'Jianti Zhongwen (Simplified Chinese)', 'Fanti Zhongwen (Traditional Chinese)', 'Hangugeo (Korean)'
+	values.ruRU, values.zhCN, values.zhTW, values.koKR = nil, nil, nil, nil
 
 	local prefixes = GenGen.numberPrefixStyle.values
-	prefixes.CHINESE, prefixes.TCHINESE, prefixes.KOREAN = 'Wan, Yi, Zhao (Simplified Chinese)', 'Wan, Yi, Zhao (Traditional Chinese)', 'Man, Eok, Jo (Korean)'
+	prefixes.CHINESE, prefixes.TCHINESE, prefixes.KOREAN = nil, nil, nil
 end
 
 GenGen.textureGroup = ACH:Group(L["Textures"], nil, 20, nil, function(info) return E.private.general[info[#info]] end)
@@ -299,7 +300,7 @@ blizz.quest.args.objectiveTracker = ACH:Toggle(L["Objective Frame"], L["Enable"]
 blizz.quest.inline = true
 
 blizz.objectiveFrameGroup = ACH:Group(L["Objective Frame"], nil, 20, nil, function(info) return E.db.general[info[#info]] end, nil, function() return BL:ObjectiveTracker_HasQuestTracker() end, E.Classic or E.TBC or (E.Modern and (IsAddOnLoaded('BigWigs') or IsAddOnLoaded('DBM-Core'))))
-blizz.objectiveFrameGroup.args.objectiveFrameAutoHide = ACH:Toggle(L["Auto Hide"], L["Automatically hide the objective frame during boss or arena fights."], 1, nil, nil, nil, nil, function(info, value) E.db.general[info[#info]] = value BL:ObjectiveTracker_AutoHide() end, nil, E.Classic or IsAddOnLoaded('BigWigs') or IsAddOnLoaded('DBM-Core'))
+blizz.objectiveFrameGroup.args.objectiveFrameAutoHide = ACH:Toggle(L["Auto Hide"], L["Automatically hide the objective frame during boss or arena fights."], 1, nil, nil, nil, nil, function(info, value) E.db.general[info[#info]] = value BL:ObjectiveTracker_AutoHide() end, nil, E.Classic or (not ElvUI335 and (IsAddOnLoaded('BigWigs') or IsAddOnLoaded('DBM-Core')))) -- ElvUI Wotlk: offered with DBM too (its own tracker option is separate)
 blizz.objectiveFrameGroup.args.objectiveFrameAutoHideInKeystone = ACH:Toggle(L["Hide In Keystone"], L["Automatically hide the objective frame during boss fights while you are running a key."], 2, nil, nil, nil, nil, nil, nil, function() return not E.Retail or IsAddOnLoaded('BigWigs') or IsAddOnLoaded('DBM-Core') or not E.db.general.objectiveFrameAutoHide end)
 blizz.objectiveFrameGroup.args.objectiveFrameHeight = ACH:Range(L["Objective Frame Height"], L["Height of the objective tracker. Increase size to be able to see more objectives."], 3, { min = 400, max = ceil(E.screenHeight), step = 1 }, nil, nil, function(info, value) E.db.general[info[#info]] = value BL:ObjectiveTracker_SetHeight() end, nil, not (E.Wrath or E.Mists))
 blizz.objectiveFrameGroup.inline = true
