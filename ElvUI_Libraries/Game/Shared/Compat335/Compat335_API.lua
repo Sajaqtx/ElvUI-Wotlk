@@ -785,6 +785,17 @@ rawset(env, "GetWeaponEnchantInfo", function()
 	return hasMain, mainExpiration, mainCharges, nil, hasOff, offExpiration, offCharges, nil
 end)
 --3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
+--3.3.5 casts: name, rank, text, texture, start, end, trade skill, cast ID, not interruptible (channel: no cast ID); the
+--later order has no rank and a spell ID last (for ElvUI only: oUF read the rank as the text and every value after shifted)
+rawset(env, "UnitCastingInfo", function(unit)
+	local name, _, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = realG.UnitCastingInfo(unit)
+	return name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, nil
+end)
+rawset(env, "UnitChannelInfo", function(unit)
+	local name, _, text, texture, startTime, endTime, isTradeSkill, notInterruptible = realG.UnitChannelInfo(unit)
+	return name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, nil
+end)
+
 --> what the DataTexts use from later clients (for ElvUI only)
 --stat indexes and the resilience rating (3.3.5: the melee crit taken rating), labels, the base run speed (yards/s)
 for name, value in next, { LE_UNIT_STAT_STRENGTH = 1, LE_UNIT_STAT_AGILITY = 2, LE_UNIT_STAT_STAMINA = 3,

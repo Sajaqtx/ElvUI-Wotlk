@@ -172,6 +172,7 @@ function NP:SetCVars()
 		-- ElvUI Wotlk: the nameplate CVars of rebuffed.dll: the distance, and the clamp (the plates whose place is above the
 		-- view stay under the top screen border: the world frame extended for them, the border for all of them)
 		E:SetCVar('nameplateDistance', db.loadDistance)
+		E:SetCVar('enableNameplateCastbars', 1) -- the client follows the casts of every plate, not just the target's
 		NP:ToggleCVar('nameplateExtendWorldFrameHeight', db.clampToScreen)
 		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
@@ -1071,8 +1072,45 @@ if ElvUI335 then
 		AuraRelay335:Show()
 	end
 
+	-- the casts: the events of another name of the plate's unit go to the plate as its own (the 3.3.5 arguments kept),
+	-- the combat log casts of a plate's GUID (the plates not targeted) make it read its unit's cast again
+	local CAST_LOG = { SPELL_CAST_START = 'source', SPELL_CAST_SUCCESS = 'source', SPELL_CAST_FAILED = 'source', SPELL_INTERRUPT = 'dest' }
+
+	local function PlateEvent(plate, event, ...)
+		local handler = plate[event]
+		if handler and plate:IsVisible() then
+			handler(plate, event, ...)
+		end
+	end
+
+	local function CastRefresh(plate, interrupted)
+		local unit = plate.__unit
+		if not unit then return end
+
+		if UnitCastingInfo(unit) then
+			PlateEvent(plate, 'UNIT_SPELLCAST_START', unit)
+		elseif UnitChannelInfo(unit) then
+			PlateEvent(plate, 'UNIT_SPELLCAST_CHANNEL_START', unit)
+		elseif interrupted then
+			PlateEvent(plate, 'UNIT_SPELLCAST_INTERRUPTED', unit, nil, nil, plate.Castbar and plate.Castbar.castID)
+		else
+			PlateEvent(plate, 'UNIT_SPELLCAST_STOP', unit)
+			PlateEvent(plate, 'UNIT_SPELLCAST_CHANNEL_STOP', unit)
+		end
+	end
+
 	AuraRelay335:SetScript('OnEvent', function(_, event, ...)
-		if event == 'UNIT_AURA' then
+		if strfind(event, '^UNIT_SPELLCAST') then
+			local unit = ...
+			if not unit or strfind(unit, '^nameplate') then return end
+
+			for plate in next, NP.Plates do
+				local plateUnit = plate.__unit
+				if plateUnit and plate:IsShown() and UnitIsUnit(plateUnit, unit) then
+					PlateEvent(plate, event, plateUnit, select(2, ...))
+				end
+			end
+		elseif event == 'UNIT_AURA' then
 			local unit = ...
 			if not unit or strfind(unit, '^nameplate') then return end
 
@@ -1082,10 +1120,16 @@ if ElvUI335 then
 				end
 			end
 		else -- COMBAT_LOG_EVENT_UNFILTERED, the 3.3.5 arguments: timestamp, event, source GUID / name / flags, dest GUID
-			local _, subEvent, _, _, _, destGUID = ...
+			local _, subEvent, sourceGUID, _, _, destGUID = ...
 			local plate = AURA_EVENTS[subEvent] and destGUID and NP.PlateGUID[destGUID]
 			if plate then
 				Mark(plate)
+			end
+
+			local cast = CAST_LOG[subEvent]
+			local castPlate = cast and NP.PlateGUID[(cast == 'source' and sourceGUID) or destGUID]
+			if castPlate then
+				CastRefresh(castPlate, subEvent == 'SPELL_INTERRUPT')
 			end
 		end
 	end)
@@ -1112,6 +1156,11 @@ function NP:Initialize()
 	if AuraRelay335 then
 		AuraRelay335:RegisterEvent('UNIT_AURA')
 		AuraRelay335:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+		for _, event in next, { 'UNIT_SPELLCAST_START', 'UNIT_SPELLCAST_STOP', 'UNIT_SPELLCAST_FAILED', 'UNIT_SPELLCAST_INTERRUPTED',
+			'UNIT_SPELLCAST_DELAYED', 'UNIT_SPELLCAST_CHANNEL_START', 'UNIT_SPELLCAST_CHANNEL_STOP', 'UNIT_SPELLCAST_CHANNEL_UPDATE',
+			'UNIT_SPELLCAST_INTERRUPTIBLE', 'UNIT_SPELLCAST_NOT_INTERRUPTIBLE' } do
+			AuraRelay335:RegisterEvent(event)
+		end
 	end
 
 	-- ElvUI Wotlk: a profile imported from ElvUI 6.10 has its text styles (CURRENT_PERCENT...) where this version
