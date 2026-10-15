@@ -92,5 +92,24 @@ Fonctionnent en jeu : plaques de nom, cadres joueur / cible / cible de la cible,
       vérifier qu'aucun ne manque à une fonction visible.
 - [ ] Atlas absents de Rebuffed (`ElvUI335.missingAtlases`) : pièce de camelote et icône « à démonter » des sacs,
       point d'exclamation de quête des plaques, sac de parangon, flèches de rotation. Remplacer par des textures 3.3.5.
-- [ ] Bulles de discussion : le module d'ElvUI ou l'addon ChatBubbleSkin, pas les deux.
+- [x] Bulles de discussion : le skin ElvUI marche sur la bulle 3.3.5 ; style « Disable » = ChatBubbleSkin, et « Replace Font »
+      garde la police ElvUI sur ses bulles. **(à vérifier en jeu)**
 - [ ] Données (DataTexts) liées au retail à retirer de la liste : logement, Mythique+, jetons WoW...
+
+## Nettoyage retail et plugins (2026-10-15)
+
+- [x] Skins : la liste ne montre que les fenêtres 3.3.5 skinnées ; Tutorial lit la bonne clé (skin 6.10 porté).
+- [x] Masqués : Boss Button, Zone Button (barres et Cooldown & Duration), Alternative Power.
+- Plugins ElvUI_Enhanced / ElvUI_ProjectZidras (6.10) : ils s'appuient sur les internes de la 6.10, pas chargeables tels
+  quels ; ce qui manque est porté en natif (dossier Wrath/Enhanced335, désactivé par défaut), sans plugin.
+  - Déjà dans la v15 (pas de doublon) : suivi de réputation auto, texte de zone, lieu sur la minicarte, bordure de
+    qualité des infobulles, meilleure récompense de quête, ilvl / enchantements / gemmes des emplacements (WrathArmory),
+    DataTexts (stats, munitions, combat, ilvl, courrier), icônes de rôle LFG dans le chat, tags [guild] [npctitle]
+    [target] des plaques, barres de cast des plaques par unité, masquage du suivi d'objectifs.
+  - Déjà portés : feuille de personnage Enhanced, liste des addons.
+  - [ ] Manque sur 3.3.5 : soins entrants + absorptions (LibHealComm-4.0 + SpecializedAbsorbs, vides en v15).
+  - [ ] À choisir : regroupement des boutons de minicarte, carte sans brouillard, Lose Control, suivi des interruptions,
+        récap de mort, « tout prendre » du courrier, déjà connu, tout apprendre, achat par pile, déshabiller, refus des
+        duels, libération auto en JcJ, niveau des quêtes, icône des infobulles, taille du cadre d'erreurs, animation
+        des touches, liens DPS, couronne du maître de guilde dans le chat.
+  - Sans objet : ProgressionInfo (raids Cataclysm), Analyzer, compatibilité addons.
