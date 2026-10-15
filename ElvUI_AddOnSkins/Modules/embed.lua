@@ -1,4 +1,4 @@
-local E, L, V, P, G = unpack(ElvUI)
+setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local EMB = E:NewModule("EmbedSystem")
 local AS = E:GetModule("AddOnSkins")
 

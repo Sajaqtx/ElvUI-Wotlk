@@ -1,6 +1,6 @@
-local E, L, V, P, G = unpack(ElvUI)
+setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local AS = E:GetModule("AddOnSkins")
-local S = E:GetModule("Skins")
+local S = E:GetModule("Skins").Skins610 -- ElvUI Wotlk: the 6.10 skin calls on this version (Skins335 adapter)
 
 function AS:AcceptFrame(text, onClick)
 	if not self.acceptFrame then

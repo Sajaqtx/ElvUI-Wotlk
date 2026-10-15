@@ -1,5 +1,5 @@
-local E, L, V, P, G = unpack(ElvUI)
-local S = E:GetModule("Skins")
+setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
+local S = E:GetModule("Skins").Skins610 -- ElvUI Wotlk: the 6.10 skin calls on this version (Skins335 adapter)
 local AS = E:GetModule("AddOnSkins")
 
 if not AS:IsAddonLODorEnabled("Enchantrix") then return end
