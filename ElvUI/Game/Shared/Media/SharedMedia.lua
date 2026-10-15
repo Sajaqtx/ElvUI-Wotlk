@@ -85,6 +85,7 @@ AddMedia('font','PTSansNarrow.ttf',			'PT Sans Narrow', nil, westAndRU)
 AddMedia('font','Expressway.ttf',			true, nil, westAndRU)
 AddMedia('font','Homespun.ttf',				true, nil, westAndRU)
 AddMedia('font','Invisible.ttf')
+AddMedia('font','Naowh.ttf',				'Naowh', nil, westAndRU) -- ElvUI Wotlk: the user's font, built in
 
 AddMedia('sound','AwwCrap.ogg',					'Awww Crap')
 AddMedia('sound','BbqAss.ogg',					'BBQ Ass')

@@ -516,7 +516,9 @@ local function FontTemplate(fs, fontName, fontSize, fontStyle, skip)
 			fs:SetScaleAnimationMode(slug and FontStringScaleAnimationMode.Vertex or FontStringScaleAnimationMode.FontSize)
 		end
 
-		local font = (fontName and LSM:Fetch('font', fontName)) or E.media.normFont
+		-- ElvUI Wotlk: v15 and the ElvUI 6.10 skins give a font file, v16 a media name: a file is used as it is
+		local isFile = ElvUI335 and type(fontName) == 'string' and strfind(fontName, '[\\/]')
+		local font = (isFile and fontName) or (fontName and LSM:Fetch('font', fontName)) or E.media.normFont
 		fs:SetFont(font, fontSize, fontStyle)
 		E:SetFontShadow(fs, fontStyle, shadow)
 	end

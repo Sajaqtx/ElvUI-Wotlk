@@ -1465,6 +1465,15 @@ function S:HandleEditBox(frame, template)
 end
 
 function S:HandleDropDownBox(frame, width, template, old)
+	-- ElvUI Wotlk: a 3.3.5 dropdown (UIDropDownMenuTemplate: no Arrow / Button keys, a <name>Button) is an old one, whoever
+	-- skins it (the ElvUI 6.10 skins call this with their own arguments): its Blizzard button is skinned, not left over ours
+	if ElvUI335 and not old and not frame.Arrow and not frame.Button then
+		local frameName = frame.GetName and frame:GetName()
+		if frameName and (_G[frameName..'Button'] or _G[frameName..'_Button']) then
+			old = true
+		end
+	end
+
 	if not width then
 		width = 155
 	end
