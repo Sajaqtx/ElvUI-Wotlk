@@ -393,7 +393,9 @@ for _, name in ipairs({"C_ActionBar", "C_AddOns", "C_BattleNet", "C_ChatInfo", "
 	"C_MerchantFrame", "C_MountJournal", "C_NewItems", "C_PaperDollInfo", "C_PartyInfo", "C_PlayerInfo", "C_PvP",
 	"C_QuestLog", "C_Reputation", "C_SpecializationInfo", "C_Spell", "C_SpellBook", "C_StorePublic", "C_StringUtil",
 	"C_Texture", "C_Timer", "C_TradeSkillUI", "C_TransmogCollection", "C_UnitAuras", "C_VoiceChat", "C_WowTokenPublic",
-	"C_Club", "C_ClubFinder", "C_UIFileAsset", "C_GameRules"}) do
+	"C_Club", "C_ClubFinder", "C_UIFileAsset", "C_GameRules",
+	-- ElvUI v16 reads these at load too
+	"C_CombatLog", "C_PetBattles", "C_CombatText"}) do
 	fill(name, {})
 end
 
@@ -440,6 +442,9 @@ do
 	local function objectType(t) return function(o) return o.GetObjectType and o:GetObjectType() == t end end
 
 	add("IsForbidden", returnFalse)
+	add("HasSecretValues", returnFalse) -- 12.x secret values: none on 3.3.5
+	--11.x: the frame is the one under the mouse (3.3.5 GetMouseFocus)
+	add("IsMouseMotionFocus", function(self) return realG.GetMouseFocus() == self end, isFrame)
 	add("SetIgnoreParentAlpha", noop, isRegionOrFrame)
 	add("SetIgnoreParentScale", noop, isRegionOrFrame)
 	add("IsIgnoringParentAlpha", returnFalse, isRegionOrFrame)
@@ -484,6 +489,10 @@ do
 	end
 	add("GetDrawSwipe", function() return true end, objectType("Cooldown"))
 	add("Clear", function(self) self:SetCooldown(0, 0) end, objectType("Cooldown"))
+	--12.x: a cooldown set from a duration object (Compat335_API.lua)
+	local function FromDuration(self, d) if (d and d.GetStartTime) then self:SetCooldown(d:GetStartTime(), d:GetTotalDuration()) else self:SetCooldown(0, 0) end end
+	add("SetCooldownFromDuration", FromDuration, objectType("Cooldown"))
+	add("SetCooldownFromDurationObject", FromDuration, objectType("Cooldown"))
 	--models: the 3.3.5 model has no separate model alpha, the frame's alpha is the model's
 	add("SetModelAlpha", function(self, alpha) self:SetAlpha(alpha) end, function(o) return o.SetModel ~= nil end)
 	add("GetModelAlpha", function(self) return self:GetAlpha() end, function(o) return o.SetModel ~= nil end)

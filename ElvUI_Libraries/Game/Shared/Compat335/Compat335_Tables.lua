@@ -201,3 +201,21 @@ do
 	end
 	rawset(env, "RAID_CLASS_COLORS", colors)
 end
+
+--font colors: plain tables (or absent) on 3.3.5, color objects on later clients (LibDualSpec of v16 calls
+--RED_FONT_COLOR:WrapTextInColorCode); ElvUI's copies as color objects, the client's tables stay as they are
+do
+	local FONT_COLORS = {
+		NORMAL_FONT_COLOR = {1, .82, 0}, HIGHLIGHT_FONT_COLOR = {1, 1, 1}, RED_FONT_COLOR = {1, .1, .1},
+		GREEN_FONT_COLOR = {.1, 1, .1}, GRAY_FONT_COLOR = {.5, .5, .5}, YELLOW_FONT_COLOR = {1, 1, 0},
+		ORANGE_FONT_COLOR = {1, .5, .25}, DISABLED_FONT_COLOR = {.5, .5, .5}, WHITE_FONT_COLOR = {1, 1, 1},
+	}
+	for name, default in pairs(FONT_COLORS) do
+		local color = realG[name]
+		if (type(color) ~= "table" or not color.WrapTextInColorCode) then
+			local r, g, b = default[1], default[2], default[3]
+			if (type(color) == "table" and color.r) then r, g, b = color.r, color.g, color.b end
+			rawset(env, name, env.CreateColor(r, g, b))
+		end
+	end
+end

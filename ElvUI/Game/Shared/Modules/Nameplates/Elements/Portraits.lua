@@ -52,8 +52,14 @@ function NP:Construct_Portrait(nameplate)
 	Portrait:SetSize(28, 28)
 	Portrait:Hide()
 
-	Portrait:HookScript('OnShow', NP.Portrait_BackdropShow)
-	Portrait:HookScript('OnHide', NP.Portrait_BackdropHide)
+	if ElvUI335 then -- a 3.3.5 texture has no OnShow / OnHide: its Show / Hide / SetShown calls instead
+		hooksecurefunc(Portrait, 'Show', NP.Portrait_BackdropShow)
+		hooksecurefunc(Portrait, 'Hide', NP.Portrait_BackdropHide)
+		if Portrait.SetShown then hooksecurefunc(Portrait, 'SetShown', function(self, shown) if shown then NP.Portrait_BackdropShow(self) else NP.Portrait_BackdropHide(self) end end) end
+	else
+		Portrait:HookScript('OnShow', NP.Portrait_BackdropShow)
+		Portrait:HookScript('OnHide', NP.Portrait_BackdropHide)
+	end
 
 	Portrait.PostUpdate = NP.Portrait_PostUpdate
 

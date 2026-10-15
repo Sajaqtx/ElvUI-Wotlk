@@ -84,7 +84,7 @@ function AB:UpdatePet(event, unit)
 		if autoCast.ShowAutoCastEnabled then
 			autoCast:ShowAutoCastEnabled(autoCastEnabled)
 		else -- 3.3.5: the shine model of the button
-			local shine = _G[buttonName..'Shine']
+			local shine = _G[button:GetName()..'Shine']
 			if shine then
 				if autoCastEnabled then
 					_G.AutoCastShine_AutoCastStart(shine)

@@ -71,7 +71,7 @@ function NP:Construct_ClassPower(nameplate)
 		bar.bg:SetTexture(texture)
 		bar.bg:SetAllPoints(bar)
 
-		if nameplate == NP.TestFrame then
+		if nameplate == NP.TestFrame and nameplate.ClassPower then -- ElvUI Wotlk: no class bar on the 3.3.5 test plate
 			local combo = NP.db.colors.classResources.comboPoints[i]
 			if combo then
 				bar.bg:SetVertexColor(combo.r, combo.g, combo.b)

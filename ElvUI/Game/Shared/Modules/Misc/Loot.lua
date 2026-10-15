@@ -397,7 +397,7 @@ function M:LoadLoot()
 
 	-- Forever parents the master looter list to the Blizzard LootFrame, which never shows once ours replaces it
 	local MasterLooterFrame = _G.MasterLooterFrame
-	if MasterLooterFrame:GetParent() == _G.LootFrame then
+	if MasterLooterFrame and MasterLooterFrame:GetParent() == _G.LootFrame then -- ElvUI Wotlk: none on 3.3.5
 		MasterLooterFrame:SetParent(_G.UIParent)
 	end
 

@@ -703,6 +703,21 @@ define("GetNumClasses", function() return 11 end)
 ---------------------------------------------------------------------------------------------------------------
 --> unit functions of later clients
 
+--ElvUI v16: 12.x secret values and tokens (none on 3.3.5: every unit is known and comparable), the nameplate hit test
+--insets (no such setting on 3.3.5), the curves of the 12.x percent functions (only read on the Modern path)
+fill("C_Secrets", {
+	ShouldUnitIdentityBeSecret = returnFalse,
+	CanCompareUnitTokens = function() return true end,
+})
+fill("C_NamePlateManager", {SetNamePlateHitTestInsets = noop})
+define("CurveConstants", {})
+define("strlenutf8", function(s) return string.utf8len(s) end) -- 12.x global (the UTF8 library, loaded later, gives it)
+define("issecretvalue", returnFalse)
+define("issecrettable", returnFalse)
+define("canaccessvalue", function() return true end)
+fill("C_PetBattles", {IsInBattle = returnFalse}) -- no pet battles on 3.3.5
+define("UnitNameUnmodified", function(unit) return UnitName(unit) end)
+
 define("UnitEffectiveLevel", function(unit) return UnitLevel(unit) end)
 define("UnitIsTapDenied", function(unit)
 	return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit) and true or false
@@ -985,6 +1000,12 @@ do
 		return setmetatable({startTime = startTime or 0, duration = duration or 0, modRate = modRate or 1}, DurationObject)
 	end
 	Compat.NewDuration = NewDuration
+
+	--12.x GetTotemDuration: the totem's time as a duration object (nil without a totem in the slot)
+	define("GetTotemDuration", function(slot)
+		local haveTotem, _, startTime, duration = realG.GetTotemInfo(slot)
+		if (haveTotem and startTime and duration and duration > 0) then return NewDuration(startTime, duration, 1) end
+	end)
 
 	Compat.IsDurationObject = function(value)
 		return type(value) == "table" and getmetatable(value) == DurationObject
