@@ -25,8 +25,11 @@ local SHARED = {
 	["LibDataBroker-1.1"] = true,
 }
 
---never shared: the option interface libraries (another addon's 3.3.5 dialogs on ElvUI's widgets break) and ElvUI's
-local PRIVATE = {"^AceGUI", "^AceConfig", "^AceDBOptions", "^LibActionButton", "^LibAceConfigHelper", "^LibElvUIPlugin"}
+--never shared: the option interface libraries (another addon's 3.3.5 dialogs on ElvUI's widgets break), ElvUI's own,
+--and the libraries other addons ship in their 3.3.5 version: ElvUI's newer copy would take their place in the shared
+--LibStub (the highest minor wins) and break them (LibCustomGlow 25 stopped WeakAuras' 3.3.5 copy, 21, at login)
+local PRIVATE = {"^AceGUI", "^AceConfig", "^AceDBOptions", "^LibActionButton", "^LibAceConfigHelper", "^LibElvUIPlugin",
+	"^LibCustomGlow", "^LibDualSpec", "^LibDispel", "^LibAnim", "^LibSimpleSticky", "^LibTranslit"}
 local function AlwaysPrivate(major)
 	for _, pattern in ipairs(PRIVATE) do
 		if (major:find(pattern)) then return true end
