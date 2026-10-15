@@ -47,6 +47,9 @@ end
 do
 	local validator = CreateFrame('Frame')
 	function Private.validateUnit(unit)
+		-- ElvUI Wotlk: the 3.3.5 IsEventRegistered gives back no unit to read the check from (always invalid)
+		if ElvUI335 then return ElvUI335.IsUnitToken(unit) end
+
 		local success = pcall(validator.RegisterUnitEvent, validator, 'UNIT_HEALTH', unit)
 		if not success then return end
 
@@ -59,6 +62,8 @@ do
 	function Private.validateEvent(event)
 		-- ElvUI Wotlk: a later name registered as its 3.3.5 events (Compat335.lua)
 		if ElvUI335.EVENT_ALIASES[event] then return true end
+		-- and the events the compat raises itself (the absorbs, the heal prediction)
+		if ElvUI335.VIRTUAL_EVENTS[event] then return true end
 
 		local isOK = xpcall(validator.RegisterEvent, Private.nierror, validator, event)
 		if(isOK) then
@@ -69,6 +74,9 @@ do
 	end
 
 	function Private.isUnitEvent(event, unit)
+		-- ElvUI Wotlk: the unit events the compat raises itself (the absorbs, the heal prediction)
+		if ElvUI335.VIRTUAL_EVENTS[event] then return true end
+
 		local isOK = pcall(validator.RegisterUnitEvent, validator, event, unit)
 		if(isOK) then
 			validator:UnregisterEvent(event)

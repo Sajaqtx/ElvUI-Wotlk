@@ -58,7 +58,8 @@ function AceComm:RegisterComm(prefix, method)
 		method = "OnCommReceived"
 	end
 
-	if #prefix > 16 then -- TODO: 15?
+	-- ElvUI Wotlk: the 16 characters are a 4.1 limit, a 3.3.5 prefix only counts in the message's 254 (SpecializedAbsorbs)
+	if #prefix > 16 and not ElvUI335 then -- TODO: 15?
 		error("AceComm:RegisterComm(prefix,method): prefix length is limited to 16 characters")
 	end
 	if C_ChatInfo then

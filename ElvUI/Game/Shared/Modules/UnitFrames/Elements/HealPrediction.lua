@@ -230,7 +230,7 @@ function UF:UpdateHealComm(_, _, _, absorb, _, hasOverAbsorb, hasOverHealAbsorb,
 	UF:SetSize_HealComm(frame)
 
 	-- absorbs is set to none so hide both
-	if E.Classic or ElvUI335 or db.absorbStyle == 'NONE' then -- ElvUI Wotlk: no absorbs on 3.3.5
+	if E.Classic or db.absorbStyle == 'NONE' then
 		healAbsorb:Hide()
 		damageAbsorb:Hide()
 

@@ -707,9 +707,26 @@ define("UnitEffectiveLevel", function(unit) return UnitLevel(unit) end)
 define("UnitIsTapDenied", function(unit)
 	return UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) and not UnitIsTappedByAllThreatList(unit) and true or false
 end)
-define("UnitGetIncomingHeals", function() return nil end)
-define("UnitGetTotalAbsorbs", function() return 0 end)
-define("UnitGetTotalHealAbsorbs", function() return 0 end)
+--heal prediction (4.x / 5.x): what the MoP client gives, from the two 3.3.5 libraries that follow it (both in the
+--client's LibStub, shared with the other addons, loaded after this file): the incoming heals of LibHealComm-4.0 (its
+--own casts and those of the players running it), the absorbs SpecializedAbsorbs-1.0 estimates from the combat log
+local function HealComm335() return realG.LibStub:GetLibrary("LibHealComm-4.0", true) end
+local function Absorbs335() return realG.LibStub:GetLibrary("SpecializedAbsorbs-1.0", true) end
+define("UnitGetIncomingHeals", function(unit, healer)
+	local lib, guid = HealComm335(), unit and UnitGUID(unit)
+	if (not (lib and guid)) then return nil end
+	local amount = lib:GetHealAmount(guid, lib.CASTED_HEALS, nil, healer and UnitGUID(healer))
+	return (amount or 0) * (lib:GetHealModifier(guid) or 1)
+end)
+define("UnitGetTotalAbsorbs", function(unit)
+	local lib, guid = Absorbs335(), unit and UnitGUID(unit)
+	return (lib and guid and lib.UnitTotal(guid)) or 0
+end)
+define("UnitGetTotalHealAbsorbs", function(unit)
+	local lib, guid = Absorbs335(), unit and UnitGUID(unit)
+	local amount = lib and guid and lib.UnitTotalHealAbsorbs(guid)
+	return (type(amount) == "number" and amount > 0 and amount) or 0
+end)
 define("UnitPhaseReason", function() return nil end)
 define("UnitInPhase", function() return true end)
 define("UnitIsWarModePhased", returnFalse)

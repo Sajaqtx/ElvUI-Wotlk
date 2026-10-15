@@ -24,6 +24,11 @@
 	<Include file='Shared\Ace3\AceTimer-3.0\AceTimer-3.0.xml'/>
 	<Include file='Shared\Ace3\AceHook-3.0\AceHook-3.0.xml'/>
 
+	<!-- ElvUI Wotlk: heal prediction as on MoP, the incoming heals and absorbs of two 3.3.5 libraries (client's LibStub) -->
+	<Script file='Shared\LibHealComm-4.0\LibHealComm-4.0.lua'/>
+	<Script file='Shared\SpecializedAbsorbs-1.0\SpecializedAbsorbs-1.0.lua'/>
+	<Script file='Shared\Compat335\Compat335_HealPrediction.lua'/>
+
 	<Script file='Shared\LibSharedMedia-3.0\LibSharedMedia-3.0.lua'/>
 	<Include file='Shared\AceGUI-3.0-SharedMediaWidgets\widget.xml'/>
 	<!-- ElvUI Wotlk: TaintLess fixes the modern FrameXML, not 3.3.5's -->

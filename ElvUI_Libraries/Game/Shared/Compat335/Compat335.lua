@@ -582,6 +582,11 @@ do
 	local aliased = setmetatable({}, {__mode = "k"}) --frame -> {legacy -> {modern -> true}}
 	local filters = setmetatable({}, {__mode = "k"}) --frame -> {event -> {unit -> true}}
 	local handlers = setmetatable({}, {__mode = "k"}) --frame -> its own OnEvent
+	--events the 3.3.5 client never sends, raised here (Compat.FireUnitEventByGUID): event -> frames registered for it
+	local VIRTUAL = {UNIT_ABSORB_AMOUNT_CHANGED = true, UNIT_HEAL_ABSORB_AMOUNT_CHANGED = true, UNIT_HEAL_PREDICTION = true}
+	local virtual = {}
+	for event in pairs(VIRTUAL) do virtual[event] = setmetatable({}, {__mode = "k"}) end
+	Compat.VIRTUAL_EVENTS = VIRTUAL
 
 	--hidden: its sample children must never show (a 3.3.5 edit box shown with autoFocus takes the keyboard)
 	local holder = CreateFrame("Frame")
@@ -640,6 +645,7 @@ do
 			end
 		else
 			direct[frame][event] = true
+			if (VIRTUAL[event]) then virtual[event][frame] = true end
 			--a name 3.3.5 does not know: nothing to register (the client would ignore it or raise)
 			pcall(nativeRegister, frame, event)
 		end
@@ -662,6 +668,7 @@ do
 			end
 		else
 			if (direct[frame]) then direct[frame][event] = nil end
+			if (VIRTUAL[event]) then virtual[event][frame] = nil end
 			if (not StillNeeded(frame, event)) then pcall(nativeUnregister, frame, event) end
 		end
 	end
@@ -688,6 +695,23 @@ do
 		if (direct[frame] and direct[frame][event]) then return true end
 		return nativeIsRegistered(frame, event) and true or false
 	end
+	--a virtual unit event about a GUID (the absorbs SpecializedAbsorbs follows, the heals of LibHealComm): to each frame
+	--registered for it, under each unit it watches (its unit filter, or else its unit) that has this GUID now
+	Compat.FireUnitEventByGUID = function(event, guid)
+		local UnitGUID = realG.UnitGUID
+		for frame in pairs(virtual[event]) do
+			local units = filters[frame] and filters[frame][event]
+			if (units) then
+				for unit in pairs(units) do
+					if (UnitGUID(unit) == guid) then Wrapper(frame, event, unit) end
+				end
+			else
+				local unit = rawget(frame, "unit")
+				if (type(unit) == "string" and UnitGUID(unit) == guid) then Wrapper(frame, event, unit) end
+			end
+		end
+	end
+
 	--raw, on a frame (oUF and AceEvent call these from their own methods)
 	Compat.FrameRegisterEvent, Compat.FrameUnregisterEvent = RegisterEvent, UnregisterEvent
 	Compat.FrameRegisterUnitEvent, Compat.FrameIsEventRegistered = RegisterUnitEvent, IsEventRegistered
@@ -711,6 +735,28 @@ do
 	Compat.IsEventRegistered = function(obj, event, ...)
 		if (Own(obj, "IsEventRegistered", nativeIsRegistered)) then return obj:IsEventRegistered(event, ...) end
 		return IsEventRegistered(obj, event)
+	end
+
+	--a unit token (oUF registers a unit event only for one): later clients tell it from the units RegisterUnitEvent
+	--kept, the 3.3.5 IsEventRegistered gives none back. The base tokens, the numbered ones, and their "target" chains
+	local BASE_UNITS = {player = true, pet = true, target = true, focus = true, mouseover = true, vehicle = true, npc = true}
+	local NUMBERED_UNITS = {"^party%d+$", "^partypet%d+$", "^raid%d+$", "^raidpet%d+$", "^arena%d+$", "^arenapet%d+$", "^boss%d+$", "^nameplate%d+$"}
+	local function IsBaseUnit(unit)
+		if (BASE_UNITS[unit]) then return true end
+		for _, pattern in ipairs(NUMBERED_UNITS) do
+			if (unit:find(pattern)) then return true end
+		end
+		return false
+	end
+	Compat.IsUnitToken = function(unit)
+		if (type(unit) ~= "string" or unit == "") then return false end
+		unit = unit:lower()
+		while (not IsBaseUnit(unit)) do
+			local owner = unit:match("^(.+)target$")
+			if (not owner) then return false end
+			unit = owner
+		end
+		return true
 	end
 
 	--RegisterUnitEvent as a method, for the frames that call it themselves: a method the 3.3.5 frames lack, so the

@@ -167,8 +167,8 @@ local function Update(self, event, unit)
 		local myIncomingHeal = UnitGetIncomingHeals(unit, 'player') or 0
 		local allIncomingHeal = UnitGetIncomingHeals(unit) or 0
 		local overTimeHeals = not oUF.isRetail and HealComm and ((HealComm:GetHealAmount(GUID, HealComm.OVERTIME_AND_BOMB_HEALS) or 0) * (HealComm:GetHealModifier(GUID) or 1)) or 0
-		local absorb = (oUF.isRetail or oUF.isMists) and UnitGetTotalAbsorbs(unit) or 0
-		local healAbsorb = (oUF.isRetail or oUF.isMists) and UnitGetTotalHealAbsorbs(unit) or 0
+		local absorb = (oUF.isRetail or oUF.isMists or ElvUI335) and UnitGetTotalAbsorbs(unit) or 0 -- ElvUI Wotlk: SpecializedAbsorbs
+		local healAbsorb = (oUF.isRetail or oUF.isMists or ElvUI335) and UnitGetTotalHealAbsorbs(unit) or 0
 		local otherIncomingHeal = 0
 		local hasOverHealAbsorb = false
 
@@ -435,6 +435,12 @@ local function Enable(self)
 			self:RegisterEvent('UNIT_MAX_HEALTH_MODIFIERS_CHANGED', Path)
 		else
 			element:SetUseHealComm(true)
+
+			-- ElvUI Wotlk: the absorbs as on MoP, these events raised by the compat from SpecializedAbsorbs
+			if ElvUI335 then
+				self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', Path)
+				self:RegisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', Path)
+			end
 		end
 
 		-- Setup retail widget names
@@ -565,6 +571,11 @@ local function Disable(self)
 			self:UnregisterEvent('UNIT_MAX_HEALTH_MODIFIERS_CHANGED', Path)
 		else
 			element:SetUseHealComm(false)
+
+			if ElvUI335 then
+				self:UnregisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', Path)
+				self:UnregisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', Path)
+			end
 		end
 	end
 end
