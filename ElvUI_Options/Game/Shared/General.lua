@@ -232,12 +232,12 @@ Cosmetic.afkGroup.args.afkChatReset = ACH:Execute(L["Reset Chat Position"], nil,
 
 Cosmetic.chatBubblesGroup = ACH:Group(L["Chat Bubbles"], nil, 35, nil, function(info) return E.private.general[info[#info]] end, function(info, value) E.private.general[info[#info]] = value E.ShowPopup = true end)
 Cosmetic.chatBubblesGroup.inline = true
-Cosmetic.chatBubblesGroup.args.replaceBubbleFont = ACH:Toggle(L["Replace Font"], nil, 1)
+Cosmetic.chatBubblesGroup.args.replaceBubbleFont = ACH:Toggle(L["Replace Font"], ElvUI335 and L["Also applies to the bubbles of another skin (ChatBubbleSkin) when Chat Bubbles Style is set to Disable."] or nil, 1)
 Cosmetic.chatBubblesGroup.args.chatBubbleFont = ACH:SharedMediaFont(L["Font"], nil, 2, nil, nil, nil, function() return not E.private.general.replaceBubbleFont end)
 Cosmetic.chatBubblesGroup.args.chatBubbleFontSize = ACH:Range(L["Font Size"], nil, 3, C.Values.FontSize, nil, nil, nil, function() return not E.private.general.replaceBubbleFont end)
 Cosmetic.chatBubblesGroup.args.chatBubbleFontOutline = ACH:FontFlags(L["Font Outline"], nil, 4, nil, nil, nil, function() return not E.private.general.replaceBubbleFont end)
 Cosmetic.chatBubblesGroup.args.spacer1 = ACH:Spacer(10, 'full')
-Cosmetic.chatBubblesGroup.args.warning = ACH:Description(L["|cffFF3333This does not work in Instances or Garrisons!|r"], 11, 'medium')
+Cosmetic.chatBubblesGroup.args.warning = ACH:Description(L["|cffFF3333This does not work in Instances or Garrisons!|r"], 11, 'medium', nil, nil, nil, nil, nil, ElvUI335 ~= nil)
 Cosmetic.chatBubblesGroup.args.chatBubbles = ACH:Select(L["Chat Bubbles Style"], L["Skin the blizzard chat bubbles."], 12, { backdrop = L["Skin Backdrop"], nobackdrop = L["Remove Backdrop"], backdrop_noborder = L["Skin Backdrop (No Borders)"], disabled = L["Disable"] })
 Cosmetic.chatBubblesGroup.args.chatBubbleName = ACH:Toggle(L["Chat Bubble Names"], L["Display the name of the unit on the chat bubble. This will not work if backdrop is disabled or when you are in an instance."], 13)
 

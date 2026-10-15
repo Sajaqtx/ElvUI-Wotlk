@@ -2,7 +2,7 @@ setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local M = E:GetModule('Misc')
 local CH = E:GetModule('Chat')
 
-local format, wipe, pairs = format, wipe, pairs
+local format, wipe, pairs, select = format, wipe, pairs, select
 local strmatch, strlower, gmatch, gsub = strmatch, strlower, gmatch, gsub
 
 local Ambiguate = Ambiguate
@@ -122,6 +122,86 @@ function M:SkinBubble(frame, holder)
 	frame.IsSkinnedElvUI = true
 end
 
+-- ElvUI Wotlk: a 3.3.5 bubble is the WorldFrame child itself, no holder frame: its backdrop pieces and its tail are
+-- textures of its own next to the text, and there is no ChatBubbleFont object, so the font goes on each bubble's text
+function M:BubbleFont335(frame)
+	local text = frame.String335
+	if not text then
+		for i = 1, frame:GetNumRegions() do
+			local region = select(i, frame:GetRegions())
+			if region:IsObjectType('FontString') then
+				text = region
+				frame.String335 = text
+				break
+			end
+		end
+	end
+
+	if text and E.private.general.replaceBubbleFont then
+		text:FontTemplate(E.Libs.LSM:Fetch('font', E.private.general.chatBubbleFont), E.private.general.chatBubbleFontSize, E.private.general.chatBubbleFontOutline)
+	end
+
+	return text
+end
+
+local function BubbleFont335_OnShow(frame)
+	M:BubbleFont335(frame)
+end
+
+function M:SkinBubble335(frame)
+	local text = M:BubbleFont335(frame)
+	if not text then return end
+
+	for i = 1, frame:GetNumRegions() do
+		local region = select(i, frame:GetRegions())
+		if region:IsObjectType('Texture') then
+			region:SetTexture(nil)
+		end
+	end
+
+	local option = E.private.general.chatBubbles
+	if option ~= 'nobackdrop' then
+		local noBorder = option == 'backdrop_noborder'
+		frame:SetTemplate('Transparent', nil, true, noBorder)
+
+		if noBorder and frame.Center then
+			frame.Center:SetInside(frame, 4, 4)
+		end
+	end
+
+	local name = frame:CreateFontString(nil, 'OVERLAY')
+	name:Height(10)
+	name:Point('BOTTOM', frame, 'TOP', 0, yOffset)
+	name:SetJustifyH('LEFT')
+	name:FontTemplate(E.Libs.LSM:Fetch('font', E.private.general.chatBubbleFont), E.private.general.chatBubbleFontSize * 0.85, E.private.general.chatBubbleFontOutline)
+	frame.Name = name
+
+	frame.holder = frame
+	frame.String = text
+
+	frame:HookScript('OnShow', BubbleFont335_OnShow)
+	frame:HookScript('OnShow', M.UpdateBubbleBorder)
+	M.UpdateBubbleBorder(frame)
+
+	frame.IsSkinnedElvUI = true
+end
+
+-- the bubble style set to Disable (another bubble skin, ChatBubbleSkin): the font of the bubbles still follows the
+-- Chat Bubbles font settings when Replace Font is on
+local function ChatBubbleFont335_OnUpdate(eventFrame, elapsed)
+	eventFrame.lastupdate = (eventFrame.lastupdate or -2) + elapsed
+	if eventFrame.lastupdate < 0.1 then return end
+	eventFrame.lastupdate = 0
+
+	for _, frame in pairs(C_ChatBubbles_GetAllChatBubbles()) do
+		if not frame.FontElvUI335 then
+			frame.FontElvUI335 = true
+			M:BubbleFont335(frame)
+			frame:HookScript('OnShow', BubbleFont335_OnShow)
+		end
+	end
+end
+
 local function ChatBubble_OnEvent(_, event, msg, sender, _, _, _, _, _, _, _, _, _, guid)
 	if event == 'PLAYER_ENTERING_WORLD' then --Clear caches
 		wipe(messageToGUID)
@@ -138,7 +218,13 @@ local function ChatBubble_OnUpdate(eventFrame, elapsed)
 	eventFrame.lastupdate = 0
 
 	for _, frame in pairs(C_ChatBubbles_GetAllChatBubbles()) do
-		local holder = frame:GetChildren()
+		if ElvUI335 then
+			if not frame.IsSkinnedElvUI then
+				M:SkinBubble335(frame)
+			end
+		end
+
+		local holder = not ElvUI335 and frame:GetChildren()
 		if holder and not holder:IsForbidden() and not frame.IsSkinnedElvUI then
 			M:SkinBubble(frame, holder)
 		end
@@ -158,6 +244,9 @@ function M:LoadChatBubbles()
 	if E.private.general.chatBubbles ~= 'disabled' then
 		M.BubbleFrame:SetScript('OnEvent', ChatBubble_OnEvent)
 		M.BubbleFrame:SetScript('OnUpdate', ChatBubble_OnUpdate)
+	elseif ElvUI335 and E.private.general.replaceBubbleFont then
+		M.BubbleFrame:SetScript('OnEvent', nil)
+		M.BubbleFrame:SetScript('OnUpdate', ChatBubbleFont335_OnUpdate)
 	else
 		M.BubbleFrame:SetScript('OnEvent', nil)
 		M.BubbleFrame:SetScript('OnUpdate', nil)
