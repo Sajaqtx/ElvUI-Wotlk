@@ -194,6 +194,12 @@ function NP:SetCVars()
 		NP:ToggleCVar('nameplateExtendWorldFrameHeight', db.clampToScreen)
 		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
+		-- the click area of the rebuffed.dll plates: Clickable Size (enemy, friendly)
+		local click = db.clickSize
+		E:SetCVar('nameplateHitboxWidth', click.enemyWidth)
+		E:SetCVar('nameplateHitboxHeight', click.enemyHeight)
+		E:SetCVar('nameplateFriendlyHitboxWidth', click.friendlyWidth)
+		E:SetCVar('nameplateFriendlyHitboxHeight', click.friendlyHeight)
 		NP:EnviromentConditionals() -- the stacking and its spacing (Overlap H / V), the one the clamp needs
 	else
 		E:SetCVar('nameplateMaxDistance', db.loadDistance)

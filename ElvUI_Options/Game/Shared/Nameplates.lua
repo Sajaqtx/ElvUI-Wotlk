@@ -513,10 +513,10 @@ NamePlates.generalGroup.args.clickThrough = ACH:Group(L["Click Through"], nil, 6
 NamePlates.generalGroup.args.clickThrough.args.friendly = ACH:Toggle(L["Friendly"], nil, 2, nil, nil, nil, nil, function(info, value) E.db.nameplates.clickThrough[info[#info]] = value NP:SetNamePlateClickThrough() end)
 NamePlates.generalGroup.args.clickThrough.args.enemy = ACH:Toggle(L["Enemy"], nil, 3, nil, nil, nil, nil, function(info, value) E.db.nameplates.clickThrough[info[#info]] = value NP:SetNamePlateClickThrough() end)
 
-NamePlates.generalGroup.args.clickableRange = ACH:Group(L["Clickable Size"], nil, 70, nil, function(info) return E.db.nameplates.clickSize[info[#info]] end, function(info, value) E.db.nameplates.clickSize[info[#info]] = value NP:ConfigureAll() end)
+NamePlates.generalGroup.args.clickableRange = ACH:Group(L["Clickable Size"], nil, 70, nil, function(info) return E.db.nameplates.clickSize[info[#info]] end, function(info, value) E.db.nameplates.clickSize[info[#info]] = value NP:ConfigureAll() if ElvUI335 then NP:SetCVars() end end)
 
-if ElvUI335 then -- the rebuffed.dll plate keeps its own click area: this sizes the ElvUI plate drawn on it
-	NamePlates.generalGroup.args.clickableRange.desc = L["On 3.3.5 (Rebuffed) this sets the size of the plates; the area you click stays the client's."]
+if ElvUI335 then -- the size of the ElvUI plates and the click area of the rebuffed.dll ones (its hitbox cvars)
+	NamePlates.generalGroup.args.clickableRange.desc = L["On 3.3.5 (Rebuffed) this sets the size of the plates and their click area (the Rebuffed nameplate hitbox)."]
 end
 
 NamePlates.generalGroup.args.clickableRange.args.personal = ACH:Group(L["Personal"], nil, 10)
