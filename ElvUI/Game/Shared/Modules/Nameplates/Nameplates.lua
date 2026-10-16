@@ -1203,12 +1203,25 @@ if ElvUI335 then
 	local elapsed = 0
 
 	-- the 3.3.5 client draws the plates of the units not targeted at half alpha (on the native plate, the ElvUI plate inherits
-	-- it), which later clients leave to a cvar ElvUI v16 no longer fades with: the native plates put back to full alpha, every frame
+	-- it), which later clients leave to a cvar: the native plates put back to full alpha every frame, and the ElvUI plates of
+	-- the units not targeted, while there is a target, at the Non-Target Alpha of the settings
+	local UnitExists, UnitIsUnit = UnitExists, UnitIsUnit
 	local function FullAlpha()
+		local hasTarget = UnitExists('target')
+		local nonTargetAlpha = NP.db and NP.db.nonTargetAlpha or 1
+
 		for plate in next, NP.Plates do
 			local native = plate:GetParent()
-			if native and native:GetParent() == WorldFrame and native:GetAlpha() < 1 then
-				native:SetAlpha(1)
+			if native and native:GetParent() == WorldFrame then
+				if native:GetAlpha() < 1 then
+					native:SetAlpha(1)
+				end
+
+				local unit = plate.__unit
+				local alpha = (hasTarget and unit and not UnitIsUnit(unit, 'target')) and nonTargetAlpha or 1
+				if plate:GetAlpha() ~= alpha then
+					plate:SetAlpha(alpha)
+				end
 			end
 		end
 	end

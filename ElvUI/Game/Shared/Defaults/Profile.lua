@@ -862,6 +862,7 @@ P.nameplates = {
 	nameColoredGlow = false,
 	overlapH = 0.8,
 	overlapV = 1.1,
+	nonTargetAlpha = 1, -- ElvUI Wotlk: the plates not targeted while there is a target (3.3.5)
 	classColorNames = false,
 	showEnemyCombat = 'DISABLED',
 	showFriendlyCombat = 'DISABLED',

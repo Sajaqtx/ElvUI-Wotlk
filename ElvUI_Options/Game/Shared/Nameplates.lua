@@ -414,6 +414,8 @@ NamePlates.generalGroup.args.multiplier = ACH:Range(L["Multiplier"], L["Backdrop
 NamePlates.generalGroup.args.overlapV = ACH:Range(L["Overlap Vertical"], L["Percentage amount for vertical overlap of Nameplates."], 12, { min = 0, max = 3, step = .1 })
 NamePlates.generalGroup.args.overlapH = ACH:Range(L["Overlap Horizontal"], L["Percentage amount for horizontal overlap of Nameplates."], 13, { min = 0, max = 3, step = .1 })
 NamePlates.generalGroup.args.lowHealthThreshold = ACH:Range(L["Low Health Threshold"], L["Make the unitframe glow when it is below this percent of health."], 14, { min = 0, softMax = .5, max = .8, step = .01, isPercent = true }, nil, nil, nil, nil, E.Modern)
+-- ElvUI Wotlk: the alpha of the plates not targeted (the 3.3.5 client's own half alpha is taken off, see Nameplates.lua)
+NamePlates.generalGroup.args.nonTargetAlpha = ACH:Range(L["Non-Target Alpha"], L["Alpha of the nameplates that are not your target, while you have a target."], 13.5, { min = 0, max = 1, step = 0.01, isPercent = true }, nil, nil, nil, nil, not ElvUI335)
 NamePlates.generalGroup.args.loadDistance = ACH:Range(L["Load Distance"], L["Only load nameplates for units within this range."], 15, { min = 0, max = 41, step = 1 }, nil, nil, nil, nil, E.Modern)
 
 NamePlates.generalGroup.args.spacer3 = ACH:Spacer(20, 'full')
