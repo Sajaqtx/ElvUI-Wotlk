@@ -99,6 +99,7 @@ function NP:Construct_Health(nameplate)
 
 	NP.StatusBars[Health] = 'health'
 
+	NP:Construct_FlashTexture(nameplate, Health) -- ElvUI Wotlk: Style Filters
 	UF:Construct_ClipFrame(nameplate, Health)
 
 	return Health

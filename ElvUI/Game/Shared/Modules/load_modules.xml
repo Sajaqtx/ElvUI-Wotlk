@@ -7,6 +7,7 @@
 	<Script file='Auras\Containers.lua'/>
 
 	<Script file='Nameplates\Nameplates.lua'/> <!-- main file -->
+	<Script file='Nameplates\StyleFilter.lua'/> <!-- ElvUI Wotlk: the Style Filters of ElvUI 14 -->
 	<Script file='Nameplates\Elements\Auras.lua'/>
 	<Script file='Nameplates\Elements\CastBar.lua'/>
 	<Script file='Nameplates\Elements\ClassPower.lua'/>

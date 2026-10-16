@@ -975,7 +975,8 @@ do	--The code in this function is from WeakAuras, credit goes to Mirrored and th
 		profile = 'E.db',
 		private = 'E.private',
 		global = 'E.global',
-		filters = 'E.global'
+		filters = 'E.global',
+		styleFilters = 'E.global' -- ElvUI Wotlk: Style Filters
 	}
 
 	local function BuildLineStructure(str) -- str is profileText
@@ -1692,6 +1693,7 @@ end
 
 function E:UpdateNamePlates()
 	NamePlates:ConfigureAll()
+	NamePlates:StyleFilterInitialize() -- ElvUI Wotlk: Style Filters
 end
 
 function E:UpdateTooltip()

@@ -27,6 +27,7 @@
 	<Script file='Shared\Tooltip.lua'/>
 	<Script file='Shared\UnitFrames.lua'/>
 	<Script file='Shared\Nameplates.lua'/>
+	<Script file='Shared\StyleFilters.lua'/> <!-- ElvUI Wotlk: the Style Filters of ElvUI 14 -->
 	<Script file='Shared\Maps.lua'/>
 	<Script file='Shared\Search.lua'/>
 	<Script file='Shared\Tags.lua'/>

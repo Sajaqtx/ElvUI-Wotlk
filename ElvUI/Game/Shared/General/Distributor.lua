@@ -1,5 +1,6 @@
 setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
 local D = E:GetModule('Distributor')
+local NP = E:GetModule('NamePlates')
 
 local _G = _G
 local tonumber, type, gsub, pairs, pcall, loadstring = tonumber, type, gsub, pairs, pcall, loadstring
@@ -36,7 +37,8 @@ local profileTypes = {
 	profile = true,
 	private = true,
 	global = true,
-	filters = true
+	filters = true,
+	styleFilters = true -- ElvUI Wotlk: the nameplate Style Filters (ElvUI 14)
 }
 
 -- The active downloads
@@ -474,6 +476,12 @@ function D:GetProfileData(dataType, dataKey)
 		profileData.unitframe.aurawatch = E:CopyTable({}, ElvDB.global.unitframe.aurawatch)
 		profileData = E:RemoveTableDuplicates(profileData, G, D.GeneratedKeys.global)
 		profileKey = 'filters'
+	elseif dataType == 'styleFilters' then -- ElvUI Wotlk: the nameplate Style Filters (ElvUI 14)
+		profileKey = 'styleFilters'
+		profileData.nameplates = {}
+		profileData.nameplates.filters = E:CopyTable({}, ElvDB.global.nameplates.filters)
+		NP:StyleFilterClearDefaults(profileData.nameplates.filters)
+		profileData = E:RemoveTableDuplicates(profileData, G, D.GeneratedKeys.global)
 	end
 
 	return profileKey, profileData
@@ -485,11 +493,7 @@ function D:GetProfileExport(dataType, dataKey, dataFormat)
 
 	local profileExport
 	if dataFormat == 'text' then
-		local serialString = SerializeCBOR(profileData)
-		local exportString = D:CreateProfileExport(dataType, profileKey, serialString)
-		local compressedData = CompressString(exportString, COMPRESS, OPTIMIZE)
-		local printableString = EncodeBase64(compressedData)
-		profileExport = printableString and format('%s%s', EXPORT_PREFIX, printableString) or nil
+		profileExport = D:GetTextExport(dataType, profileKey, profileData)
 	elseif dataFormat == 'luaTable' then
 		local exportString = E:TableToLuaString(profileData)
 		profileExport = D:CreateProfileExport(dataType, profileKey, exportString)
@@ -498,6 +502,15 @@ function D:GetProfileExport(dataType, dataKey, dataFormat)
 	end
 
 	return profileKey, profileExport
+end
+
+-- the text export of some data (also used by the Style Filters export of the options)
+function D:GetTextExport(dataType, profileKey, profileData)
+	local serialString = SerializeCBOR(profileData)
+	local exportString = D:CreateProfileExport(dataType, profileKey, serialString)
+	local compressedData = CompressString(exportString, COMPRESS, OPTIMIZE)
+	local printableString = EncodeBase64(compressedData)
+	return printableString and format('%s%s', EXPORT_PREFIX, printableString) or nil
 end
 
 function D:CreateProfileExport(dataType, dataKey, dataString)
@@ -609,6 +622,9 @@ function D:SetImportedProfile(dataType, dataKey, dataProfile, force)
 	elseif dataType == 'filters' then
 		E:CopyTable(ElvDB.global.unitframe, dataProfile.unitframe)
 		E:UpdateUnitFrames()
+	elseif dataType == 'styleFilters' then -- ElvUI Wotlk: the nameplate Style Filters (ElvUI 14)
+		E:CopyTable(ElvDB.global.nameplates, dataProfile.nameplates or dataProfile.nameplate)
+		E:UpdateNamePlates()
 	end
 end
 

@@ -118,6 +118,7 @@ function NP:Construct_Power(nameplate)
 	Power.PostUpdate = NP.Power_PostUpdate
 	Power.UpdateColor = NP.Power_UpdateColor
 
+	NP:Construct_FlashTexture(nameplate, Power) -- ElvUI Wotlk: Style Filters
 	UF:Construct_ClipFrame(nameplate, Power)
 
 	return Power

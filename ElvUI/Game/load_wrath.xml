@@ -21,6 +21,7 @@
 	<Script file='Shared\Defaults\Profile.lua'/>
 	<Script file='Shared\Defaults\Global.lua'/>
 	<Script file='Shared\Defaults\Private.lua'/>
+	<Script file='Shared\Defaults\StyleFilters.lua'/> <!-- ElvUI Wotlk: the Style Filters of ElvUI 14 (removed in 15.00) -->
 	<Include file ='Shared\Modules\load_templates.xml'/> <!-- ElvUIStaticPopupTemplate -->
 	<Script file='Shared\General\Core.lua'/>
 	<Script file='Shared\General\Math.lua'/>

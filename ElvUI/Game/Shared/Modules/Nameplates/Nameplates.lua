@@ -427,9 +427,44 @@ function NP:StylePlate(nameplate)
 	nameplate.Cutaway = NP:Construct_Cutaway(nameplate)
 
 	NP:Construct_Auras(nameplate)
+	NP:StyleFilterEvents(nameplate) -- ElvUI Wotlk: Style Filters, prepare the watcher
+
 	NP:Construct_ClassPowerTwo(nameplate)
 
 	NP.Plates[nameplate] = nameplate.frameName
+end
+
+-- ElvUI Wotlk: the Style Filters of ElvUI 14 (removed in 15.00): their flash over a bar, their scale and alpha
+function NP:Construct_FlashTexture(nameplate, element)
+	local barTexture = element:GetStatusBarTexture()
+	if not barTexture then -- a bar without its texture yet (set by Update_StatusBars)
+		element:SetStatusBarTexture(LSM:Fetch('statusbar', NP.db.statusbar) or E.media.normTex)
+		barTexture = element:GetStatusBarTexture()
+	end
+
+	local flashTexture = element:CreateTexture(nil, 'OVERLAY')
+	flashTexture:SetTexture(LSM:Fetch('background', 'ElvUI Blank'))
+	flashTexture:Point('BOTTOMLEFT', barTexture, 'BOTTOMLEFT')
+	flashTexture:Point('TOPRIGHT', barTexture, 'TOPRIGHT')
+	flashTexture:Hide()
+
+	element.barTexture = barTexture
+	element.flashTexture = flashTexture
+end
+
+function NP:ScalePlate(nameplate, scale)
+	if nameplate then
+		nameplate:SetScale(scale)
+	end
+end
+
+-- a filter's alpha (endAlpha 1: back to the plate's own), kept by the 3.3.5 alpha loop (FullAlpha) over Non-Target Alpha
+function NP:PlateFade(nameplate, _, _, endAlpha)
+	nameplate.styleFilterAlpha = (endAlpha and endAlpha ~= 1) and endAlpha or nil
+
+	if not ElvUI335 then
+		nameplate:SetAlpha(endAlpha or 1)
+	end
 end
 
 do
@@ -535,11 +570,12 @@ function NP:DisablePlate(nameplate, nameOnly, hideRaised, updateBase)
 	NP:ReparentElements(nameplate, E.HiddenFrame)
 
 	if nameOnly then
-		if updateBase then
-			NP:Update_Tags(nameplate)
+		local styleFilter = nameOnly == 1 -- ElvUI Wotlk: Name Only of a Style Filter
+		if updateBase or styleFilter then
+			NP:Update_Tags(nameplate, styleFilter)
 		end
 
-		NP:Update_Highlight(nameplate)
+		NP:Update_Highlight(nameplate, styleFilter)
 
 		-- The position values here are forced on purpose.
 		nameplate.Name:ClearAllPoints()
@@ -616,11 +652,15 @@ end
 
 function NP:Update_StatusBars()
 	local texture = LSM:Fetch('statusbar', NP.db.statusbar) or E.media.normTex
-	for bar in pairs(NP.StatusBars) do
-		if bar.SetStatusBarTexture then
-			bar:SetStatusBarTexture(texture)
-		else
-			bar:SetTexture(texture)
+	for bar, which in pairs(NP.StatusBars) do
+		local styleFilter = NP:StyleFilterChanges(bar.__owner or bar:GetParent()) -- ElvUI Wotlk: a Style Filter's texture stays
+		local filter = styleFilter[which]
+		if not (filter and filter.texture) then
+			if bar.SetStatusBarTexture then
+				bar:SetStatusBarTexture(texture)
+			else
+				bar:SetTexture(texture)
+			end
 		end
 	end
 end
@@ -759,6 +799,8 @@ end
 
 function NP:ConfigureAll(init)
 	if not E.private.nameplates.enable then return end
+
+	NP:StyleFilterConfigure() -- ElvUI Wotlk: Style Filters, keep this at the top
 
 	NP.multiplier = NP.db.multiplier
 
@@ -915,6 +957,8 @@ function NP:NAME_PLATE_UNIT_ADDED(_, unit)
 			NP.TargetPlate = self
 			NP:SetupTarget(self)
 		end
+
+		NP:StyleFilterEventWatch(self, 'NAME_PLATE_UNIT_ADDED', unit) -- ElvUI Wotlk: Style Filters, fire up the watcher and update
 	end
 end
 
@@ -932,6 +976,8 @@ function NP:NAME_PLATE_UNIT_REMOVED(event, unit)
 	if self.unitGUID then
 		NP:UpdatePlateGUID(self)
 	end
+
+	NP:StyleFilterEventWatch(self, 'NAME_PLATE_UNIT_REMOVED', unit) -- ElvUI Wotlk: Style Filters, shut down the watcher
 
 	if E.Modern then
 		NP:AuraContainer_RemoveActive(self)
@@ -984,6 +1030,16 @@ function NP:TargetChanged()
 	if not current then -- no target plate, release the class bar
 		NP:SetupTarget(nil, true)
 	end
+
+	-- ElvUI Wotlk: Style Filters, every plate (the driver only tells the new target's): its target state, then its filters
+	if NP.StyleFilterTriggerEvents.PLAYER_TARGET_CHANGED then
+		for nameplate in next, NP.Plates do
+			if nameplate ~= NP.TestFrame and nameplate.unit and nameplate:IsShown() then
+				nameplate.isTarget = UnitIsUnit(nameplate.unit, 'target') or nil
+				NP:StyleFilterUpdate(nameplate, 'PLAYER_TARGET_CHANGED')
+			end
+		end
+	end
 end
 
 function NP:UNIT_FACTION(_, unit)
@@ -1002,6 +1058,8 @@ function NP:UNIT_FACTION(_, unit)
 	NP:UpdatePlateType(self)
 	NP:UpdatePlateSize(self)
 	NP:UpdatePlateBase(self)
+
+	NP:StyleFilterUpdate(self, 'UNIT_FACTION') -- ElvUI Wotlk: Style Filters, keep this after UpdatePlateBase
 end
 
 function NP:GetThreatSituationColor(indicator, status)
@@ -1133,6 +1191,13 @@ function NP:UpdateColors()
 end
 
 function NP:SetStatusBarColor(bar, r, g, b, a)
+	-- ElvUI Wotlk: Style Filters, the color is kept to switch back to, a filter's color stays
+	bar.r, bar.g, bar.b = r, g, b
+
+	local which = NP.StatusBars[bar]
+	local filter = which and NP:StyleFilterChanges(bar.__owner or bar:GetParent())[which]
+	if filter and filter.color then return end
+
 	bar:SetStatusBarColor(r, g, b, a)
 
 	if bar.bg then
@@ -1232,6 +1297,10 @@ if ElvUI335 then
 			if unit and element and element.UpdateAuras then
 				element.UpdateAuras(plate, 'UNIT_AURA', unit)
 			end
+
+			if unit and NP.StyleFilterTriggerEvents.UNIT_AURA then -- the Style Filters of the plate (auras of the plate units come by here only)
+				NP:StyleFilterUpdate(plate, 'UNIT_AURA', unit)
+			end
 		end
 	end)
 end
@@ -1263,7 +1332,7 @@ if ElvUI335 then
 				ElvUI335.KeepNativeHidden(native) -- its spell icon, name, level shown again by the client
 
 				local unit = plate.__unit
-				local alpha = (hasTarget and unit and not UnitIsUnit(unit, 'target')) and nonTargetAlpha or 1
+				local alpha = plate.styleFilterAlpha or ((hasTarget and unit and not UnitIsUnit(unit, 'target')) and nonTargetAlpha) or 1
 				if plate:GetAlpha() ~= alpha then
 					plate:SetAlpha(alpha)
 				end
@@ -1303,6 +1372,45 @@ if ElvUI335 then
 		end
 	end
 
+	-- the Style Filters: the unit events rebuffed.dll does not send for the plate units, from what changed since the last poll
+	local UnitAffectingCombat = UnitAffectingCombat
+	local function StyleFilterPoll(plate, unit, seen)
+		local events = NP.StyleFilterTriggerEvents
+		if not next(NP.StyleFilterTriggerList) then
+			seen.healthChanged, seen.powerChanged = nil, nil
+			return
+		end
+
+		local update = NP.StyleFilterExecuteUpdate
+		if seen.healthChanged and events.UNIT_HEALTH then update(plate, 'UNIT_HEALTH', unit) end
+		if seen.powerChanged and events.UNIT_POWER_UPDATE then update(plate, 'UNIT_POWER_UPDATE', unit) end
+		seen.healthChanged, seen.powerChanged = nil, nil
+
+		if events.UNIT_THREAT_SITUATION_UPDATE then
+			local threat = E:GetThreatSituation(unit, 'player')
+			if seen.threat ~= threat then
+				seen.threat = threat
+				update(plate, 'UNIT_THREAT_SITUATION_UPDATE', unit)
+			end
+		end
+
+		if events.UNIT_FLAGS then
+			local combat = UnitAffectingCombat(unit) and true or false
+			if seen.combat ~= combat then
+				seen.combat = combat
+				update(plate, 'UNIT_FLAGS', unit)
+			end
+		end
+
+		if events.UNIT_TARGET then
+			local targetingMe = UnitIsUnit(unit..'target', 'player') and true or false
+			if seen.targetingMe ~= targetingMe then
+				seen.targetingMe = targetingMe
+				update(plate, 'UNIT_TARGET', unit)
+			end
+		end
+	end
+
 	HealthPoll335 = CreateFrame('Frame')
 	HealthPoll335:Hide()
 	HealthPoll335:SetScript('OnUpdate', function(_, delta)
@@ -1327,12 +1435,16 @@ if ElvUI335 then
 					seen.unit, seen.health, seen.maxHealth = unit, health, maxHealth
 					if plate.Health and plate.Health.ForceUpdate and plate.Health.__owner then plate.Health:ForceUpdate() end
 					if plate.HealthPrediction and plate.HealthPrediction.ForceUpdate and plate.HealthPrediction.__owner then plate.HealthPrediction:ForceUpdate() end
+					seen.healthChanged = true
 				end
 
 				if seen.power ~= power or seen.maxPower ~= maxPower then
 					seen.power, seen.maxPower = power, maxPower
 					if plate.Power and plate.Power.ForceUpdate and plate.Power.__owner and plate.Power:IsShown() then plate.Power:ForceUpdate() end
+					seen.powerChanged = true
 				end
+
+				StyleFilterPoll(plate, unit, seen)
 			end
 		end
 	end)
@@ -1472,6 +1584,8 @@ function NP:Initialize()
 	NP:RegisterEvent('PLAYER_UPDATE_RESTING', 'EnviromentConditionals')
 	NP:RegisterEvent('ZONE_CHANGED_NEW_AREA', 'EnviromentConditionals')
 	NP:RegisterEvent('UNIT_FACTION', 'NamePlateCallBack')
+	NP:RegisterEvent('PLAYER_LOGOUT') -- ElvUI Wotlk: Style Filters, their defaults taken out of the saved variables
+	NP:StyleFilterInitialize()
 
 	NP:HideInterfaceOptions()
 	NP:SetCVars()

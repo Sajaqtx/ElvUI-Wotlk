@@ -18,7 +18,12 @@ function NP:ThreatIndicator_PostUpdate(unit, status)
 	local nameplate, db = self.__owner, NP.db.threat
 	local allow = status and db.enable and db.useThreatColor and not UnitIsTapDenied(unit)
 	local scale = allow and NP:GetThreatSituationScale(self, db, status) or 1
-	nameplate:SetScale(scale)
+	nameplate.threatScale = scale -- ElvUI Wotlk: Style Filters, a filter's scale stays (and goes back to this one)
+
+	local styleFilter = NP:StyleFilterChanges(nameplate)
+	if not (styleFilter.general and styleFilter.general.scale) then
+		nameplate:SetScale(scale)
+	end
 
 	nameplate.threatStatus = status -- export for plugins
 end

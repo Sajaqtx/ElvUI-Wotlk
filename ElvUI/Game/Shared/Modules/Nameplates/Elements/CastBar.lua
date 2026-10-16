@@ -159,6 +159,8 @@ function NP:Construct_Castbar(nameplate)
 	castbar:CreateBackdrop('Transparent', nil, nil, nil, nil, true)
 	castbar:SetStatusBarTexture(castbarTexture)
 
+	NP:Construct_FlashTexture(nameplate, castbar) -- ElvUI Wotlk: Style Filters
+
 	NP.StatusBars[castbar] = 'castbar'
 	castbar.ModuleStatusBars = NP.StatusBars -- not oUF
 

@@ -190,7 +190,7 @@ function NP:Construct_Highlight(nameplate)
 	return element
 end
 
-function NP:Update_Highlight(nameplate)
+function NP:Update_Highlight(nameplate, nameOnlySF) -- ElvUI Wotlk: nameOnlySF, Name Only of a Style Filter
 	local db = NP:PlateDB(nameplate)
 
 	if NP.db.highlight and db.enable then
@@ -198,7 +198,7 @@ function NP:Update_Highlight(nameplate)
 			nameplate:EnableElement('Highlight')
 		end
 
-		if db.health.enable and not db.nameOnly then
+		if db.health.enable and not (db.nameOnly or nameOnlySF) then
 			nameplate.Highlight.texture:SetColorTexture(1, 1, 1, 0.25)
 			nameplate.Highlight.texture:SetAllPoints(nameplate.Health)
 			nameplate.Highlight.texture:SetAlpha(0.75)
