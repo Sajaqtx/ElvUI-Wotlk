@@ -195,11 +195,13 @@ function NP:SetCVars()
 		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
 		-- the click area of the rebuffed.dll plates: Clickable Size (enemy, friendly)
-		-- in units without the UI scale (measured in game: a 130x16 plate at UI scale 0.6 needed a 220x28 hitbox): divided by it
+		-- in UIParent units (measured in game: a 130x16 plate drawn at scale 1, UI scale 0.6, needed a 220x28 hitbox): the plate
+		-- size with its border (one unit each side, the plates' borders are not scaled), times the plate scale over UIParent's
 		local click = db.clickSize
-		local scale = UIParent:GetEffectiveScale()
-		if not scale or scale <= 0 then scale = 1 end
-		local function unscaled(size) return floor((size or 0) / scale + 0.5) end
+		local uiScale = UIParent:GetEffectiveScale()
+		if not uiScale or uiScale <= 0 then uiScale = 1 end
+		local plateScale = (WorldFrame:GetEffectiveScale() or 1) * (NP.plateScale335 or 1)
+		local function unscaled(size) return floor(((size or 0) + 2) * plateScale / uiScale + 0.5) end
 		local ew, eh, fw, fh = unscaled(click.enemyWidth), unscaled(click.enemyHeight), unscaled(click.friendlyWidth), unscaled(click.friendlyHeight)
 		local hitbox = format('%d:%d:%d:%d', ew, eh, fw, fh)
 		E:SetCVar('nameplateHitboxWidth', ew)
