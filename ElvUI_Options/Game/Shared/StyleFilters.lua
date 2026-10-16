@@ -544,6 +544,8 @@ StyleFilters.triggers.args.threat.args.types.args.spacer1 = ACH:Spacer(5, 'full'
 StyleFilters.triggers.args.threat.args.types.args.offTank = ACH:Toggle(L["Off Tank"], nil, 6)
 StyleFilters.triggers.args.threat.args.types.args.offTankGoodTransition = ACH:Toggle(L["Off Tank Good Transition"], nil, 7, nil, nil, 200)
 StyleFilters.triggers.args.threat.args.types.args.offTankBadTransition = ACH:Toggle(L["Off Tank Bad Transition"], nil, 8, nil, nil, 200)
+StyleFilters.triggers.args.threat.args.types.args.spacer2 = ACH:Spacer(9, 'full') -- ElvUI Wotlk
+StyleFilters.triggers.args.threat.args.types.args.noThreat = ACH:Toggle(L["No Threat"], L["The unit has no threat on you (not in combat with you)."], 10)
 
 StyleFilters.triggers.args.nameplateType = ACH:Group(L["Unit Type"], nil, 26, nil, nil, nil, DisabledFilter)
 StyleFilters.triggers.args.nameplateType.args.enable = ACH:Toggle(L["Enable"], nil, 0, nil, nil, nil, function() local triggers = GetFilter(true) return triggers.nameplateType and triggers.nameplateType.enable end, function(_, value) local triggers = GetFilter(true) triggers.nameplateType.enable = value NP:ConfigureAll() end)

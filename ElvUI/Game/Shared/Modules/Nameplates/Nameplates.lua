@@ -1375,6 +1375,15 @@ if ElvUI335 then
 	-- the Style Filters: the unit events rebuffed.dll does not send for the plate units, from what changed since the last poll
 	local UnitAffectingCombat = UnitAffectingCombat
 	local function StyleFilterPoll(plate, unit, seen)
+		-- the threat (no UNIT_THREAT_* either): the health color and the threat scale follow it, then the filters
+		local threat = E:GetThreatSituation(unit, 'player')
+		local threatChanged = seen.threat ~= threat
+		if threatChanged then
+			seen.threat = threat
+			if plate.Health and plate.Health.ForceUpdate and plate.Health.__owner then plate.Health:ForceUpdate() end
+			if plate.ThreatIndicator and plate.ThreatIndicator.ForceUpdate and plate.ThreatIndicator.__owner then plate.ThreatIndicator:ForceUpdate() end
+		end
+
 		local events = NP.StyleFilterTriggerEvents
 		if not next(NP.StyleFilterTriggerList) then
 			seen.healthChanged, seen.powerChanged = nil, nil
@@ -1386,12 +1395,8 @@ if ElvUI335 then
 		if seen.powerChanged and events.UNIT_POWER_UPDATE then update(plate, 'UNIT_POWER_UPDATE', unit) end
 		seen.healthChanged, seen.powerChanged = nil, nil
 
-		if events.UNIT_THREAT_SITUATION_UPDATE then
-			local threat = E:GetThreatSituation(unit, 'player')
-			if seen.threat ~= threat then
-				seen.threat = threat
-				update(plate, 'UNIT_THREAT_SITUATION_UPDATE', unit)
-			end
+		if threatChanged and events.UNIT_THREAT_SITUATION_UPDATE then
+			update(plate, 'UNIT_THREAT_SITUATION_UPDATE', unit)
 		end
 
 		if events.UNIT_FLAGS then

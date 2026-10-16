@@ -802,7 +802,9 @@ function NP:StyleFilterThreatUpdate(frame, unit)
 	local element = frame.ThreatIndicator
 	local status = E:GetThreatSituation(unit, element.feedbackUnit)
 
-	return status or huge, NP.ThreatIndicator_PreUpdate(element, unit, true)
+	NP.ThreatIndicator_PreUpdate(element, unit, true)
+
+	return status or huge, element.isTank, element.offTank -- ElvUI Wotlk: the ElvUI 16 PreUpdate returns nothing, it sets them
 end
 
 -- ElvUI Wotlk: the mob type of an enemy NPC, as EllesmereUI tells them: a boss (a skull, a world boss, an elite two levels
@@ -1086,10 +1088,15 @@ function NP:StyleFilterConditionCheck(frame, event, arg1, arg2, filter, trigger)
 	if trigger.threat and trigger.threat.enable then
 		local checkOffTank = trigger.threat.offTank or trigger.threat.offTankGoodTransition or trigger.threat.offTankBadTransition
 		local checkThreat = trigger.threat.good or trigger.threat.goodTransition or trigger.threat.badTransition or trigger.threat.bad
-		if checkOffTank or checkThreat then
+		local checkNone = trigger.threat.noThreat -- ElvUI Wotlk
+		if checkOffTank or checkThreat or checkNone then
 			local status, isTank, offTank = NP:StyleFilterThreatUpdate(frame, frame.unit)
-			local value = (checkOffTank and offTank and NP.TriggerConditions.offTankThreat[status]) or checkThreat and ((isTank and NP.TriggerConditions.tankThreat[status]) or status) or nil
-			if trigger.threat[NP.TriggerConditions.threat[value]] then passed = true else return end
+			if checkNone and status == huge then -- no threat on the unit
+				passed = true
+			else
+				local value = (checkOffTank and offTank and NP.TriggerConditions.offTankThreat[status]) or checkThreat and ((isTank and NP.TriggerConditions.tankThreat[status]) or status) or nil
+				if trigger.threat[NP.TriggerConditions.threat[value]] then passed = true else return end
+			end
 		end
 	end
 

@@ -79,6 +79,7 @@ G.nameplates.filters = {
 		triggers = {
 			priority = 3,
 			mobType = { enable = true, boss = true },
+			threat = { enable = true, good = true, offTank = true, noThreat = true }, -- a bad threat or a transition shows the threat color
 			nameplateType = { enable = true, enemyNPC = true }
 		},
 		actions = {
@@ -89,6 +90,7 @@ G.nameplates.filters = {
 		triggers = {
 			priority = 3,
 			mobType = { enable = true, miniBoss = true },
+			threat = { enable = true, good = true, offTank = true, noThreat = true }, -- a bad threat or a transition shows the threat color
 			nameplateType = { enable = true, enemyNPC = true }
 		},
 		actions = {
@@ -99,6 +101,7 @@ G.nameplates.filters = {
 		triggers = {
 			priority = 3,
 			mobType = { enable = true, caster = true },
+			threat = { enable = true, good = true, offTank = true, noThreat = true }, -- a bad threat or a transition shows the threat color
 			nameplateType = { enable = true, enemyNPC = true }
 		},
 		actions = {
@@ -240,7 +243,8 @@ E.StyleFilterDefaults = {
 			bad = false,
 			offTank = false,
 			offTankGoodTransition = false,
-			offTankBadTransition = false
+			offTankBadTransition = false,
+			noThreat = false -- ElvUI Wotlk: no threat on the unit (out of combat with it)
 		},
 		curlevel = 0,
 		maxlevel = 0,
