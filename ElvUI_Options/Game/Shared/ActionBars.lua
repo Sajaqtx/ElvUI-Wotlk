@@ -16,7 +16,7 @@ local SaveBindings = SaveBindings
 
 local GetCVarBool = C_CVar.GetCVarBool
 
-local MICRO_SLOTS = (E.Mists or E.Forever) and 13 or 12
+local MICRO_SLOTS = (E.Mists or E.Forever or ElvUI335) and 13 or 12 -- ElvUI Wotlk: the 13 micro buttons of Rebuffed
 local STANCE_SLOTS = _G.NUM_STANCE_SLOTS or 10
 local ACTION_SLOTS = _G.NUM_PET_ACTION_SLOTS or 10
 
