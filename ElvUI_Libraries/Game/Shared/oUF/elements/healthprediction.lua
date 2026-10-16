@@ -182,7 +182,10 @@ local function Update(self, event, unit)
 		local health = UnitHealth(unit)
 		local myIncomingHeal = UnitGetIncomingHeals(unit, 'player') or 0
 		local allIncomingHeal = UnitGetIncomingHeals(unit) or 0
-		local overTimeHeals = not oUF.isModern and HealComm and ((HealComm:GetHealAmount(GUID, HealComm.OVERTIME_AND_BOMB_HEALS) or 0) * (HealComm:GetHealModifier(GUID) or 1)) or 0
+		-- ElvUI Wotlk: the 3.3.5 LibHealComm has no OVERTIME_AND_BOMB_HEALS (nil made it error on every update with a heal
+		-- pending): its hots and bombs (the casted heals come through UnitGetIncomingHeals)
+		local overTimeType = HealComm and (HealComm.OVERTIME_AND_BOMB_HEALS or bit.bor(HealComm.HOT_HEALS, HealComm.BOMB_HEALS))
+		local overTimeHeals = not oUF.isModern and HealComm and ((HealComm:GetHealAmount(GUID, overTimeType) or 0) * (HealComm:GetHealModifier(GUID) or 1)) or 0
 		local absorb = (oUF.isModern or oUF.isMists or ElvUI335) and UnitGetTotalAbsorbs(unit) or 0 -- ElvUI Wotlk: SpecializedAbsorbs
 		local healAbsorb = (oUF.isModern or oUF.isMists or ElvUI335) and UnitGetTotalHealAbsorbs(unit) or 0
 		local otherIncomingHeal = 0
