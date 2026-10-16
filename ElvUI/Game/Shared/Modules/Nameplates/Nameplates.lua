@@ -138,6 +138,18 @@ function NP:CVarReset()
 	E:SetCVar('nameplatePlayerLargerScale', 1.8)
 end
 
+-- ElvUI Wotlk: a size of the ElvUI plates in rebuffed.dll's units (its hitbox and spacing cvars are in UIParent units, as
+-- measured in game), with the factor per axis the hitbox calibration found (HealthPoll335)
+function NP:RebuffedUnits335(size, axis)
+	local uiScale = UIParent:GetEffectiveScale()
+	if not uiScale or uiScale <= 0 then uiScale = 1 end
+
+	local plateScale = (WorldFrame:GetEffectiveScale() or 1) * (NP.plateScale335 or 1)
+	local factor = NP.hitboxFactor335 and NP.hitboxFactor335[axis] or 1
+
+	return floor((size or 0) * plateScale / uiScale * factor + 0.5)
+end
+
 function NP:ToggleCVar(cvar, enabled)
 	if ElvUI335 and cvar == 'nameplateMotion' then -- ElvUI Wotlk: Rebuffed's stacking (rebuffed.dll)
 		cvar = 'nameplateStacking'
@@ -149,8 +161,9 @@ function NP:ToggleCVar(cvar, enabled)
 		local clamp = db and db.clampToScreen
 		local overlap = clamp and not enabled
 		local size = db and db.clickSize
-		local xSpace = floor((size and size.enemyWidth or 150) * (db and db.overlapH or 0.8) + 0.5)
-		local ySpace = floor((size and size.enemyHeight or 30) * (db and db.overlapV or 1.1) + 0.5)
+		-- in rebuffed.dll's units, as the hitbox (SetCVars): Overlap 0.8 is 80% of the plate as it is drawn
+		local xSpace = NP:RebuffedUnits335((size and size.enemyWidth or 150) * (db and db.overlapH or 0.8), 'w')
+		local ySpace = NP:RebuffedUnits335((size and size.enemyHeight or 30) * (db and db.overlapV or 1.1), 'h')
 		E:SetCVar('nameplateXSpace', overlap and 0 or xSpace)
 		E:SetCVar('nameplateYSpace', overlap and 0 or ySpace)
 		enabled = enabled or clamp
@@ -1418,64 +1431,82 @@ if ElvUI335 then
 
 	-- the draw order: every ElvUI plate drew its parts at the same fixed levels (10 to 70, Construct_RaisedElement), so the
 	-- texts of a plate were drawn over the bars of the plate under it (no level apart per plate from rebuffed.dll, as the
-	-- later clients give). Each plate gets a band of levels of its own, its parts squeezed in it in the same order, the
-	-- bands sorted by depth: the plate lowest on the screen (the nearest unit) on top, the target over every other one
-	local BAND = 24
-	local function Squeeze(level) -- 10 + 5 per layer, +1 / +2 inside a layer: two levels per layer
-		if not level or level < 10 then return 0 end
-		local layer, inside = floor((level - 10) / 5), (level - 10) % 5
-		return min(BAND - 1, 1 + layer * 2 + min(inside, 1))
-	end
+	-- later clients give). Each plate gets a band of levels of its own, its parts laid out in it in ElvUI's order, the
+	-- bands sorted by depth: the plate lowest on the screen (the nearest unit) on top, the target over every other one.
+	-- The layout is set part by part (measured in game: the levels 3.3.5 had given the parts were no layout to read back,
+	-- a bar, its backdrop and the auras all at the plate's level, the backdrop drawn over the bar), and the bands start
+	-- over the native plates (10 to 15: a plate under its native one is raised back over it)
+	local BAND, FIRST = 24, 20
+	local LAYOUT = { -- offsets in a band, as ElvUI orders them (Construct_RaisedElement)
+		TargetIndicatorLevel = 1, HealthLevel = 3, PowerLevel = 6, HighlightLevel = 8, RaidTargetIndicatorLevel = 9,
+		AuraLevel = 10, ClassBarLevel = 14, ClassButtonLevel = 15, PVPRoleLevel = 16, ClassificationLevel = 16,
+		QuestIconLevel = 16, CastBarLevel = 18, TagTextLevel = 22
+	}
+	local PARTS = { -- the plate's parts and their offsets, in that order (a later one may set a part an earlier one set)
+		{ 'StackingBounds', 0 }, { 'TargetIndicator', 'TargetIndicatorLevel' }, { 'Health', 'HealthLevel' },
+		{ 'Power', 'PowerLevel' }, { 'Highlight', 'HighlightLevel' }, { 'RaidTargetIndicator', 'RaidTargetIndicatorLevel' },
+		{ 'Auras', 'AuraLevel' }, { 'Buffs', 'AuraLevel' }, { 'Debuffs', 'AuraLevel' }, { 'ClassPower', 'ClassBarLevel' },
+		{ 'Runes', 'ClassBarLevel' }, { 'RaisedElement', 'PVPRoleLevel' }, { 'Castbar', 'CastBarLevel' }
+	}
+	local TAGS = { 'Name', 'Level', 'Title' }
 
 	local maxBands
 	local function MaxBands()
 		if not maxBands then
 			local probe = CreateFrame('Frame', nil, UIParent)
 			probe:SetFrameLevel(255) -- measured in game: kept up to 256, odd past it (1000 gave 384, 10000 gave 512)
-			maxBands = max(1, floor(((probe:GetFrameLevel() or 128) - 1) / BAND))
+			maxBands = max(1, floor(((probe:GetFrameLevel() or 128) - FIRST) / BAND))
 			probe:Hide()
 		end
 		return maxBands
 	end
 
-	local function LevelTree(frame, base, plate, children)
-		children = { frame:GetChildren() }
-		for _, child in next, children do
-			if child.offset335 == nil then -- its place in the band: from the ElvUI layout, or from the band it was made in
-				local level = child:GetFrameLevel()
-				child.offset335 = plate.base335 and max(0, min(BAND - 1, level - plate.base335)) or Squeeze(level)
-			end
+	-- a part at its level, its children one over it (its backdrop one under it), within the band
+	local function LevelPart(frame, level, top)
+		if frame:GetFrameLevel() ~= level then
+			frame:SetFrameLevel(level)
+		end
 
-			local want = base + child.offset335
-			if child:GetFrameLevel() ~= want then
-				child:SetFrameLevel(want)
+		for _, child in next, { frame:GetChildren() } do
+			if child == frame.backdrop then
+				child:SetFrameLevel(max(level - 1, 0))
+			else
+				LevelPart(child, min(level + 1, top), top)
 			end
-
-			LevelTree(child, base, plate)
 		end
 	end
 
 	local function LevelPlate(plate, rank)
-		local base = 1 + rank * BAND
+		local base = FIRST + rank * BAND
+		local top = base + BAND - 1
+
 		local raised = plate.RaisedElement
-		if raised and not raised.design335 then -- the layout levels, kept: the elements set their level from these fields
-			raised.design335 = {}
-			for key, value in next, raised do
-				if type(value) == 'number' and strmatch(key, 'Level$') then
-					raised.design335[key] = value
-				end
+		if raised then -- the elements set their own level from these fields (their updates)
+			for key, offset in next, LAYOUT do
+				raised[key] = base + offset
 			end
 		end
 
-		if raised then
-			for key, value in next, raised.design335 do
-				raised[key] = base + Squeeze(value)
+		LevelPart(plate, base, top) -- the whole plate in its band first (the parts not laid out below too)
+		for _, part in next, PARTS do
+			local frame = plate[part[1]]
+			if frame and frame.SetFrameLevel then
+				LevelPart(frame, base + (type(part[2]) == 'number' and part[2] or LAYOUT[part[2]]), top)
 			end
 		end
 
-		plate:SetFrameLevel(base)
-		LevelTree(plate, base, plate)
-		plate.base335, plate.rank335 = base, rank
+		-- the texts over everything of the plate (their frames are children of RaisedElement)
+		for _, key in next, TAGS do
+			local text = plate[key]
+			local holder = text and text.GetParent and text:GetParent()
+			if holder and holder ~= raised then holder:SetFrameLevel(base + LAYOUT.TagTextLevel) end
+		end
+		for _, element in next, { plate.Health, plate.Power } do
+			local holder = element and element.Text and element.Text:GetParent()
+			if holder and holder ~= raised then holder:SetFrameLevel(base + LAYOUT.TagTextLevel) end
+		end
+
+		plate.rank335 = rank
 	end
 
 	local order, levelElapsed = {}, 0
