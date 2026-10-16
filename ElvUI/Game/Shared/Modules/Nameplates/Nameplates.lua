@@ -1217,6 +1217,8 @@ if ElvUI335 then
 					native:SetAlpha(1)
 				end
 
+				ElvUI335.KeepNativeHidden(native) -- its spell icon, name, level shown again by the client
+
 				local unit = plate.__unit
 				local alpha = (hasTarget and unit and not UnitIsUnit(unit, 'target')) and nonTargetAlpha or 1
 				if plate:GetAlpha() ~= alpha then

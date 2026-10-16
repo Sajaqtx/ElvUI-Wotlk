@@ -1429,11 +1429,17 @@ function Compat.HideNativePlate(plate)
 	plate.__elvNativeHidden = true
 	RecordPlate(plate, "before")
 
+	-- what the client draws on its plate, kept out of sight again by the nameplates (it shows them back: the spell icon on
+	-- every cast, the name and level...): ElvUI335.KeepNativeHidden(plate)
+	local hidden = {}
+	plate.__elvNativeParts = hidden
+
 	for i = 1, select("#", plate:GetChildren()) do
 		local child = select(i, plate:GetChildren())
 		if (child:IsObjectType("StatusBar")) then
 			child:SetStatusBarTexture("")
 			child:SetAlpha(0)
+			hidden[#hidden + 1] = child
 		end
 	end
 
@@ -1445,12 +1451,24 @@ function Compat.HideNativePlate(plate)
 			region:SetTexture("")
 			region:SetTexCoord(0, 0, 0, 0)
 			region:SetAlpha(0)
+			hidden[#hidden + 1] = region
 		elseif (region:IsObjectType("FontString")) then
 			region:SetWidth(0.001)
 			region:SetAlpha(0)
+			hidden[#hidden + 1] = region
 		end
 	end
 	RecordPlate(plate, "after")
+end
+
+-- the parts of a hidden native plate the client showed again, put back out of sight (called every frame for the visible plates)
+function Compat.KeepNativeHidden(plate)
+	local parts = plate.__elvNativeParts
+	if (not parts) then return end
+	for i = 1, #parts do
+		local part = parts[i]
+		if (part:GetAlpha() > 0) then part:SetAlpha(0) end
+	end
 end
 
 ---------------------------------------------------------------------------------------------------------------
