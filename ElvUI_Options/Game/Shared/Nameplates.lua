@@ -492,6 +492,12 @@ do
 	NamePlates.generalGroup.args.blizzardCVars.args.cvars = ACH:MultiSelect(C.Blank, nil, 10, cvarToggles, nil, nil, function(_, key) return CheckCVar(key) end, function(_, key, value) ApplyCVar(key, value) end)
 end
 
+-- ElvUI Wotlk: none of these client settings exist on 3.3.5 (neither in Wow.exe nor in rebuffed.dll): alpha and scale ranges,
+-- At Base, Show Only Names, Class Color Names. The plates' own Name Only (each plate type, General) shows names only
+if ElvUI335 and NamePlates.generalGroup.args.blizzardCVars then
+	NamePlates.generalGroup.args.blizzardCVars.hidden = true
+end
+
 local envConditions = { party = L["Dungeons"], raid = L["Raids"], scenario = L["Scenario"], arena = L["Arena"], pvp = L["Battlegrounds"], resting = L["Resting"], world = L["World"] }
 NamePlates.generalGroup.args.enviromentConditions = ACH:Group(L["Environment Conditions"], nil, 60, nil, function(info) return E.db.nameplates.enviromentConditions[info[#info]] end, function(info, value) E.db.nameplates.enviromentConditions[info[#info]] = value NP:EnviromentConditionals() end)
 NamePlates.generalGroup.args.enviromentConditions.args.enemyEnabled = ACH:Toggle(L["Enemy Enabled"], L["This option controls whether nameplates will follow the visibility settings below.\n\n|cffff3333Note:|r This will be overridden by the Enemy Combat Toggle."], 10, nil, nil, 250)
@@ -506,6 +512,10 @@ NamePlates.generalGroup.args.clickThrough.args.friendly = ACH:Toggle(L["Friendly
 NamePlates.generalGroup.args.clickThrough.args.enemy = ACH:Toggle(L["Enemy"], nil, 3, nil, nil, nil, nil, function(info, value) E.db.nameplates.clickThrough[info[#info]] = value NP:SetNamePlateClickThrough() end)
 
 NamePlates.generalGroup.args.clickableRange = ACH:Group(L["Clickable Size"], nil, 70, nil, function(info) return E.db.nameplates.clickSize[info[#info]] end, function(info, value) E.db.nameplates.clickSize[info[#info]] = value NP:ConfigureAll() end)
+
+if ElvUI335 then -- the rebuffed.dll plate keeps its own click area: this sizes the ElvUI plate drawn on it
+	NamePlates.generalGroup.args.clickableRange.desc = L["On 3.3.5 (Rebuffed) this sets the size of the plates; the area you click stays the client's."]
+end
 
 NamePlates.generalGroup.args.clickableRange.args.personal = ACH:Group(L["Personal"], nil, 10)
 NamePlates.generalGroup.args.clickableRange.args.personal.inline = true
