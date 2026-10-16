@@ -39,41 +39,7 @@ local defaults = {
 }
 
 G.nameplates.filters = {
-	ElvUI_Boss = {
-		triggers = {
-			level = true,
-			curlevel = -1,
-			priority = 2
-		},
-		actions = {
-			usePortrait = true,
-			scale = 1.15
-		}
-	},
-	ElvUI_Target = {
-		triggers = {
-			isTarget = true
-		},
-		actions = {
-			scale = 1.2
-		}
-	},
-	ElvUI_NonTarget = {
-		triggers = {
-			notTarget = true,
-			requireTarget = true,
-			nameplateType = {
-				enable = true,
-				friendlyPlayer = true,
-				friendlyNPC = true,
-				enemyPlayer = true,
-				enemyNPC = true
-			}
-		},
-		actions = {
-			alpha = 50
-		}
-	},
+	-- ElvUI Wotlk: the ElvUI defaults (Boss, Target, NonTarget, Below20, Below20_Players) taken out at the user's request
 	-- ElvUI Wotlk: the mob type health colors of EllesmereUI (its default colors), enemy NPCs only
 	ElvUI_MobBoss = {
 		triggers = {
@@ -108,39 +74,6 @@ G.nameplates.filters = {
 			health = { colors = { enable = true, color = { r = 0.231, g = 0.510, b = 0.965, a = 1 } } }
 		}
 	},
-	ElvUI_Below20 = {
-		triggers = {
-			healthThreshold = true,
-			underHealthThreshold = 0.2,
-			nameplateType = {
-				enable = true,
-				enemyNPC = true,
-				friendlyNPC = true
-			}
-		},
-		actions = {
-			tags = {
-				name = '[healthcolor][name][ || >perhp<%]'
-			}
-		}
-	},
-	ElvUI_Below20_Players = {
-		triggers = {
-			healthThreshold = true,
-			underHealthThreshold = 0.2,
-			nameplateType = {
-				enable = true,
-				enemyPlayer = true,
-				friendlyPlayer = true,
-				player = true
-			}
-		},
-		actions = {
-			tags = {
-				name = '[spec:icon< ][healthcolor][name][ || >perhp<%]'
-			}
-		}
-	}
 }
 
 E.StyleFilterDefaults = {

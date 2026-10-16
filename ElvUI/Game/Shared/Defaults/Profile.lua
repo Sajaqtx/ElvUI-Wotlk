@@ -864,11 +864,8 @@ P.nameplates = {
 	overlapV = 1.1,
 	nonTargetAlpha = 1, -- ElvUI Wotlk: the plates not targeted while there is a target (3.3.5)
 	motionSpeed = 0, -- ElvUI Wotlk: the speed of the stacked plates (rebuffed.dll), 0 for the client's own
-	-- ElvUI Wotlk: the Style Filters enabled in this profile (ElvUI 14). ElvUI_NonTarget stays off: Non-Target Alpha does it
+	-- ElvUI Wotlk: the Style Filters enabled in this profile (ElvUI 14)
 	filters = {
-		ElvUI_Boss = { triggers = { enable = false } },
-		ElvUI_Target = { triggers = { enable = false } },
-		ElvUI_NonTarget = { triggers = { enable = false } },
 		ElvUI_MobBoss = { triggers = { enable = true } },
 		ElvUI_MobMiniBoss = { triggers = { enable = true } },
 		ElvUI_MobCaster = { triggers = { enable = true } },
