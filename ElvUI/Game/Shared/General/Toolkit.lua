@@ -281,6 +281,13 @@ local function SetInside(obj, anchor, xOffset, yOffset, anchor2, noScale)
 	obj:SetPoint('BOTTOMRIGHT', anchor2 or anchor, 'BOTTOMRIGHT', -x, y)
 end
 
+-- ElvUI Wotlk: the 3.3.5 plates hang on the world frame (scale 1), not on UIParent: one screen pixel there is
+-- E.perfect / its scale (0.71 at 1080p), where E:Scale gives one pixel at the UI scale (1.19 at UI scale 0.6, 1.7 pixels on
+-- a plate). Their borders and offsets in plate pixels, as ElvUI 6.10 drew them (E.mult * UIParent:GetScale())
+local function PlatePixel335()
+	return E.perfect / ((_G.WorldFrame and _G.WorldFrame:GetEffectiveScale()) or 1)
+end
+
 local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelMode, isUnitFrameElement, isNamePlateElement, noScale)
 	GetTemplate(template, isUnitFrameElement)
 
@@ -305,6 +312,9 @@ local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelM
 		frame:SetBackdrop(nil)
 	else
 		local edgeSize = E.twoPixelsPlease and 2 or 1
+		if ElvUI335 and isNamePlateElement then
+			edgeSize, noScale = edgeSize * PlatePixel335(), true
+		end
 
 		frame:SetBackdrop({
 			edgeFile = E.media.blankTex,
@@ -382,7 +392,12 @@ local function CreateBackdrop(frame, template, glossTex, ignoreUpdates, forcePix
 			backdrop:SetOutside(frame, E.twoPixelsPlease and 2 or 1, E.twoPixelsPlease and 2 or 1, nil, noScale)
 		else
 			local border = (isUnitFrameElement and UF.BORDER) or (isNamePlateElement and NP.BORDER)
-			backdrop:SetOutside(frame, border, border, nil, noScale)
+			if ElvUI335 and isNamePlateElement then
+				border = (border or 1) * PlatePixel335()
+				backdrop:SetOutside(frame, border, border, nil, true)
+			else
+				backdrop:SetOutside(frame, border, border, nil, noScale)
+			end
 		end
 	end
 
