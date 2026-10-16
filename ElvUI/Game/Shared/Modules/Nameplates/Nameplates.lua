@@ -194,6 +194,17 @@ function NP:SetCVars()
 		NP:ToggleCVar('nameplateExtendWorldFrameHeight', db.clampToScreen)
 		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
+		-- how fast the stacked plates move to their place (rebuffed.dll's raise, lower and reset speeds; lower is calmer),
+		-- 0 for the client's own speeds
+		local speed = db.motionSpeed or 0
+		for _, cvar in next, { 'nameplateSpeedRaise', 'nameplateSpeedLower', 'nameplateSpeedReset' } do
+			local value = speed
+			if value <= 0 then
+				local ok, default = pcall(GetCVarDefault, cvar)
+				value = ok and default
+			end
+			if value then E:SetCVar(cvar, value) end
+		end
 		-- the click area of the rebuffed.dll plates: Clickable Size (enemy, friendly)
 		-- in UIParent units (measured in game: a 130x16 plate drawn at scale 1, UI scale 0.6, needed a 220x28 hitbox): the plate
 		-- size with its border (one screen pixel each side), times the plate scale over UIParent's

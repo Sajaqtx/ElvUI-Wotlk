@@ -863,6 +863,7 @@ P.nameplates = {
 	overlapH = 0.8,
 	overlapV = 1.1,
 	nonTargetAlpha = 1, -- ElvUI Wotlk: the plates not targeted while there is a target (3.3.5)
+	motionSpeed = 0, -- ElvUI Wotlk: the speed of the stacked plates (rebuffed.dll), 0 for the client's own
 	classColorNames = false,
 	showEnemyCombat = 'DISABLED',
 	showFriendlyCombat = 'DISABLED',
