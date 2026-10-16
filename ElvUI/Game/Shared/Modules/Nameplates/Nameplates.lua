@@ -1202,9 +1202,22 @@ if ElvUI335 then
 	local last = setmetatable({}, {__mode = 'k'})
 	local elapsed = 0
 
+	-- the 3.3.5 client draws the plates of the units not targeted at half alpha (on the native plate, the ElvUI plate inherits
+	-- it), which later clients leave to a cvar ElvUI v16 no longer fades with: the native plates put back to full alpha, every frame
+	local function FullAlpha()
+		for plate in next, NP.Plates do
+			local native = plate:GetParent()
+			if native and native:GetParent() == WorldFrame and native:GetAlpha() < 1 then
+				native:SetAlpha(1)
+			end
+		end
+	end
+
 	HealthPoll335 = CreateFrame('Frame')
 	HealthPoll335:Hide()
 	HealthPoll335:SetScript('OnUpdate', function(_, delta)
+		FullAlpha()
+
 		elapsed = elapsed + delta
 		if elapsed < 0.1 then return end
 		elapsed = 0
