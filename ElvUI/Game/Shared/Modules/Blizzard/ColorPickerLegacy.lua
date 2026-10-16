@@ -431,15 +431,24 @@ function BL:EnhanceColorPicker()
 
 	-- ElvUI Wotlk: the options open the picker in FULLSCREEN_DIALOG (AceGUI's color widget): boxes kept in DIALOG were under
 	-- their own frame, which took their clicks (no code could be typed). They take the frame's strata, above its level
+	-- (3.3.5: the children do not follow a strata change of their parent, so the Copy / Paste / Class / Default buttons
+	-- stayed under it too, dimmed and not clickable: every child of the frame follows it)
 	if ElvUI335 then
 		ColorPickerFrame:HookScript('OnShow', function(frame)
 			local strata, level = frame:GetFrameStrata(), frame:GetFrameLevel() + 5
-			for _, rgb in next, { 'R', 'G', 'B', 'H', 'A' } do
-				local box = _G['ColorPPBox'..rgb]
-				box:SetFrameStrata(strata)
-				box:SetFrameLevel(level)
+			for _, child in next, { frame:GetChildren() } do
+				child:SetFrameStrata(strata)
+				child:SetFrameLevel(level)
 			end
 		end)
+
+		-- the 3.3.5 edit boxes give Enter to OnEnterPressed, not to OnKeyUp: a typed code is taken on Enter again
+		for _, rgb in next, { 'R', 'G', 'B', 'H', 'A' } do
+			local box = _G['ColorPPBox'..rgb]
+			local onKeyUp = rgb == 'A' and AlphaBox_OnKeyUp or Box_OnKeyUp
+			box:SetScript('OnEnterPressed', function(eb) onKeyUp(eb, 'ENTER') end)
+			box:SetScript('OnEscapePressed', function(eb) onKeyUp(eb, 'ESCAPE') end)
+		end
 	end
 
 	-- define the order of tab cursor movement, cycle via tab
