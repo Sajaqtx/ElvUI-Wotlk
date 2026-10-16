@@ -1711,6 +1711,7 @@ function NP:Initialize()
 	NP:RegisterEvent('UNIT_FACTION', 'NamePlateCallBack')
 	NP:RegisterEvent('PLAYER_LOGOUT') -- ElvUI Wotlk: Style Filters, their defaults taken out of the saved variables
 	NP:StyleFilterInitialize()
+	NP:StyleFilterConfigure() -- 3.3.5: PLAYER_ENTERING_WORLD has no initLogin / isReload, its ConfigureAll never ran at login
 
 	NP:HideInterfaceOptions()
 	NP:SetCVars()
