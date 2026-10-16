@@ -195,12 +195,17 @@ function NP:SetCVars()
 		NP:ToggleCVar('nameplateUpperBorderOnlyBoss', false)
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
 		-- the click area of the rebuffed.dll plates: Clickable Size (enemy, friendly)
+		-- in units without the UI scale (measured in game: a 130x16 plate at UI scale 0.6 needed a 220x28 hitbox): divided by it
 		local click = db.clickSize
-		local hitbox = format('%s:%s:%s:%s', click.enemyWidth, click.enemyHeight, click.friendlyWidth, click.friendlyHeight)
-		E:SetCVar('nameplateHitboxWidth', click.enemyWidth)
-		E:SetCVar('nameplateHitboxHeight', click.enemyHeight)
-		E:SetCVar('nameplateFriendlyHitboxWidth', click.friendlyWidth)
-		E:SetCVar('nameplateFriendlyHitboxHeight', click.friendlyHeight)
+		local scale = UIParent:GetEffectiveScale()
+		if not scale or scale <= 0 then scale = 1 end
+		local function unscaled(size) return floor((size or 0) / scale + 0.5) end
+		local ew, eh, fw, fh = unscaled(click.enemyWidth), unscaled(click.enemyHeight), unscaled(click.friendlyWidth), unscaled(click.friendlyHeight)
+		local hitbox = format('%d:%d:%d:%d', ew, eh, fw, fh)
+		E:SetCVar('nameplateHitboxWidth', ew)
+		E:SetCVar('nameplateHitboxHeight', eh)
+		E:SetCVar('nameplateFriendlyHitboxWidth', fw)
+		E:SetCVar('nameplateFriendlyHitboxHeight', fh)
 
 		-- rebuffed.dll reads them when it makes a plate: the plates shown are made again (hidden and shown back, out of combat)
 		if NP.hitbox335 and NP.hitbox335 ~= hitbox and not InCombatLockdown() then
@@ -1287,6 +1292,10 @@ function NP:Initialize()
 
 	if HealthPoll335 then
 		HealthPoll335:Show()
+	end
+
+	if ElvUI335 then -- the plate hitbox is set without the UI scale: set again when it changes
+		hooksecurefunc(E, 'UIScale', function() if NP.Initialized then NP:SetCVars() end end)
 	end
 
 	if AuraRelay335 then
