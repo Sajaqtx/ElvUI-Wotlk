@@ -819,12 +819,34 @@ end)
 --3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
 --3.3.5 casts: name, rank, text, texture, start, end, trade skill, cast ID, not interruptible (channel: no cast ID); the
 --later order has no rank and a spell ID last (for ElvUI only: oUF read the rank as the text and every value after shifted)
+--rebuffed.dll does not tell whether a nameplateN cast can be interrupted (the client knows it for its own units only): the
+--flag of the same unit under another name (target, focus, mouseover) is taken, otherwise the one last seen for that spell
+local KNOWN_UNITS = { "target", "focus", "mouseover" }
+local castInterruptible = {} -- spell name -> its last notInterruptible on a unit the client knows (casts and channels apart)
+local function NotInterruptible(unit, name, notInterruptible, info, slot, learned)
+	if not name or type(unit) ~= "string" then return notInterruptible end
+	if not strfind(unit, "^nameplate") then
+		learned[name] = notInterruptible and true or false
+		return notInterruptible
+	end
+	if notInterruptible then return notInterruptible end
+	for _, other in ipairs(KNOWN_UNITS) do
+		if realG.UnitExists(other) and realG.UnitIsUnit(unit, other) then
+			local otherName = info(other)
+			if otherName == name then return (select(slot, info(other))) end
+		end
+	end
+	return learned[name] or notInterruptible
+end
+local channelInterruptible = {}
 rawset(env, "UnitCastingInfo", function(unit)
 	local name, _, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = realG.UnitCastingInfo(unit)
+	notInterruptible = NotInterruptible(unit, name, notInterruptible, realG.UnitCastingInfo, 9, castInterruptible)
 	return name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, nil
 end)
 rawset(env, "UnitChannelInfo", function(unit)
 	local name, _, text, texture, startTime, endTime, isTradeSkill, notInterruptible = realG.UnitChannelInfo(unit)
+	notInterruptible = NotInterruptible(unit, name, notInterruptible, realG.UnitChannelInfo, 8, channelInterruptible)
 	return name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, nil
 end)
 

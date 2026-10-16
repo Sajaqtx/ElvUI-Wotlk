@@ -202,8 +202,13 @@ function NP:SetCVars()
 		if not uiScale or uiScale <= 0 then uiScale = 1 end
 		local plateScale = (WorldFrame:GetEffectiveScale() or 1) * (NP.plateScale335 or 1)
 		local border = E.perfect / plateScale -- one screen pixel on the plates (Toolkit.lua PlatePixel335)
-		local function unscaled(size) return floor(((size or 0) + 2 * border) * plateScale / uiScale + 0.5) end
-		local ew, eh, fw, fh = unscaled(click.enemyWidth), unscaled(click.enemyHeight), unscaled(click.friendlyWidth), unscaled(click.friendlyHeight)
+		-- a factor per axis, calibrated in game against the plates the client makes (rebuffed.dll does not size the width the
+		-- way it sizes the height: 124 wide for 132 asked, 17.4 high for 17.4): HealthPoll335 measures them
+		local factor = NP.hitboxFactor335 or { w = 1, h = 1 }
+		NP.hitboxFactor335 = factor
+		local function unscaled(size, axis) return floor(((size or 0) + 2 * border) * plateScale / uiScale * factor[axis] + 0.5) end
+		local ew, eh, fw, fh = unscaled(click.enemyWidth, 'w'), unscaled(click.enemyHeight, 'h'), unscaled(click.friendlyWidth, 'w'), unscaled(click.friendlyHeight, 'h')
+		NP.hitboxWanted335 = { w = (click.enemyWidth or 0) + 2 * border, h = (click.enemyHeight or 0) + 2 * border }
 		local hitbox = format('%d:%d:%d:%d', ew, eh, fw, fh)
 		E:SetCVar('nameplateHitboxWidth', ew)
 		E:SetCVar('nameplateHitboxHeight', eh)
@@ -1255,10 +1260,43 @@ if ElvUI335 then
 		end
 	end
 
+	-- the hitbox calibration: an enemy native plate measured against the size asked for it (NP:SetCVars), the factor of an axis
+	-- corrected when they differ by more than 2% (at most three times, out of combat, the plates made again each time)
+	local calibrations, calibrateElapsed = 0, 0
+	local function CalibrateHitbox(delta)
+		if calibrations >= 3 or not NP.hitboxWanted335 or InCombatLockdown() then return end
+		calibrateElapsed = calibrateElapsed + delta
+		if calibrateElapsed < 1 then return end
+		calibrateElapsed = 0
+
+		for plate in next, NP.Plates do
+			local native, unit = plate:GetParent(), plate.__unit
+			if native and native:GetParent() == WorldFrame and unit and plate:IsVisible() and UnitCanAttack('player', unit) then
+				-- in screen pixels: the ElvUI plate and the native one are not at the same scale
+				local nativeScale, plateScale = native:GetEffectiveScale(), plate:GetEffectiveScale()
+				local width, height = (native:GetWidth() or 0) * nativeScale, (native:GetHeight() or 0) * nativeScale
+				if width > 2 and height > 2 then
+					local wanted, factor = NP.hitboxWanted335, NP.hitboxFactor335
+					local rw, rh = wanted.w * plateScale / width, wanted.h * plateScale / height
+					if abs(rw - 1) > 0.02 or abs(rh - 1) > 0.02 then
+						-- kept within reason: a plate the client clamps (too small, too big) must not send it away
+						factor.w, factor.h = min(max(factor.w * rw, 0.5), 2), min(max(factor.h * rh, 0.5), 2)
+						calibrations = calibrations + 1
+						NP:SetCVars()
+					else
+						calibrations = 3 -- right: nothing more to do
+					end
+				end
+				return
+			end
+		end
+	end
+
 	HealthPoll335 = CreateFrame('Frame')
 	HealthPoll335:Hide()
 	HealthPoll335:SetScript('OnUpdate', function(_, delta)
 		FullAlpha()
+		CalibrateHitbox(delta)
 
 		elapsed = elapsed + delta
 		if elapsed < 0.1 then return end
