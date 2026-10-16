@@ -1622,6 +1622,11 @@ function E:LoadAPI()
 		ElvUI335.RegisterEvent(E, 'PLAYER_SPECIALIZATION_CHANGED', 'CheckRole')
 	else
 		E:RegisterEvent('CHARACTER_POINTS_CHANGED', 'CheckRole')
+
+		if ElvUI335 then -- ElvUI Wotlk: the dual spec swap (no CHARACTER_POINTS_CHANGED for it), the talents learned
+			E:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'CheckRole')
+			E:RegisterEvent('PLAYER_TALENT_UPDATE', 'CheckRole')
+		end
 	end
 
 	if E.Retail or E.Mists then

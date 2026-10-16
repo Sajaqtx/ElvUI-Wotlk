@@ -819,6 +819,16 @@ end)
 --3.3.5 returns a subtext second and no spell ID: the later order, for ElvUI only (the global is untouched)
 --3.3.5 casts: name, rank, text, texture, start, end, trade skill, cast ID, not interruptible (channel: no cast ID); the
 --later order has no rank and a spell ID last (for ElvUI only: oUF read the rank as the text and every value after shifted)
+--3.3.5 gives the role as three booleans (tank, healer, damage, set by the dungeon finder only): the later string, the
+--raid's main tank assignment when the dungeon finder gave none
+rawset(env, "UnitGroupRolesAssigned", function(unit)
+	local isTank, isHealer, isDamage = realG.UnitGroupRolesAssigned(unit)
+	if type(isTank) == "string" then return isTank end
+	if isTank then return "TANK" elseif isHealer then return "HEALER" elseif isDamage then return "DAMAGER" end
+	if type(unit) == "string" and realG.GetPartyAssignment and realG.GetPartyAssignment("MAINTANK", unit) then return "TANK" end
+	return "NONE"
+end)
+
 --rebuffed.dll does not tell whether a nameplateN cast can be interrupted (the client knows it for its own units only): the
 --flag of the same unit under another name (target, focus, mouseover) is taken, otherwise the one last seen for that spell
 local KNOWN_UNITS = { "target", "focus", "mouseover" }
