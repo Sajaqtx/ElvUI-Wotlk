@@ -1045,7 +1045,15 @@ do
 
 				nameplate.unitFrame = CreateFrame('Button', self.prefix .. plateName, nameplate, oUF.isModern and 'PingableUnitFrameTemplate' or '')
 				nameplate.unitFrame:EnableMouse(false)
-				nameplate.unitFrame:SetAllPoints()
+				if ElvUI335 then
+					-- ElvUI Wotlk: the rebuffed.dll plate is 1x1: on its edges the unit frame had no size, and what ElvUI anchors
+					-- to the plate's edges (the name over it, the castbar under it) fell on its center, over the health bar.
+					-- Centered on it instead, the unit frame takes the size ElvUI gives it (Clickable Size, NP:UpdatePlateSize)
+					nameplate.unitFrame:SetPoint('CENTER')
+					nameplate.unitFrame:SetSize(200, 30)
+				else
+					nameplate.unitFrame:SetAllPoints()
+				end
 				nameplate.unitFrame.isNameplate = true
 
 				Private.UpdateUnits(nameplate.unitFrame, unit)
