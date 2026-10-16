@@ -381,7 +381,9 @@ function BL:EnhanceColorPicker()
 	for i, rgb in next, { 'R', 'G', 'B', 'H', 'A' } do
 		local box = CreateFrame('EditBox', 'ColorPPBox'..rgb, ColorPickerFrame, 'InputBoxTemplate')
 		box:Point('TOP', 'ColorPickerWheel', 'BOTTOM', 0, -15)
-		box:SetFrameStrata('DIALOG')
+		if not ElvUI335 then -- ElvUI Wotlk: they follow the frame instead (see below)
+			box:SetFrameStrata('DIALOG')
+		end
 		box:SetAutoFocus(false)
 		box:SetTextInsets(0,7,0,0)
 		box:SetJustifyH('RIGHT')
@@ -426,6 +428,19 @@ function BL:EnhanceColorPicker()
 	_G.ColorPPBoxB:Point('RIGHT', 'ColorPPDefault', 'LEFT', -40, 0)
 	_G.ColorPPBoxG:Point('RIGHT', 'ColorPPBoxB', 'LEFT', -25, 0)
 	_G.ColorPPBoxR:Point('RIGHT', 'ColorPPBoxG', 'LEFT', -25, 0)
+
+	-- ElvUI Wotlk: the options open the picker in FULLSCREEN_DIALOG (AceGUI's color widget): boxes kept in DIALOG were under
+	-- their own frame, which took their clicks (no code could be typed). They take the frame's strata, above its level
+	if ElvUI335 then
+		ColorPickerFrame:HookScript('OnShow', function(frame)
+			local strata, level = frame:GetFrameStrata(), frame:GetFrameLevel() + 5
+			for _, rgb in next, { 'R', 'G', 'B', 'H', 'A' } do
+				local box = _G['ColorPPBox'..rgb]
+				box:SetFrameStrata(strata)
+				box:SetFrameLevel(level)
+			end
+		end)
+	end
 
 	-- define the order of tab cursor movement, cycle via tab
 	_G.ColorPPBoxR:SetScript('OnTabPressed', OnTabPressed_R)
