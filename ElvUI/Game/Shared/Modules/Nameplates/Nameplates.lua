@@ -1416,6 +1416,94 @@ if ElvUI335 then
 		end
 	end
 
+	-- the draw order: every ElvUI plate drew its parts at the same fixed levels (10 to 70, Construct_RaisedElement), so the
+	-- texts of a plate were drawn over the bars of the plate under it (no level apart per plate from rebuffed.dll, as the
+	-- later clients give). Each plate gets a band of levels of its own, its parts squeezed in it in the same order, the
+	-- bands sorted by depth: the plate lowest on the screen (the nearest unit) on top, the target over every other one
+	local BAND = 24
+	local function Squeeze(level) -- 10 + 5 per layer, +1 / +2 inside a layer: two levels per layer
+		if not level or level < 10 then return 0 end
+		local layer, inside = floor((level - 10) / 5), (level - 10) % 5
+		return min(BAND - 1, 1 + layer * 2 + min(inside, 1))
+	end
+
+	local maxBands
+	local function MaxBands()
+		if not maxBands then
+			local probe = CreateFrame('Frame', nil, UIParent)
+			probe:SetFrameLevel(10000)
+			maxBands = max(1, floor(((probe:GetFrameLevel() or 128) - 1) / BAND))
+			probe:Hide()
+		end
+		return maxBands
+	end
+
+	local function LevelTree(frame, base, plate, children)
+		children = { frame:GetChildren() }
+		for _, child in next, children do
+			if child.offset335 == nil then -- its place in the band: from the ElvUI layout, or from the band it was made in
+				local level = child:GetFrameLevel()
+				child.offset335 = plate.base335 and max(0, min(BAND - 1, level - plate.base335)) or Squeeze(level)
+			end
+
+			local want = base + child.offset335
+			if child:GetFrameLevel() ~= want then
+				child:SetFrameLevel(want)
+			end
+
+			LevelTree(child, base, plate)
+		end
+	end
+
+	local function LevelPlate(plate, rank)
+		local base = 1 + rank * BAND
+		local raised = plate.RaisedElement
+		if raised and not raised.design335 then -- the layout levels, kept: the elements set their level from these fields
+			raised.design335 = {}
+			for key, value in next, raised do
+				if type(value) == 'number' and strmatch(key, 'Level$') then
+					raised.design335[key] = value
+				end
+			end
+		end
+
+		if raised then
+			for key, value in next, raised.design335 do
+				raised[key] = base + Squeeze(value)
+			end
+		end
+
+		plate:SetFrameLevel(base)
+		LevelTree(plate, base, plate)
+		plate.base335, plate.rank335 = base, rank
+	end
+
+	local order, levelElapsed = {}, 0
+	local function byDepth(a, b) return (a.depth335 or 0) > (b.depth335 or 0) end
+	local function DrawOrder(delta)
+		levelElapsed = levelElapsed + delta
+		local full = levelElapsed > 1 -- once a second every plate again (an element may have set its level back)
+		if full then levelElapsed = 0 end
+
+		wipe(order)
+		for plate in next, NP.Plates do
+			local native = plate:GetParent()
+			if plate.__unit and plate:IsVisible() and native and native:GetParent() == WorldFrame then
+				plate.depth335 = (plate.__unit and UnitIsUnit(plate.__unit, 'target') and -math.huge) or native:GetBottom() or 0
+				order[#order + 1] = plate
+			end
+		end
+
+		sort(order, byDepth) -- the highest on the screen (the farthest) first, the target last
+		local count, bands = #order, MaxBands()
+		for index, plate in next, order do
+			local rank = max(0, index - 1 - max(0, count - bands)) -- the nearest plates their own band, the farthest share the lowest
+			if full or plate.rank335 ~= rank then
+				LevelPlate(plate, rank)
+			end
+		end
+	end
+
 	HealthPoll335 = CreateFrame('Frame')
 	HealthPoll335:Hide()
 	HealthPoll335:SetScript('OnUpdate', function(_, delta)
@@ -1425,6 +1513,8 @@ if ElvUI335 then
 		elapsed = elapsed + delta
 		if elapsed < 0.1 then return end
 		elapsed = 0
+
+		DrawOrder(0.1)
 
 		for plate in next, NP.Plates do
 			local unit = plate.__unit
