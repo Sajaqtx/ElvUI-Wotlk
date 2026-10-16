@@ -1076,6 +1076,10 @@ do
 	function E:PLAYER_REGEN_DISABLED()
 		local wasShown
 
+		if ElvUI335 then -- ElvUI Wotlk: the role checked again as a fight starts (ElvUI_FixRole: the role the dungeon finder gave or took meanwhile)
+			E:CheckRole()
+		end
+
 		if IsAddOnLoaded('ElvUI_Options') then
 			local ACD = E.Libs.AceConfigDialog
 			if ACD and ACD.OpenFrames and ACD.OpenFrames.ElvUI then
