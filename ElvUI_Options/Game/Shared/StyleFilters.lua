@@ -423,6 +423,16 @@ StyleFilters.triggers.args.classification.args.types.args.trivial = ACH:Toggle(L
 StyleFilters.triggers.args.classification.args.types.args.elite = ACH:Toggle(L["Elite"], nil, 6)
 StyleFilters.triggers.args.classification.args.types.args.minus = ACH:Toggle(L["Minus"], nil, 7)
 
+-- ElvUI Wotlk: the mob types of EllesmereUI / Plater (one type per enemy NPC)
+StyleFilters.triggers.args.mobType = ACH:Group(L["Mob Type"], nil, 16.5, nil, function(info) local triggers = GetFilter(true) return triggers.mobType[info[#info]] end, function(info, value) local triggers = GetFilter(true) triggers.mobType[info[#info]] = value NP:ConfigureAll() end, DisabledFilter)
+StyleFilters.triggers.args.mobType.args.enable = ACH:Toggle(L["Enable"], nil, 0)
+StyleFilters.triggers.args.mobType.args.types = ACH:Group('', nil, 2, nil, nil, nil, function() local triggers = GetFilter(true) return not triggers.mobType.enable end)
+StyleFilters.triggers.args.mobType.args.types.inline = true
+StyleFilters.triggers.args.mobType.args.types.args.boss = ACH:Toggle(L["Boss"], L["A skull level, a world boss, or an elite two levels or more above you."], 1)
+StyleFilters.triggers.args.mobType.args.types.args.miniBoss = ACH:Toggle(L["Mini-Boss"], L["An elite one level above you."], 2)
+StyleFilters.triggers.args.mobType.args.types.args.caster = ACH:Toggle(L["Caster"], L["A unit with mana, when it is neither a boss nor a mini-boss."], 3)
+StyleFilters.triggers.args.mobType.args.types.args.trash = ACH:Toggle(L["Trash"], L["A normal or minor unit (not elite)."], 4)
+
 StyleFilters.triggers.args.health = ACH:Group(L["Health Threshold"], nil, 17, nil, function(info) local triggers = GetFilter(true) return triggers[info[#info]] end, function(info, value) local triggers = GetFilter(true) triggers[info[#info]] = value NP:ConfigureAll() end, DisabledFilter)
 StyleFilters.triggers.args.health.args.healthThreshold = ACH:Toggle(L["Enable"], nil, 1)
 StyleFilters.triggers.args.health.args.healthUsePlayer = ACH:Toggle(L["Player Health"], L["Enabling this will check your health amount."], 2, nil, nil, nil, nil, nil, function() local triggers = GetFilter(true) return not triggers.healthThreshold end)

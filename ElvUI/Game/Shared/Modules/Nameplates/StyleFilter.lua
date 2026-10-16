@@ -805,6 +805,32 @@ function NP:StyleFilterThreatUpdate(frame, unit)
 	return status or huge, NP.ThreatIndicator_PreUpdate(element, unit, true)
 end
 
+-- ElvUI Wotlk: the mob type of an enemy NPC, as EllesmereUI tells them: a boss (a skull, a world boss, an elite two levels
+-- or more above the player), a mini-boss (an elite one level above), a caster (a mana pool, not a boss), trash (not elite)
+function NP:StyleFilterMobType(frame)
+	local unit = frame.unit
+	if not unit or frame.isPlayer or UnitPlayerControlled(unit) then return end
+
+	local classification = UnitClassification(unit)
+	local isElite = classification == 'elite' or classification == 'rareelite' or classification == 'worldboss'
+	if isElite then
+		local level, myLevel = UnitLevel(unit), E.mylevel
+		if level == -1 or classification == 'worldboss' or (level and level >= myLevel + 2) then
+			return 'boss'
+		elseif level and level >= myLevel + 1 then
+			return 'miniBoss'
+		end
+	end
+
+	if UnitPowerType(unit) == 0 and (UnitPowerMax(unit, 0) or 0) > 0 then
+		return 'caster'
+	end
+
+	if classification == 'normal' or classification == 'minus' or classification == 'trivial' then
+		return 'trash'
+	end
+end
+
 function NP:StyleFilterConditionCheck(frame, event, arg1, arg2, filter, trigger)
 	local passed -- value we will return at the end
 
@@ -1024,6 +1050,11 @@ function NP:StyleFilterConditionCheck(frame, event, arg1, arg2, filter, trigger)
 	-- Classification
 	if trigger.classification and (trigger.classification.worldboss or trigger.classification.rareelite or trigger.classification.elite or trigger.classification.rare or trigger.classification.normal or trigger.classification.trivial or trigger.classification.minus) then
 		if trigger.classification[frame.classification] then passed = true else return end
+	end
+
+	-- Mob Type (ElvUI Wotlk: the types of EllesmereUI / Plater)
+	if trigger.mobType and trigger.mobType.enable then
+		if trigger.mobType[NP:StyleFilterMobType(frame)] then passed = true else return end
 	end
 
 	-- Faction

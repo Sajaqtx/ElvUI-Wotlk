@@ -74,6 +74,37 @@ G.nameplates.filters = {
 			alpha = 50
 		}
 	},
+	-- ElvUI Wotlk: the mob type health colors of EllesmereUI (its default colors), enemy NPCs only
+	ElvUI_MobBoss = {
+		triggers = {
+			priority = 3,
+			mobType = { enable = true, boss = true },
+			nameplateType = { enable = true, enemyNPC = true }
+		},
+		actions = {
+			health = { colors = { enable = true, color = { r = 0.518, g = 0.243, b = 0.984, a = 1 } } }
+		}
+	},
+	ElvUI_MobMiniBoss = {
+		triggers = {
+			priority = 3,
+			mobType = { enable = true, miniBoss = true },
+			nameplateType = { enable = true, enemyNPC = true }
+		},
+		actions = {
+			health = { colors = { enable = true, color = { r = 0.518, g = 0.243, b = 0.984, a = 1 } } }
+		}
+	},
+	ElvUI_MobCaster = {
+		triggers = {
+			priority = 3,
+			mobType = { enable = true, caster = true },
+			nameplateType = { enable = true, enemyNPC = true }
+		},
+		actions = {
+			health = { colors = { enable = true, color = { r = 0.231, g = 0.510, b = 0.965, a = 1 } } }
+		}
+	},
 	ElvUI_Below20 = {
 		triggers = {
 			healthThreshold = true,
@@ -183,6 +214,13 @@ E.StyleFilterDefaults = {
 			normal = false,
 			trivial = false,
 			minus = false
+		},
+		mobType = { -- ElvUI Wotlk: the mob types of EllesmereUI / Plater
+			enable = false,
+			boss = false,
+			miniBoss = false,
+			caster = false,
+			trash = false
 		},
 		raidTarget = {
 			star = false,
