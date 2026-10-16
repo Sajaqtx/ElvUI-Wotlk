@@ -1936,6 +1936,11 @@ do
 				if disable.castbar then
 					HideFrame(_G.PlayerCastingBarFrame)
 					HideFrame(_G.PetCastingBarFrame)
+					HideFrame(_G.CastingBarFrame) -- ElvUI Wotlk: the 3.3.5 player castbar
+				end
+
+				if ElvUI335 and disable.player then -- the 3.3.5 rune frame is on UIParent, not on the player frame
+					HideFrame(_G.RuneFrame)
 				end
 			elseif disable.player and unit == 'pet' then
 				HideFrame(_G.PetFrame)

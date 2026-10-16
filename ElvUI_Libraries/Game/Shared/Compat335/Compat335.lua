@@ -502,7 +502,8 @@ do
 	--12.x: a cooldown set from a duration object (Compat335_API.lua)
 	local function FromDuration(self, d) if (d and d.GetStartTime) then self:SetCooldown(d:GetStartTime(), d:GetTotalDuration()) else self:SetCooldown(0, 0) end end
 	add("SetCooldownFromDuration", FromDuration, objectType("Cooldown"))
-	add("SetCooldownFromDurationObject", FromDuration, objectType("Cooldown"))
+	-- not SetCooldownFromDurationObject: oUF and its aura bars take its presence for a 12.x client (they then wait for a
+	-- duration object 3.3.5 never gives, and cleared every aura cooldown)
 	--models: the 3.3.5 model has no separate model alpha, the frame's alpha is the model's
 	add("SetModelAlpha", function(self, alpha) self:SetAlpha(alpha) end, function(o) return o.SetModel ~= nil end)
 	add("GetModelAlpha", function(self) return self:GetAlpha() end, function(o) return o.SetModel ~= nil end)
