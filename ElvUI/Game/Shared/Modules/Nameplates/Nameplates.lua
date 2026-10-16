@@ -196,10 +196,23 @@ function NP:SetCVars()
 		E:SetCVar('nameplateUpperBorder', db.clampBorder or 30)
 		-- the click area of the rebuffed.dll plates: Clickable Size (enemy, friendly)
 		local click = db.clickSize
+		local hitbox = format('%s:%s:%s:%s', click.enemyWidth, click.enemyHeight, click.friendlyWidth, click.friendlyHeight)
 		E:SetCVar('nameplateHitboxWidth', click.enemyWidth)
 		E:SetCVar('nameplateHitboxHeight', click.enemyHeight)
 		E:SetCVar('nameplateFriendlyHitboxWidth', click.friendlyWidth)
 		E:SetCVar('nameplateFriendlyHitboxHeight', click.friendlyHeight)
+
+		-- rebuffed.dll reads them when it makes a plate: the plates shown are made again (hidden and shown back, out of combat)
+		if NP.hitbox335 and NP.hitbox335 ~= hitbox and not InCombatLockdown() then
+			local enemies, friends = GetCVar('nameplateShowEnemies'), GetCVar('nameplateShowFriends')
+			SetCVar('nameplateShowEnemies', 0)
+			SetCVar('nameplateShowFriends', 0)
+			E:Delay(0.1, function()
+				SetCVar('nameplateShowEnemies', enemies)
+				SetCVar('nameplateShowFriends', friends)
+			end)
+		end
+		NP.hitbox335 = hitbox
 		NP:EnviromentConditionals() -- the stacking and its spacing (Overlap H / V), the one the clamp needs
 	else
 		E:SetCVar('nameplateMaxDistance', db.loadDistance)
