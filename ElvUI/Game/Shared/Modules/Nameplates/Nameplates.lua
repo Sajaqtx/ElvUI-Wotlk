@@ -1193,9 +1193,54 @@ if ElvUI335 then
 	end)
 end
 
+-- ElvUI Wotlk: no UNIT_HEALTH / UNIT_POWER either for the rebuffed.dll plate units: a plate's health bar stayed where it
+-- was set up (measured in game: the bar at 91% on a mob at 3%, its text right). No event to relay for the plates not
+-- targeted, so the visible plates are read ten times a second, and an element whose value moved is updated
+local HealthPoll335
+if ElvUI335 then
+	local UnitHealth, UnitHealthMax, UnitPower, UnitPowerMax = UnitHealth, UnitHealthMax, UnitPower, UnitPowerMax
+	local last = setmetatable({}, {__mode = 'k'})
+	local elapsed = 0
+
+	HealthPoll335 = CreateFrame('Frame')
+	HealthPoll335:Hide()
+	HealthPoll335:SetScript('OnUpdate', function(_, delta)
+		elapsed = elapsed + delta
+		if elapsed < 0.1 then return end
+		elapsed = 0
+
+		for plate in next, NP.Plates do
+			local unit = plate.__unit
+			if unit and plate:IsVisible() then
+				local health, maxHealth, power, maxPower = UnitHealth(unit), UnitHealthMax(unit), UnitPower(unit), UnitPowerMax(unit)
+				local seen = last[plate]
+				if not seen then
+					seen = {}
+					last[plate] = seen
+				end
+
+				if seen.unit ~= unit or seen.health ~= health or seen.maxHealth ~= maxHealth then
+					seen.unit, seen.health, seen.maxHealth = unit, health, maxHealth
+					if plate.Health and plate.Health.ForceUpdate and plate.Health.__owner then plate.Health:ForceUpdate() end
+					if plate.HealthPrediction and plate.HealthPrediction.ForceUpdate and plate.HealthPrediction.__owner then plate.HealthPrediction:ForceUpdate() end
+				end
+
+				if seen.power ~= power or seen.maxPower ~= maxPower then
+					seen.power, seen.maxPower = power, maxPower
+					if plate.Power and plate.Power.ForceUpdate and plate.Power.__owner and plate.Power:IsShown() then plate.Power:ForceUpdate() end
+				end
+			end
+		end
+	end)
+end
+
 function NP:Initialize()
 	if not E.private.nameplates.enable then return end
 	NP.Initialized = true
+
+	if HealthPoll335 then
+		HealthPoll335:Show()
+	end
 
 	if AuraRelay335 then
 		AuraRelay335:RegisterEvent('UNIT_AURA')

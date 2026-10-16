@@ -277,6 +277,19 @@ if ElvUI335 then
 	end
 
 	local function Cooldown_OnSetCooldown(cooldown, start, duration)
+		-- a 3.3.5 cooldown set to no duration (Clear, an aura that does not run out: Unholy Presence) stays shown and draws its
+		-- dark sweep; the client's CooldownFrame_SetTimer hides it then, ElvUI calls SetCooldown itself: hidden here, and shown
+		-- again by the next real cooldown (only the ones hidden here)
+		if not (start and duration) or start <= 0 or duration <= 0 then
+			if cooldown:IsShown() then
+				cooldown.hidden335 = true
+				cooldown:Hide()
+			end
+		elseif cooldown.hidden335 then
+			cooldown.hidden335 = nil
+			cooldown:Show()
+		end
+
 		local timer = cooldown.timer335
 		local db = E:CooldownData(cooldown)
 		if not db or cooldown.hideNumbers335 or not (start and duration) or start <= 0 or duration <= 0

@@ -960,6 +960,17 @@ function TT:SetStyle(tt, _, isEmbedded)
 	end
 end
 
+-- ElvUI Wotlk: the 3.3.5 GameTooltip_OnHide puts its default colors back on every hide (blue background 0.09 0.09 0.19, white
+-- border; measured in game by ElvUI_Diag), which later clients restyle through SharedTooltip_SetBackdropStyle: the
+-- ElvUI colors of the tooltip's template put back after it
+function TT:RestoreStyle335(tt)
+	if not tt or tt.template ~= 'Transparent' or (tt.IsForbidden and tt:IsForbidden()) then return end
+
+	local r, g, b, a = unpack(E.media.backdropfadecolor)
+	tt:SetBackdropColor(r, g, b, tt.customBackdropAlpha or a)
+	tt:SetBackdropBorderColor(unpack(E.media.bordercolor))
+end
+
 function TT:PLAYER_ENTERING_WORLD(_, initLogin, isReload)
 	if initLogin or isReload then
 		TT:UpdateAuraSpellIDCVar()
@@ -1280,6 +1291,7 @@ function TT:Initialize()
 
 	TT:SecureHook('SetItemRef')
 	TT:SecureHook('GameTooltip_SetDefaultAnchor')
+	if ElvUI335 then TT:SecureHook('GameTooltip_OnHide', 'RestoreStyle335') end
 	TT:SecureHook('EmbeddedItemTooltip_SetItemByID', 'EmbeddedItemTooltip_ID')
 	TT:SecureHook('EmbeddedItemTooltip_SetCurrencyByID', 'EmbeddedItemTooltip_ID')
 	TT:SecureHook('EmbeddedItemTooltip_SetItemByQuestReward', 'EmbeddedItemTooltip_QuestReward')
