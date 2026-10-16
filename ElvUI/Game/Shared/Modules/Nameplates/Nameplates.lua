@@ -1431,7 +1431,7 @@ if ElvUI335 then
 	local function MaxBands()
 		if not maxBands then
 			local probe = CreateFrame('Frame', nil, UIParent)
-			probe:SetFrameLevel(10000)
+			probe:SetFrameLevel(255) -- measured in game: kept up to 256, odd past it (1000 gave 384, 10000 gave 512)
 			maxBands = max(1, floor(((probe:GetFrameLevel() or 128) - 1) / BAND))
 			probe:Hide()
 		end
