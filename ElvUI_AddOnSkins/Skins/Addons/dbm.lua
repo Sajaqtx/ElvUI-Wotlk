@@ -110,11 +110,12 @@ S:AddCallbackForAddon("DBM-Core", "DBM-Core", function()
 				self.owner.options.HugeBarYOffset = 20
 			end
 
-			name:Point("BOTTOMLEFT", frame, "TOPLEFT", 0, 3)
+			-- ElvUI Wotlk: Bar Text Y-Offset moves the timer with the name
+			name:Point("BOTTOMLEFT", frame, "TOPLEFT", 0, db.dbmBarTextYOffset or 3)
 			if backportVersion then
 				name:Point("BOTTOMRIGHT", timer, "BOTTOMLEFT")
 			end
-			timer:Point("BOTTOMRIGHT", frame, "TOPRIGHT", 1, 3)
+			timer:Point("BOTTOMRIGHT", frame, "TOPRIGHT", 1, db.dbmBarTextYOffset or 3)
 		else
 			name:Point("LEFT", 5, 0)
 			if backportVersion then
@@ -199,7 +200,7 @@ S:AddCallbackForAddon("DBM-Core", "DBM-Core", function()
 					if db.DBMSkinHalf then
 						name:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 0, db.dbmBarTextYOffset)
 						name:SetPoint("BOTTOMRIGHT", timer, "BOTTOMLEFT") -- truncation
-						timer:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", -1, 1)
+						timer:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", -1, db.dbmBarTextYOffset) -- ElvUI Wotlk: with the name
 					else
 						name:SetPoint("LEFT", frame, "LEFT", 4, 0)
 						name:SetPoint("RIGHT", timer, "LEFT") -- truncation
