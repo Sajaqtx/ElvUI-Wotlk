@@ -1968,7 +1968,27 @@ function NP:StyleFilterCopyDefaults(tbl)
 	return E:CopyDefaults(tbl or {}, E.StyleFilterDefaults)
 end
 
+-- ElvUI Wotlk: the ElvUI default filters taken out (Defaults/StyleFilters.lua), left in the saved variables as empty
+-- tables (and their toggles in the profiles): gone from there too, unless one was given triggers or actions of its own
+local REMOVED_DEFAULTS = { 'ElvUI_Boss', 'ElvUI_Target', 'ElvUI_NonTarget', 'ElvUI_Below20', 'ElvUI_Below20_Players' }
+local function RemoveOldDefaults()
+	local filters = E.global.nameplates.filters
+	for _, name in next, REMOVED_DEFAULTS do
+		local filter = filters[name]
+		if filter and not G.nameplates.filters[name] and not (rawget(filter, 'triggers') and next(rawget(filter, 'triggers'))) then
+			filters[name] = nil
+
+			for _, profile in next, (E.data and E.data.profiles) or {} do
+				local toggles = profile.nameplates and profile.nameplates.filters
+				if toggles then toggles[name] = nil end
+			end
+		end
+	end
+end
+
 function NP:StyleFilterInitialize()
+	RemoveOldDefaults()
+
 	for _, filterTable in next, E.global.nameplates.filters do
 		NP:StyleFilterCopyDefaults(filterTable)
 	end
