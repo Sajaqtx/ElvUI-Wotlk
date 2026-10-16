@@ -21,7 +21,24 @@ local MAX_PLAYER_LEVEL = E.Retail and GetMaxLevelForPlayerExpansion() or GetMaxP
 
 local filters, sortedFilters = {},{}
 local exportList = {}
-local raidTargetIcon = [[|TInterface\TargetingFrame\UI-RaidTargetingIcon_%s:0|t %s]]
+-- ElvUI Wotlk: the icons from the sheet the 3.3.5 menus use (the single icon files drew nothing past the fifth)
+local function RaidTargetIcon(index, text)
+	local column, row = (index - 1) % 4, floor((index - 1) / 4)
+	return format('|TInterface\\TargetingFrame\\UI-RaidTargetingIcons:0:0:0:0:256:256:%d:%d:%d:%d|t %s', column * 64, column * 64 + 64, row * 64, row * 64 + 64, text)
+end
+
+-- ElvUI Wotlk: the labels ElvUI 14 read from its locales (gone from ElvUI 16): the game's own strings, or these
+local GLOBAL_FALLBACK = {
+	ALT_KEY_TEXT = 'ALT',
+	INVTYPE_FINGER1 = (_G.INVTYPE_FINGER or 'Finger')..' 1',
+	INVTYPE_FINGER2 = (_G.INVTYPE_FINGER or 'Finger')..' 2',
+	INVTYPE_TRINKET1 = (_G.INVTYPE_TRINKET or 'Trinket')..' 1',
+	INVTYPE_TRINKET2 = (_G.INVTYPE_TRINKET or 'Trinket')..' 2',
+	LEVEL_BOSS = 'Set the level to -1 for boss units, or to 0 to disable it.',
+	RAID_INFO_WORLD_BOSS = 'World Boss',
+	SCENARIOS = 'Scenarios',
+}
+local function GL(key) return _G[key] or GLOBAL_FALLBACK[key] or L[key] end
 local sortedClasses = E:CopyTable({}, CLASS_SORT_ORDER)
 sort(sortedClasses)
 
@@ -348,7 +365,7 @@ StyleFilters.triggers.args.faction.args.types.args.Alliance = ACH:Toggle(L["Alli
 StyleFilters.triggers.args.faction.args.types.args.Horde = ACH:Toggle(L["Horde"], nil, 2)
 StyleFilters.triggers.args.faction.args.types.args.Neutral = ACH:Toggle(L["Neutral"], nil, 3)
 
-StyleFilters.triggers.args.class = ACH:Group(L["CLASS"], nil, 12, nil, nil, nil, DisabledFilter)
+StyleFilters.triggers.args.class = ACH:Group(GL("CLASS"), nil, 12, nil, nil, nil, DisabledFilter)
 
 for _, info in next, E.ClassInfoByID do
 	local className, classFile = info.className, info.classFile
@@ -368,26 +385,26 @@ for _, info in next, E.ClassInfoByID do
 end
 
 local EquippedValues = {
-	[_G.INVSLOT_AMMO] = L["INVTYPE_AMMO"], -- 0
-	[_G.INVSLOT_HEAD] = L["INVTYPE_HEAD"], -- 1
-	[_G.INVSLOT_NECK] = L["INVTYPE_NECK"], -- 2
-	[_G.INVSLOT_SHOULDER] = L["INVTYPE_SHOULDER"], -- 3
-	[_G.INVSLOT_BODY] = L["INVTYPE_BODY"], -- 4 (shirt)
-	[_G.INVSLOT_CHEST] = L["INVTYPE_CHEST"], -- 5
-	[_G.INVSLOT_WAIST] = L["INVTYPE_WAIST"], -- 6
-	[_G.INVSLOT_LEGS] = L["INVTYPE_LEGS"], -- 7
-	[_G.INVSLOT_FEET] = L["INVTYPE_FEET"], -- 8
-	[_G.INVSLOT_WRIST] = L["INVTYPE_WRIST"], -- 9
-	[_G.INVSLOT_HAND] = L["INVTYPE_HAND"], -- 10
-	[_G.INVSLOT_FINGER1] = L["INVTYPE_FINGER1"], -- 11 (no real global)
-	[_G.INVSLOT_FINGER2] = L["INVTYPE_FINGER2"], -- 12 (no real global)
-	[_G.INVSLOT_TRINKET1] = L["INVTYPE_TRINKET1"], -- 13 (no real global)
-	[_G.INVSLOT_TRINKET2] = L["INVTYPE_TRINKET2"], -- 14 (no real global)
-	[_G.INVSLOT_BACK] = L["INVTYPE_CLOAK"], -- 15
-	[_G.INVSLOT_MAINHAND] = L["INVTYPE_WEAPONMAINHAND"], -- 16
-	[_G.INVSLOT_OFFHAND] = L["INVTYPE_WEAPONOFFHAND"], -- 17
-	[_G.INVSLOT_RANGED] = L["INVTYPE_RANGED"], -- 18
-	[_G.INVSLOT_TABARD] = L["INVTYPE_TABARD"], -- 19
+	[_G.INVSLOT_AMMO] = GL("INVTYPE_AMMO"), -- 0
+	[_G.INVSLOT_HEAD] = GL("INVTYPE_HEAD"), -- 1
+	[_G.INVSLOT_NECK] = GL("INVTYPE_NECK"), -- 2
+	[_G.INVSLOT_SHOULDER] = GL("INVTYPE_SHOULDER"), -- 3
+	[_G.INVSLOT_BODY] = GL("INVTYPE_BODY"), -- 4 (shirt)
+	[_G.INVSLOT_CHEST] = GL("INVTYPE_CHEST"), -- 5
+	[_G.INVSLOT_WAIST] = GL("INVTYPE_WAIST"), -- 6
+	[_G.INVSLOT_LEGS] = GL("INVTYPE_LEGS"), -- 7
+	[_G.INVSLOT_FEET] = GL("INVTYPE_FEET"), -- 8
+	[_G.INVSLOT_WRIST] = GL("INVTYPE_WRIST"), -- 9
+	[_G.INVSLOT_HAND] = GL("INVTYPE_HAND"), -- 10
+	[_G.INVSLOT_FINGER1] = GL("INVTYPE_FINGER1"), -- 11 (no real global)
+	[_G.INVSLOT_FINGER2] = GL("INVTYPE_FINGER2"), -- 12 (no real global)
+	[_G.INVSLOT_TRINKET1] = GL("INVTYPE_TRINKET1"), -- 13 (no real global)
+	[_G.INVSLOT_TRINKET2] = GL("INVTYPE_TRINKET2"), -- 14 (no real global)
+	[_G.INVSLOT_BACK] = GL("INVTYPE_CLOAK"), -- 15
+	[_G.INVSLOT_MAINHAND] = GL("INVTYPE_WEAPONMAINHAND"), -- 16
+	[_G.INVSLOT_OFFHAND] = GL("INVTYPE_WEAPONOFFHAND"), -- 17
+	[_G.INVSLOT_RANGED] = GL("INVTYPE_RANGED"), -- 18
+	[_G.INVSLOT_TABARD] = GL("INVTYPE_TABARD"), -- 19
 }
 
 StyleFilters.triggers.args.slots = ACH:Group(L["Slots"], nil, 13, nil, nil, nil, DisabledFilter)
@@ -401,13 +418,13 @@ StyleFilters.triggers.args.items.args.negativeMatch = ACH:Toggle(L["Negative Mat
 StyleFilters.triggers.args.items.args.list = ACH:Group('', nil, 50, nil, function(info) local triggers = GetFilter(true) return triggers.items and triggers.items[info[#info]] end, function(info, value) local triggers = GetFilter(true) if not triggers.items then triggers.items = {} end triggers.items[info[#info]] = value NP:ConfigureAll() end, nil, true)
 StyleFilters.triggers.args.items.args.list.inline = true
 
-StyleFilters.triggers.args.role = ACH:Group(L["ROLE"], nil, 15, nil, nil, nil, DisabledFilter)
+StyleFilters.triggers.args.role = ACH:Group(GL("ROLE"), nil, 15, nil, nil, nil, DisabledFilter)
 
 for option, name in next, { myRole = L["Player"], unitRole = L["Unit"] } do
 	StyleFilters.triggers.args.role.args[option] = ACH:Group(name, nil, nil, nil, function(info) local triggers = GetFilter(true) return triggers[option] and triggers[option][info[#info]] end, function(info, value) local triggers = GetFilter(true) if not triggers[option] then triggers[option] = {} end triggers[option][info[#info]] = value NP:ConfigureAll() end)
 	StyleFilters.triggers.args.role.args[option].inline = true
 
-	for role, roleLocale in next, { tank = L["Tank"], healer = L["Healer"], damager = L["DAMAGER"] } do
+	for role, roleLocale in next, { tank = L["Tank"], healer = L["Healer"], damager = GL("DAMAGER") } do
 		StyleFilters.triggers.args.role.args[option].args[role] = ACH:Toggle(roleLocale)
 	end
 end
@@ -415,10 +432,10 @@ end
 StyleFilters.triggers.args.classification = ACH:Group(L["Classification"], nil, 16, nil, function(info) local triggers = GetFilter(true) return triggers.classification[info[#info]] end, function(info, value) local triggers = GetFilter(true) triggers.classification[info[#info]] = value NP:ConfigureAll() end, DisabledFilter)
 StyleFilters.triggers.args.classification.args.types = ACH:Group('', nil, 2)
 StyleFilters.triggers.args.classification.args.types.inline = true
-StyleFilters.triggers.args.classification.args.types.args.worldboss = ACH:Toggle(L["RAID_INFO_WORLD_BOSS"], nil, 1)
+StyleFilters.triggers.args.classification.args.types.args.worldboss = ACH:Toggle(GL("RAID_INFO_WORLD_BOSS"), nil, 1)
 StyleFilters.triggers.args.classification.args.types.args.rareelite = ACH:Toggle(L["Rare Elite"], nil, 2)
-StyleFilters.triggers.args.classification.args.types.args.normal = ACH:Toggle(L["PLAYER_DIFFICULTY1"], nil, 3)
-StyleFilters.triggers.args.classification.args.types.args.rare = ACH:Toggle(L["ITEM_QUALITY3_DESC"], nil, 4)
+StyleFilters.triggers.args.classification.args.types.args.normal = ACH:Toggle(GL("PLAYER_DIFFICULTY1"), nil, 3)
+StyleFilters.triggers.args.classification.args.types.args.rare = ACH:Toggle(GL("ITEM_QUALITY3_DESC"), nil, 4)
 StyleFilters.triggers.args.classification.args.types.args.trivial = ACH:Toggle(L["Trivial"], nil, 5)
 StyleFilters.triggers.args.classification.args.types.args.elite = ACH:Toggle(L["Elite"], nil, 6)
 StyleFilters.triggers.args.classification.args.types.args.minus = ACH:Toggle(L["Minus"], nil, 7)
@@ -449,9 +466,9 @@ StyleFilters.triggers.args.keyMod = ACH:Group(L["Key Modifiers"], nil, 19, nil, 
 StyleFilters.triggers.args.keyMod.args.enable = ACH:Toggle(L["Enable"], nil, 0)
 StyleFilters.triggers.args.keyMod.args.types = ACH:Group('', nil, 1, nil, nil, nil, function() local triggers = GetFilter(true) return DisabledFilter() or not triggers.keyMod.enable end)
 StyleFilters.triggers.args.keyMod.args.types.inline = true
-StyleFilters.triggers.args.keyMod.args.types.args.Shift = ACH:Toggle(L["SHIFT_KEY_TEXT"], nil, 1)
-StyleFilters.triggers.args.keyMod.args.types.args.Alt = ACH:Toggle(L["ALT_KEY_TEXT"], nil, 2)
-StyleFilters.triggers.args.keyMod.args.types.args.Control = ACH:Toggle(L["CTRL_KEY_TEXT"], nil, 3)
+StyleFilters.triggers.args.keyMod.args.types.args.Shift = ACH:Toggle(GL("SHIFT_KEY_TEXT"), nil, 1)
+StyleFilters.triggers.args.keyMod.args.types.args.Alt = ACH:Toggle(GL("ALT_KEY_TEXT"), nil, 2)
+StyleFilters.triggers.args.keyMod.args.types.args.Control = ACH:Toggle(GL("CTRL_KEY_TEXT"), nil, 3)
 StyleFilters.triggers.args.keyMod.args.types.args.Modifier = ACH:Toggle(L["Any"], nil, 4)
 StyleFilters.triggers.args.keyMod.args.types.args.LeftShift = ACH:Toggle(L["Left Shift"], nil, 6)
 StyleFilters.triggers.args.keyMod.args.types.args.LeftAlt = ACH:Toggle(L["Left Alt"], nil, 7)
@@ -463,7 +480,7 @@ StyleFilters.triggers.args.keyMod.args.types.args.RightControl = ACH:Toggle(L["R
 StyleFilters.triggers.args.levels = ACH:Group(L["Level"], nil, 20, nil, function(info) local triggers = GetFilter(true) return triggers[info[#info]] end, function(info, value) local triggers = GetFilter(true) triggers[info[#info]] = value NP:ConfigureAll() end, DisabledFilter)
 StyleFilters.triggers.args.levels.args.level = ACH:Toggle(L["Enable"], nil, 1)
 StyleFilters.triggers.args.levels.args.mylevel = ACH:Toggle(L["Match Player Level"], L["If enabled then the filter will only activate if the level of the unit matches your own."], 2, nil, nil, nil, nil, nil, function() local triggers = GetFilter(true) return not triggers.level end)
-StyleFilters.triggers.args.levels.args.spacer1 = ACH:Description(L["LEVEL_BOSS"], 3)
+StyleFilters.triggers.args.levels.args.spacer1 = ACH:Description(GL("LEVEL_BOSS"), 3)
 StyleFilters.triggers.args.levels.args.minlevel = ACH:Range(L["Minimum Level"], L["If enabled then the filter will only activate if the level of the unit is equal to or higher than this value."], 4, { min = -1, max = MAX_PLAYER_LEVEL + 3, step = 1 }, nil, function(info) local triggers = GetFilter(true) return triggers[info[#info]] or 0 end, nil, function() local triggers = GetFilter(true) return not (triggers.level and not triggers.mylevel) end)
 StyleFilters.triggers.args.levels.args.maxlevel = ACH:Range(L["Maximum Level"], L["If enabled then the filter will only activate if the level of the unit is equal to or lower than this value."], 5, { min = -1, max = MAX_PLAYER_LEVEL + 3, step = 1 }, nil, function(info) local triggers = GetFilter(true) return triggers[info[#info]] or 0 end, nil, function() local triggers = GetFilter(true) return not (triggers.level and not triggers.mylevel) end)
 StyleFilters.triggers.args.levels.args.curlevel = ACH:Range(L["Current Level"], L["If enabled then the filter will only activate if the level of the unit matches this value."], 6, { min = -1, max = MAX_PLAYER_LEVEL + 3, step = 1 }, nil, function(info) local triggers = GetFilter(true) return triggers[info[#info]] or 0 end, nil, function() local triggers = GetFilter(true) return not (triggers.level and not triggers.mylevel) end)
@@ -599,13 +616,13 @@ StyleFilters.triggers.args.instanceType = ACH:Group(L["Instance Type"], nil, 29,
 StyleFilters.triggers.args.instanceType.args.types = ACH:Group('', nil, 2)
 StyleFilters.triggers.args.instanceType.args.types.inline = true
 StyleFilters.triggers.args.instanceType.args.types.args.none = ACH:Toggle(L["None"], nil, 1)
-StyleFilters.triggers.args.instanceType.args.types.args.scenario = ACH:Toggle(L["SCENARIOS"], nil, 2, nil, nil, nil, nil, nil, nil, not E.Retail)
+StyleFilters.triggers.args.instanceType.args.types.args.scenario = ACH:Toggle(GL("SCENARIOS"), nil, 2, nil, nil, nil, nil, nil, nil, not E.Retail)
 StyleFilters.triggers.args.instanceType.args.types.args.party = ACH:Toggle(L["Party"], nil, 5)
 StyleFilters.triggers.args.instanceType.args.types.args.raid = ACH:Toggle(L["Raid"], nil, 5)
 StyleFilters.triggers.args.instanceType.args.types.args.arena = ACH:Toggle(L["Arena"], nil, 7, nil, nil, nil, nil, nil, nil, E.Classic)
-StyleFilters.triggers.args.instanceType.args.types.args.pvp = ACH:Toggle(L["BATTLEFIELDS"], nil, 8)
+StyleFilters.triggers.args.instanceType.args.types.args.pvp = ACH:Toggle(GL("BATTLEFIELDS"), nil, 8)
 
-StyleFilters.triggers.args.instanceType.args.dungeonDifficulty = ACH:MultiSelect(L["DUNGEON_DIFFICULTY"], L["Check these to only have the filter active in certain difficulties. If none are checked, it is active in all difficulties."], 10, { normal = GetDifficultyInfo(1), heroic = GetDifficultyInfo(2) }, nil, nil, function(_, key) local triggers = GetFilter(true) return triggers.instanceDifficulty.dungeon[key] end, function(_, key, value) local triggers = GetFilter(true) triggers.instanceDifficulty.dungeon[key] = value NP:ConfigureAll() end, nil, function() local filter = GetFilter() return not filter.triggers.instanceType.party end)
+StyleFilters.triggers.args.instanceType.args.dungeonDifficulty = ACH:MultiSelect(GL("DUNGEON_DIFFICULTY"), L["Check these to only have the filter active in certain difficulties. If none are checked, it is active in all difficulties."], 10, { normal = GetDifficultyInfo(1), heroic = GetDifficultyInfo(2) }, nil, nil, function(_, key) local triggers = GetFilter(true) return triggers.instanceDifficulty.dungeon[key] end, function(_, key, value) local triggers = GetFilter(true) triggers.instanceDifficulty.dungeon[key] = value NP:ConfigureAll() end, nil, function() local filter = GetFilter() return not filter.triggers.instanceType.party end)
 
 if E.Retail then
 	StyleFilters.triggers.args.instanceType.args.dungeonDifficulty.values.mythic = GetDifficultyInfo(23)
@@ -685,12 +702,12 @@ StyleFilters.triggers.args.location.args.btns.args.instanceID = ACH:Execute(L["I
 StyleFilters.triggers.args.location.args.btns.args.zoneName = ACH:Execute(L["Zone Name"], nil, 3, function() local zone = E.MapInfo.realZoneText if not zone then return end local triggers = GetFilter(true) if triggers.location.zoneNames[zone] then return end triggers.location.zoneNames[zone] = true NP:ConfigureAll() E:Print(format(L["Added Zone Name: %s"], zone)) end, nil, nil, 130)
 StyleFilters.triggers.args.location.args.btns.args.subZoneName = ACH:Execute(L["Subzone Name"], nil, 4, function() local subZone = E.MapInfo.subZoneText if not subZone then return end local triggers = GetFilter(true) if triggers.location.subZoneNames[subZone] then return end triggers.location.subZoneNames[subZone] = true NP:ConfigureAll() E:Print(format(L["Added Subzone Name: %s"], subZone)) end, nil, nil, 130)
 
-StyleFilters.triggers.args.raidTarget = ACH:Group(L["BINDING_HEADER_RAID_TARGET"], nil, 31, nil, function(info) local triggers = GetFilter(true) return triggers.raidTarget[info[#info]] end, function(info, value) local triggers = GetFilter(true) triggers.raidTarget[info[#info]] = value NP:ConfigureAll() end, DisabledFilter)
+StyleFilters.triggers.args.raidTarget = ACH:Group(GL("BINDING_HEADER_RAID_TARGET"), nil, 31, nil, function(info) local triggers = GetFilter(true) return triggers.raidTarget[info[#info]] end, function(info, value) local triggers = GetFilter(true) triggers.raidTarget[info[#info]] = value NP:ConfigureAll() end, DisabledFilter)
 StyleFilters.triggers.args.raidTarget.args.types = ACH:Group('')
 StyleFilters.triggers.args.raidTarget.args.types.inline = true
 
 for i, iconName in next, E.NamePlates.TriggerConditions.raidTargets do
-	StyleFilters.triggers.args.raidTarget.args.types.args[iconName] = ACH:Toggle(format(raidTargetIcon, i, L["RAID_TARGET_"..i]), nil, i)
+	StyleFilters.triggers.args.raidTarget.args.types.args[iconName] = ACH:Toggle(RaidTargetIcon(i, GL("RAID_TARGET_"..i)), nil, i)
 end
 
 local actionDefaults = {
@@ -803,15 +820,15 @@ local function CreateActions(locale, order, key)
 
 	group.args.flash = ACH:Group(L["Flash"], nil, 15, nil, ActionSubGroup, ActionSubGroup, ActionHidePlate)
 	group.args.flash.args.enable = ACH:Toggle(L["Enable"], nil, 1)
-	group.args.flash.args.color = ACH:Color(L["COLOR"], nil, 2, true)
+	group.args.flash.args.color = ACH:Color(GL("COLOR"), nil, 2, true)
 	group.args.flash.args.unitClass = ACH:Toggle(L["Unit Class Color"], nil, 3)
 	group.args.flash.args.playerClass = ACH:Toggle(L["Class Color"], nil, 4)
-	group.args.flash.args.speed = ACH:Range(L["SPEED"], nil, 5, { min = 1, max = 10, step = 1 })
+	group.args.flash.args.speed = ACH:Range(GL("SPEED"), nil, 5, { min = 1, max = 10, step = 1 })
 	--group.args.flash.inline = true
 
 	group.args.border = ACH:Group(L["Border"], nil, 20, nil, ActionSubGroup, ActionSubGroup, ActionHidePlate)
 	group.args.border.args.enable = ACH:Toggle(L["Enable"], nil, 1)
-	group.args.border.args.color = ACH:Color(L["COLOR"], nil, 2, true)
+	group.args.border.args.color = ACH:Color(GL("COLOR"), nil, 2, true)
 	group.args.border.args.unitClass = ACH:Toggle(L["Unit Class Color"], nil, 3)
 	group.args.border.args.playerClass = ACH:Toggle(L["Class Color"], nil, 4)
 	--group.args.border.inline = true
@@ -819,9 +836,9 @@ local function CreateActions(locale, order, key)
 	group.args.glow = ACH:Group(L["Custom Glow"], nil, 30, nil, ActionSubGroup, ActionSubGroup, ActionHidePlate)
 	group.args.glow.args.enable = ACH:Toggle(L["Enable"], nil, 1)
 	group.args.glow.args.style = ACH:Select(L["Style"], nil, 2, function() local tbl = {} for _, name in next, E.Libs.CustomGlow.glowList do if name ~= 'Action Button Glow' then tbl[name] = name end end return tbl end)
-	group.args.glow.args.color = ACH:Color(L["COLOR"], nil, 3, true, nil, function() local _, actions = GetFilter(true) local d = actionDefaults[key].glow.color local t = actions[key].glow.color return t[1], t[2], t[3], t[4], d[1], d[2], d[3], d[4] end, function(_, r, g, b, a) local _, actions = GetFilter(true) local t = actions[key].glow.color t[1], t[2], t[3], t[4] = r, g, b, a NP:ConfigureAll() end)
+	group.args.glow.args.color = ACH:Color(GL("COLOR"), nil, 3, true, nil, function() local _, actions = GetFilter(true) local d = actionDefaults[key].glow.color local t = actions[key].glow.color return t[1], t[2], t[3], t[4], d[1], d[2], d[3], d[4] end, function(_, r, g, b, a) local _, actions = GetFilter(true) local t = actions[key].glow.color t[1], t[2], t[3], t[4] = r, g, b, a NP:ConfigureAll() end)
 	group.args.glow.args.spacer1 = ACH:Spacer(4, 'full')
-	group.args.glow.args.speed = ACH:Range(L["SPEED"], nil, 5, { min = -1, max = 1, softMin = -0.5, softMax = 0.5, step = .01, bigStep = .05 })
+	group.args.glow.args.speed = ACH:Range(GL("SPEED"), nil, 5, { min = -1, max = 1, softMin = -0.5, softMax = 0.5, step = .01, bigStep = .05 })
 	group.args.glow.args.size = ACH:Range(L["Size"], nil, 6, { min = 1, max = 5, step = 1 }, nil, nil, nil, nil, function() local _, actions = GetFilter(true) return actions[key].glow.style ~= 'Pixel Glow' end)
 	group.args.glow.args.lines = ACH:Range(function() local _, actions = GetFilter(true) return actions[key].glow.style == 'Pixel Glow' and L["Lines"] or L["Particles"] end, nil, 7, { min = 1, max = 20, step = 1 }, nil, nil, nil, nil, function() local _, actions = GetFilter(true) return actions[key].glow.style ~= 'Pixel Glow' and actions[key].glow.style ~= 'Autocast Shine' end)
 	--group.args.glow.inline = true
