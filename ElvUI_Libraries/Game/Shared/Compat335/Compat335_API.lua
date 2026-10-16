@@ -1440,8 +1440,11 @@ function Compat.HideNativePlate(plate)
 	for i = 1, select("#", plate:GetRegions()) do
 		local region = select(i, plate:GetRegions())
 		if (region:IsObjectType("Texture")) then
+			-- the client sets the spell icon again on every cast (its own castbar, enableNameplateCastbars): with no alpha it
+			-- stays out of sight (it showed as a dark square under the ElvUI castbar, its texture coords squeezed to a texel)
 			region:SetTexture("")
 			region:SetTexCoord(0, 0, 0, 0)
+			region:SetAlpha(0)
 		elseif (region:IsObjectType("FontString")) then
 			region:SetWidth(0.001)
 			region:SetAlpha(0)
