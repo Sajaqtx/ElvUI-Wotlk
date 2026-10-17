@@ -3078,6 +3078,17 @@ function B:PositionButtons(f)
 end
 
 function B:Container_OnShow()
+	-- ElvUI Wotlk: a sort that never finished (a second click while it ran: StopStacking without its update) left the frame
+	-- without any event (UnregisterBagEvents), so it no longer followed its items until a reload: no sort running, it
+	-- takes them back
+	if ElvUI335 and self.sortingSlots and not (B.SortUpdateTimer and B.SortUpdateTimer:IsShown()) then
+		self.sortingSlots = nil
+
+		if self.spinnerIcon then
+			E:StopSpinner(self.spinnerIcon)
+		end
+	end
+
 	if not self.sortingSlots then
 		B:SetListeners(self)
 		B:UpdateDelayedContainer(self)
