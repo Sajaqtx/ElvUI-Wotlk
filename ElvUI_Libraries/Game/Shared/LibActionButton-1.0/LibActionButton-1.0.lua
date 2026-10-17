@@ -296,16 +296,6 @@ function lib:CreateButton(id, name, header, config)
 	button:RegisterForDrag("LeftButton", "RightButton")
 	button:RegisterForClicks("AnyDown", "AnyUp")
 
-	-- ElvUI Wotlk: the method calls of the secure snippets (3.3.5 frame handles have no CallMethod): a counter attribute
-	-- set after the method name and its arguments (restricted code cannot set a name starting with "_")
-	button:HookScript("OnAttributeChanged", function(self, name)
-		if name ~= "lab335n" then return end
-		local method = self[self:GetAttribute("lab335call")]
-		if method then
-			method(self, self:GetAttribute("lab335arg1"), self:GetAttribute("lab335arg2"), self:GetAttribute("lab335arg3"))
-		end
-	end)
-
 	button.cooldown:SetSwipeColor(0, 0, 0, 0.8)
 	button.cooldown:SetFrameStrata(button:GetFrameStrata())
 	button.cooldown:SetFrameLevel(button:GetFrameLevel() + 1)
@@ -332,6 +322,23 @@ function lib:CreateButton(id, name, header, config)
 	button:SetScript("PostClick", Generic.PostClick)
 	button:SetScript("OnEvent", Generic.OnButtonEvent)
 	button:SetScript("OnAttributeChanged", nil) -- inherited templates bring in a handler here which we don't want, so get rid of it
+
+	-- ElvUI Wotlk: the method calls of the secure snippets (3.3.5 frame handles have no CallMethod): a counter attribute
+	-- set after the method name and its arguments (restricted code cannot set a name starting with "_"). Hooked after
+	-- the template handler is cleared above (hooked before it, the relay was dropped with it: a page change from the bar
+	-- state driver, a vehicle for one, left the buttons on the actions of the previous page)
+	button:HookScript("OnAttributeChanged", function(self, name)
+		if name ~= "lab335n" or not self.state_types then return end -- not before the button is set up
+		local call = self:GetAttribute("lab335call")
+		local method = self[call]
+		if method then
+			if call == "UpdateAction" then -- no arguments (the ones left were for an earlier call)
+				method(self)
+			else
+				method(self, self:GetAttribute("lab335arg1"), self:GetAttribute("lab335arg2"), self:GetAttribute("lab335arg3"))
+			end
+		end
+	end)
 
 	-- unwanted mixin functions, which we override through the metatable
 	button.GetActionButtonInfo = nil
