@@ -262,7 +262,10 @@ function UF:UpdateHealComm335(frame, db, myIncomingHeal, otherIncomingHeal, abso
 	end
 
 	local healthEnd = min(health or 0, maxHealth) * per
-	local mine, others = (myIncomingHeal or 0) * per, (otherIncomingHeal or 0) * per
+	-- Incoming Heals off: the absorbs only (the heals neither drawn nor counted before the absorbs)
+	local showHeals = db.showHeals ~= false
+	local mine = showHeals and (myIncomingHeal or 0) * per or 0
+	local others = showHeals and (otherIncomingHeal or 0) * per or 0
 	Place(pred.healingPlayer, healthEnd, mine)
 	Place(pred.healingOther, healthEnd + mine, others)
 

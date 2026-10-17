@@ -760,6 +760,7 @@ local function GetOptionsTable_HealPrediction(updateFunc, groupName, numGroup, s
 	config.args.height = ACH:Range(L["Height"], nil, 2, { min = -1, max = 500, step = 1 })
 	config.args.colorsButton = ACH:Execute(L["Colors"], nil, 3, function() ACD:SelectGroup('ElvUI', 'unitframe', 'allColorsGroup', 'healPrediction') end)
 	config.args.anchorPoint = ACH:Select(L["Anchor Point"], nil, 4, { TOP = 'TOP', BOTTOM = 'BOTTOM', CENTER = 'CENTER' })
+	config.args.showHeals = ACH:Toggle(L["Incoming Heals"], L["Show the incoming heals. Off, only the absorbs are shown."], 4.5, nil, nil, nil, function() return E.db.unitframe.units[groupName].healPrediction.showHeals ~= false end, nil, nil, not ElvUI335) -- ElvUI Wotlk
 	config.args.absorbStyle = ACH:Select(L["Absorb Style"], nil, 5, { NONE = L["None"], NORMAL = not E.Modern and L["Normal"] or nil, REVERSED = L["Reversed"], WRAPPED = not E.Modern and L["Wrapped"] or nil, OVERFLOW = L["Overflow"] }, nil, nil, nil, nil, nil, not (E.Modern or E.Mists or ElvUI335))
 	config.args.overflowButton = ACH:Execute(L["Max Overflow"], nil, 7, function() ACD:SelectGroup('ElvUI', 'unitframe', 'allColorsGroup', 'healPrediction') end)
 	config.args.warning = ACH:Description(function()
