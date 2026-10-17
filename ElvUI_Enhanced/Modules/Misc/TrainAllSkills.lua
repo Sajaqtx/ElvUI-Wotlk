@@ -78,11 +78,12 @@ function TA:ButtonCreate()
 	self.button:Size(80, 22)
 	self.button:SetFormattedText("%s %s", TRAIN, ALL)
 
+	-- ElvUI Wotlk: in the Exit button's place (it is hidden), next to Train: the 3.3.5 trainer skin runs after this and
+	-- puts Train back in its place, so the button left of Train lay under the money
+	self.button:Point("CENTER", ClassTrainerFrame, "TOPLEFT", 304, -417)
+
 	if E.private.skins.blizzard.enable and E.private.skins.blizzard.trainer then
-		self.button:Point("RIGHT", ClassTrainerTrainButton, "LEFT", -3, 0)
 		E:GetModule("Skins"):HandleButton(self.button)
-	else
-		self.button:Point("RIGHT", ClassTrainerTrainButton, "LEFT")
 	end
 
 	self.button:SetScript("OnClick", function() TA:TrainAllSkills() end)
@@ -119,13 +120,9 @@ end
 
 function TA:ButtonPosition(disable)
 	if disable then
-		ClassTrainerTrainButton:Point("CENTER", ClassTrainerFrame, "TOPLEFT", 221, -417)
-
 		ClassTrainerCancelButton.Show = nil
 		ClassTrainerCancelButton:Show()
 	else
-		ClassTrainerTrainButton:Point("CENTER", ClassTrainerFrame, "TOPLEFT", 304, -417)
-
 		ClassTrainerCancelButton.Show = E.noop
 		ClassTrainerCancelButton:Hide()
 	end
