@@ -6,12 +6,10 @@ local native = P.enhanced
 P.enhanced = {
 	general = {
 		pvpAutoRelease = false,
-		autoRepChange = false,
 		merchant = false,
 		moverTransparancy = 0.8,
 		showQuestLevel = false,
 		declineduel = false,
-		hideZoneText = false,
 		trainAllSkills = false,
 		undressButton = false,
 		alreadyKnown = false,
@@ -57,13 +55,6 @@ P.enhanced = {
 		font = "Homespun",
 		fontSize = 10,
 		fontOutline = "MONOCHROMEOUTLINE",
-		itemlevel = {
-			enable = true,
-			qualityColor = true,
-			position = "BOTTOMLEFT",
-			xOffset = 1,
-			yOffset = 4
-		},
 		durability = {
 			enable = false,
 			onlydamaged = true,
@@ -105,7 +96,6 @@ P.enhanced = {
 		chatBubbles = false -- ElvUI Wotlk: the class and title caches are gone, ElvUI 16 has them natively
 	},
 	tooltip = {
-		itemQualityBorderColor = false,
 		tooltipIcon = {
 			enable = false,
 			tooltipIconSpells = true,
@@ -117,13 +107,11 @@ P.enhanced = {
 			checkAchievements = false,
 			checkPlayer = false,
 			modifier = "SHIFT",
-			tiers = {
-				["DS"] = true,
-				["FL"] = true,
-				["BH"] = true,
-				["TOTFW"] = true,
-				["BT"] = true,
-				["BWD"] = true
+			tiers = { -- ElvUI Wotlk: the raids of the module (the 1.05 defaults named Cataclysm raids it has no data for)
+				["RS"] = true,
+				["ICC"] = true,
+				["ToC"] = true,
+				["Ulduar"] = true
 			}
 		}
 	},

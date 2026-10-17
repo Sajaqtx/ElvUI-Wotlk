@@ -1,6 +1,11 @@
 setfenv(1, ElvUI335_ENV) local E, L, V, P, G = unpack(ElvUI)
-local ML = E:NewModule("Enhanced_MinimapLocation", "AceHook-3.0")
+local ML = E:NewModule("Enhanced_MinimapLocation", "AceHook-3.0", "AceEvent-3.0")
 local M = E:GetModule("Minimap")
+
+-- ElvUI Wotlk: on ElvUI 16 the panel (zone text, with the coordinates on each side) is shown above the minimap as soon as
+-- its option is on: 6.10 showed it for an "Above Minimap" choice of ElvUI's Location Text, and moved ElvUI's minimap
+-- holder down to make room for it, which ElvUI 16 sizes again on each of its updates (the panel never showed). The
+-- panel follows the minimap (its frame, scale and visibility), the holder is left alone.
 
 local utf8sub = string.utf8sub
 
@@ -9,7 +14,6 @@ local GetPlayerMapPosition = GetPlayerMapPosition
 local InCombatLockdown = InCombatLockdown
 local UIFrameFade = UIFrameFade
 
-local init = false
 local cluster, panel, location, xMap, yMap
 
 local digits = {
@@ -18,23 +22,24 @@ local digits = {
 	[2] = {.03, "%.2f"}
 }
 
-local function UpdateLocation(self, elapsed)
+local function UpdateLocation(_, elapsed)
 	location.elapsed = (location.elapsed or 0) + elapsed
-	if location.elapsed < digits[E.db.enhanced.minimap.locationdigits][1] then return end
+	local d = digits[E.db.enhanced.minimap.locationdigits] or digits[1]
+	if location.elapsed < d[1] then return end
 
-	xMap.pos, yMap.pos = GetPlayerMapPosition("player")
-	xMap.text:SetFormattedText(digits[E.db.enhanced.minimap.locationdigits][2], xMap.pos * 100)
-	yMap.text:SetFormattedText(digits[E.db.enhanced.minimap.locationdigits][2], yMap.pos * 100)
+	local x, y = GetPlayerMapPosition("player")
+	xMap.text:SetFormattedText(d[2], (x or 0) * 100)
+	yMap.text:SetFormattedText(d[2], (y or 0) * 100)
 
 	location.elapsed = 0
 end
 
-local function CreateEnhancedMaplocation()
+local function CreatePanel()
 	cluster = MinimapCluster
 
-	panel = CreateFrame("Frame", "EnhancedLocationPanel", MinimapCluster)
-	panel:SetFrameStrata("BACKGROUND")
-	panel:Point("CENTER", E.UIParent, "CENTER", 0, 0)
+	panel = CreateFrame("Frame", "EnhancedLocationPanel", Minimap)
+	panel:SetFrameStrata(Minimap:GetFrameStrata())
+	panel:SetFrameLevel(Minimap:GetFrameLevel() + 5)
 	panel:Size(206, 22)
 
 	xMap = CreateFrame("Frame", "MapCoordinatesX", panel)
@@ -58,8 +63,6 @@ local function CreateEnhancedMaplocation()
 	location = CreateFrame("Frame", "EnhancedLocationText", panel)
 	location:SetTemplate("Transparent")
 	location:Size(40, 22)
-	location:Point("LEFT", xMap, "RIGHT", E.PixelMode and -1 or 1, 0)
-	location:Point("RIGHT", yMap, "LEFT", E.PixelMode and 1 or -1, 0)
 
 	location.text = location:CreateFontString(nil, "OVERLAY")
 	location.text:FontTemplate()
@@ -86,7 +89,7 @@ local function FadeInMinimap()
 	end
 end
 
-local function ShowMinimap()
+function ML:PLAYER_REGEN_ENABLED()
 	if E.db.enhanced.minimap.fadeindelay == 0 then
 		FadeInMinimap()
 	else
@@ -94,105 +97,93 @@ local function ShowMinimap()
 	end
 end
 
-local function HideMinimap()
+function ML:PLAYER_REGEN_DISABLED()
 	cluster:Hide()
 end
 
-local function Update_ZoneText()
-	if not location then return end -- ElvUI Wotlk: ElvUI 16 updates the zone text before the UpdateSettings hook made the panel
+function ML:UpdateZoneText()
+	if not (panel and panel:IsShown()) then return end
 
-	if E.db.enhanced.minimap.showlocationdigits then
-		xMap.text:FontTemplate(E.LSM:Fetch("font", E.db.general.minimap.locationFont), E.db.general.minimap.locationFontSize, E.db.general.minimap.locationFontOutline)
-		yMap.text:FontTemplate(E.LSM:Fetch("font", E.db.general.minimap.locationFont), E.db.general.minimap.locationFontSize, E.db.general.minimap.locationFontOutline)
-	end
+	local db = E.db.general.minimap
+	local font = E.LSM:Fetch("font", db.locationFont)
+	location.text:FontTemplate(font, db.locationFontSize, db.locationFontOutline)
+	xMap.text:FontTemplate(font, db.locationFontSize, db.locationFontOutline)
+	yMap.text:FontTemplate(font, db.locationFontSize, db.locationFontOutline)
 
-	location.text:FontTemplate(E.LSM:Fetch("font", E.db.general.minimap.locationFont), E.db.general.minimap.locationFontSize, E.db.general.minimap.locationFontOutline)
 	location.text:SetTextColor(M:GetLocTextColor())
-	location.text:SetText(utf8sub(GetMinimapZoneText(), 1, 25))
+	location.text:SetText(utf8sub(GetMinimapZoneText() or "", 1, 25))
 end
 
-local function UpdateSettings()
-	if not init then
-		init = true
-		CreateEnhancedMaplocation()
-	end
+function ML:UpdateLayout()
+	if not panel then return end
 
-	if E.db.enhanced.minimap.hideincombat then
-		M:RegisterEvent("PLAYER_REGEN_DISABLED", HideMinimap)
-		M:RegisterEvent("PLAYER_REGEN_ENABLED", ShowMinimap)
+	-- over the minimap's border: as wide as it, right above it
+	local border = Minimap.backdrop or Minimap
+	local spacing = E.PixelMode and 1 or 3
+	panel:ClearAllPoints()
+	panel:Point("BOTTOMLEFT", border, "TOPLEFT", 0, spacing - (E.PixelMode and 2 or 0))
+	panel:Point("BOTTOMRIGHT", border, "TOPRIGHT", 0, spacing - (E.PixelMode and 2 or 0))
+	panel:Height(22)
+
+	location:ClearAllPoints()
+	if E.db.enhanced.minimap.showlocationdigits then
+		location:Point("LEFT", xMap, "RIGHT", E.PixelMode and -1 or 1, 0)
+		location:Point("RIGHT", yMap, "LEFT", E.PixelMode and 1 or -1, 0)
+		location:Height(22)
+		xMap:Show()
+		yMap:Show()
+		panel:SetScript("OnUpdate", UpdateLocation)
 	else
-		M:UnregisterEvent("PLAYER_REGEN_DISABLED")
-		M:UnregisterEvent("PLAYER_REGEN_ENABLED")
-	end
-
-	local holder = M.MapHolder -- ElvUI Wotlk: MMHolder in ElvUI 6.10
-	panel:Point("BOTTOMLEFT", holder, "TOPLEFT", 0, -(E.PixelMode and 1 or -1))
-	panel:Size(E:Scale(holder:GetWidth()) + (E.PixelMode and 1 or -1), 22)
-
-	local point, relativeTo, relativePoint = holder:GetPoint()
-	if E.db.general.minimap.locationText == "ABOVE" then
-		holder:Point(point, relativeTo, relativePoint, 0, -21)
-		holder:Height(holder:GetHeight() + 22)
-
-		if E.db.enhanced.minimap.showlocationdigits then
-			panel:SetScript("OnUpdate", UpdateLocation)
-			location:ClearAllPoints()
-			location:Point("LEFT", xMap, "RIGHT", E.PixelMode and -1 or 1, 0)
-			location:Point("RIGHT", yMap, "LEFT", E.PixelMode and 1 or -1, 0)
-			location:Size(40, 22)
-			xMap:Show()
-			yMap:Show()
-		else
-			panel:SetScript("OnUpdate", nil)
-			location:ClearAllPoints()
-			location:Point("LEFT", panel, "LEFT", 0, 0)
-			location:Size(panel:GetWidth(), 22)
-			xMap:Hide()
-			yMap:Hide()
-		end
-
-		panel:Show()
-	else
-		holder:Point(point, relativeTo, relativePoint, 0, 0)
+		location:SetAllPoints(panel)
+		xMap:Hide()
+		yMap:Hide()
 		panel:SetScript("OnUpdate", nil)
-		panel:Hide()
-	end
-
-	if MinimapMover then
-		MinimapMover:Size(holder:GetSize())
 	end
 end
 
 function ML:UpdateSettings()
 	if not E.private.general.minimap.enable then return end
 
-	if E.db.enhanced.minimap.location then
-		if not self:IsHooked(M, "Update_ZoneText") then
-			self:SecureHook(M, "Update_ZoneText", Update_ZoneText)
-		end
+	local db = E.db.enhanced.minimap
+	if db.location then
+		if not panel then CreatePanel() end
+
+		panel:Show()
+		self:UpdateLayout()
+
 		if not self:IsHooked(M, "UpdateSettings") then
-			self:SecureHook(M, "UpdateSettings", UpdateSettings)
+			self:SecureHook(M, "UpdateSettings", "UpdateLayout")
 		end
 
-		M:UpdateSettings()
-		M:Update_ZoneText()
-	elseif init then
-		self:UnhookAll()
-
-		local mmholder = M.MapHolder -- ElvUI Wotlk: MMHolder in ElvUI 6.10
-		local point, relativeTo, relativePoint = mmholder:GetPoint()
-		mmholder:Point(point, relativeTo, relativePoint, 0, 0)
-
+		self:RegisterEvent("ZONE_CHANGED", "UpdateZoneText")
+		self:RegisterEvent("ZONE_CHANGED_INDOORS", "UpdateZoneText")
+		self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "UpdateZoneText")
+		self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateZoneText")
+		self:UpdateZoneText()
+	elseif panel then
 		panel:Hide()
-		M:UpdateSettings() -- ElvUI Wotlk: ElvUI 16 sizes its holder again (no LeftMiniPanel there)
+		panel:SetScript("OnUpdate", nil)
+		self:UnhookAll()
+		self:UnregisterEvent("ZONE_CHANGED")
+		self:UnregisterEvent("ZONE_CHANGED_INDOORS")
+		self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
+		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	end
+
+	cluster = MinimapCluster
+	if db.hideincombat then
+		self:RegisterEvent("PLAYER_REGEN_DISABLED")
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	else
+		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 	end
 end
 
 function ML:Initialize()
-	if not (E.private.general.minimap.enable and E.db.enhanced.minimap.location) then return end
+	if not E.private.general.minimap.enable then return end
 
-	self:SecureHook(M, "Update_ZoneText", Update_ZoneText)
-	self:SecureHook(M, "UpdateSettings", UpdateSettings)
+	self:UpdateSettings()
 end
 
 local function InitializeCallback()

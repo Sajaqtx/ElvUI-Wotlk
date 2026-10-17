@@ -147,17 +147,8 @@ function TA:ToggleState()
 			if IsAddOnLoaded("Blizzard_TrainerUI") then
 				self.blockCallback = nil
 				self:ADDON_LOADED(nil, "Blizzard_TrainerUI")
-			elseif E.private.skins.blizzard.enable and E.private.skins.blizzard.trainer then
-				if not self.skinCallback then
-					E:GetModule("Skins"):AddCallbackForAddon("Blizzard_TrainerUI", "Enhanced_Blizzard_TrainerUI_TrainAll", function()
-						self:ADDON_LOADED(nil, "Blizzard_TrainerUI")
-					end)
-
-					self.skinCallback = true
-				else
-					self.blockCallback = nil
-				end
-			else
+			else -- ElvUI Wotlk: ElvUI 16 runs no skin callback for Blizzard_TrainerUI on 3.3.5 (S.Unported335): the button never came
+				self.blockCallback = nil
 				self:RegisterEvent("ADDON_LOADED")
 			end
 		else

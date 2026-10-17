@@ -23,15 +23,6 @@ local function GeneralOptions()
 					M:AutoRelease()
 				end
 			},
-			autoRepChange = {
-				type = "toggle",
-				name = L["Track Reputation"],
-				desc = L["Automatically change your watched faction on the reputation bar to the faction you got reputation points for."],
-				set = function(info, value)
-					E.db.enhanced.general[info[#info]] = value
-					M:WatchedFaction()
-				end
-			},
 			selectQuestReward = {
 				type = "toggle",
 				name = L["Select Quest Reward"],
@@ -49,14 +40,6 @@ local function GeneralOptions()
 				set = function(info, value)
 					E.db.enhanced.general[info[#info]] = value
 					M:DeclineDuel()
-				end
-			},
-			hideZoneText = {
-				type = "toggle",
-				name = L["Hide Zone Text"],
-				set = function(info, value)
-					E.db.enhanced.general[info[#info]] = value
-					M:HideZone()
 				end
 			},
 			alreadyKnown = {
@@ -528,79 +511,7 @@ local function EquipmentInfoOptions()
 					EI:ToggleState()
 				end,
 			},
-			itemlevel = {
-				order = 3,
-				type = "group",
-				guiInline = true,
-				name = L["Item Level"],
-				get = function(info) return E.db.enhanced.equipment.itemlevel[info[#info]] end,
-				set = function(info, value)
-					E.db.enhanced.equipment.itemlevel[info[#info]] = value
-					EI:UpdateText()
-				end,
-				disabled = function() return not (E.db.enhanced.equipment.enable and E.db.enhanced.equipment.itemlevel.enable) end,
-				args = {
-					info = {
-						order = 1,
-						type = "description",
-						name = L["ITEMLEVEL_DESC"]
-					},
-					enable = {
-						order = 2,
-						type = "toggle",
-						name = L["Enable"],
-						desc = L["Enable/Disable the display of item levels on the character screen."],
-						disabled = function() return not E.db.enhanced.equipment.enable end,
-					},
-					qualityColor = {
-						order = 3,
-						type = "toggle",
-						name = L["Quality Color"]
-					},
-					spacer = {
-						order = 4,
-						type = "description",
-						name = " "
-					},
-					position = {
-						order = 5,
-						type = "select",
-						name = L["Position"],
-						values = {
-							["TOP"] = "TOP",
-							["TOPLEFT"] = "TOPLEFT",
-							["TOPRIGHT"] = "TOPRIGHT",
-							["BOTTOM"] = "BOTTOM",
-							["BOTTOMLEFT"] = "BOTTOMLEFT",
-							["BOTTOMRIGHT"] = "BOTTOMRIGHT"
-						},
-						set = function(info, value)
-							E.db.enhanced.equipment.itemlevel[info[#info]] = value
-							EI:UpdateTextSettings()
-						end
-					},
-					xOffset = {
-						order = 6,
-						type = "range",
-						min = -50, max = 50, step = 1,
-						name = L["X-Offset"],
-						set = function(info, value)
-							E.db.enhanced.equipment.itemlevel[info[#info]] = value
-							EI:UpdateTextSettings()
-						end
-					},
-					yOffset = {
-						order = 7,
-						type = "range",
-						min = -50, max = 50, step = 1,
-						name = L["Y-Offset"],
-						set = function(info, value)
-							E.db.enhanced.equipment.itemlevel[info[#info]] = value
-							EI:UpdateTextSettings()
-						end
-					}
-				}
-			},
+			-- ElvUI Wotlk: the item level part is gone, ElvUI 16 shows it natively (Blizzard > Item Level)
 			durability = {
 				order = 4,
 				type = "group",
@@ -768,14 +679,7 @@ local function MapOptions()
 end
 
 local function MinimapOptions()
-	local locationText = E.Options.args.maps.args.minimap.args.cluster.args.locationTextGroup.args.locationText -- ElvUI Wotlk: under the cluster group in ElvUI 16
-	locationText.values = {
-		["MOUSEOVER"] = L["Minimap Mouseover"],
-		["SHOW"] = L["Always Display"],
-		["ABOVE"] = EE:ColorizeSettingName(L["Above Minimap"]),
-		["HIDE"] = L["HIDE"]
-	}
-
+	-- ElvUI Wotlk: the panel shows with its own option (no "Above Minimap" choice added to ElvUI's Location Text)
 	local MBG = E:GetModule("Enhanced_MinimapButtonGrabber")
 
 	return {
@@ -799,13 +703,12 @@ local function MinimapOptions()
 				name = L["Location Panel"],
 				desc = L["Toggle Location Panel."]
 			},
-			locationText = locationText,
 			showlocationdigits = {
 				order = 2,
 				type = "toggle",
 				name = L["Show Location Digits"],
 				desc = L["Toggle Location Digits."],
-				disabled = function() return not (E.db.enhanced.minimap.location and E.db.general.minimap.locationText == "ABOVE") end
+				disabled = function() return not (E.db.enhanced.minimap.location) end
 			},
 			locationdigits = {
 				order = 3,
@@ -815,9 +718,9 @@ local function MinimapOptions()
 				min = 0, max = 2, step = 1,
 				set = function(info, value)
 					E.db.enhanced.minimap[info[#info]] = value
-					E:GetModule("Minimap"):UpdateSettings()
+					E:GetModule("Enhanced_MinimapLocation"):UpdateSettings()
 				end,
-				disabled = function() return not (E.db.enhanced.minimap.location and E.db.general.minimap.locationText == "ABOVE" and E.db.enhanced.minimap.showlocationdigits) end
+				disabled = function() return not (E.db.enhanced.minimap.location and E.db.enhanced.minimap.showlocationdigits) end
 			},
 			combatHide = {
 				order = 4,
@@ -1033,16 +936,7 @@ local function TooltipOptions()
 				type = "header",
 				name = EE:ColorizeSettingName(L["Tooltip"])
 			},
-			itemQualityBorderColor = {
-				order = 1,
-				type = "toggle",
-				name = L["Item Border Color"],
-				desc = L["Colorize the tooltip border based on item quality."],
-				set = function(info, value)
-					E.db.enhanced.tooltip.itemQualityBorderColor = value
-					E:GetModule("Enhanced_ItemBorderColor"):ToggleState()
-				end
-			},
+			-- ElvUI Wotlk: the item quality border is gone, ElvUI 16 has it natively (Tooltip > Item Quality)
 			tooltipIcon = {
 				order = 2,
 				type = "group",

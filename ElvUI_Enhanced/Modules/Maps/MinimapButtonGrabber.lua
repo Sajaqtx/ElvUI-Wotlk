@@ -433,7 +433,10 @@ function MBG:Initialize()
 	self.frame = CreateFrame("Frame", "ElvUI_MinimapButtonGrabber", UIParent)
 	self.frame:Size(db.buttonSize + (spacing * 2))
 	self.frame:Point("TOPRIGHT", E:GetModule("Minimap").MapHolder, "BOTTOMRIGHT", 0, 1) -- ElvUI Wotlk: MMHolder in ElvUI 6.10
-	self.frame:SetFrameStrata("LOW")
+	-- ElvUI Wotlk: over the minimap (ElvUI 16 sets it to LOW, level 10): at level 1 the buttons, put on this frame's level
+	-- + 5, were drawn under the minimap they sit on (inside the minimap, the default)
+	self.frame:SetFrameStrata(Minimap:GetFrameStrata())
+	self.frame:SetFrameLevel(Minimap:GetFrameLevel() + 10)
 	self.frame:SetClampedToScreen(true)
 	self.frame:CreateBackdrop()
 

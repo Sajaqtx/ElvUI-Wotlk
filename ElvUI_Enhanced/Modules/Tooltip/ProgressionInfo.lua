@@ -341,14 +341,10 @@ end
 
 function PI:ToggleState()
 	if E.db.enhanced.tooltip.progressInfo.enable then
-		if E.private.tooltip.enabled and TT then
-			if not self:IsHooked(TT, "GameTooltip_OnTooltipSetUnit", ShowInspectInfo) then
-				self:SecureHook(TT, "GameTooltip_OnTooltipSetUnit", ShowInspectInfo)
-			end
-		else
-			if not self:IsHooked(GameTooltip, "OnTooltipSetUnit", ShowInspectInfo) then
-				self:HookScript(GameTooltip, "OnTooltipSetUnit", ShowInspectInfo)
-			end
+		-- ElvUI Wotlk: ElvUI 16 sets its handler on the tooltip script by reference (SecureHookScript at its start): a hook of
+		-- TT.GameTooltip_OnTooltipSetUnit made later is never called. The script itself is hooked, after ElvUI's
+		if not self:IsHooked(GameTooltip, "OnTooltipSetUnit") then
+			self:HookScript(GameTooltip, "OnTooltipSetUnit", ShowInspectInfo)
 		end
 
 		self:UpdateModifier()

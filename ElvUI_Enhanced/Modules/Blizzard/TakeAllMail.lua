@@ -85,7 +85,12 @@ function TAM:StartOpening(mode)
 		self:AdvanceAndProcessNextMail()
 	end
 
-	E:StartSpinnerFrame(InboxFrame, 11, 12, 32, 76)
+	-- ElvUI Wotlk: ElvUI 16 animates a frame of its own (E:StartSpinner) where 6.10 made one over the parent (StartSpinnerFrame)
+	if not self.spinner then
+		self.spinner = CreateFrame("Frame", nil, InboxFrame)
+		self.spinner:SetFrameLevel(InboxFrame:GetFrameLevel() + 20)
+	end
+	E:StartSpinner(self.spinner, 11, -12, -32, 76)
 end
 
 function TAM:StopOpening(err)
@@ -108,7 +113,9 @@ function TAM:StopOpening(err)
 	self.takeAll:SetScript("OnUpdate", nil)
 	self:UpdateButtons()
 
-	E:StopSpinnerFrame(InboxFrame)
+	if self.spinner then
+		E:StopSpinner(self.spinner)
+	end
 end
 
 function TAM:AdvanceToNextMail()

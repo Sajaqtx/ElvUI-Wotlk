@@ -44,22 +44,14 @@ function M:DeclineDuel()
 	end
 end
 
-function M:HideZone()
-	if E.db.enhanced.general.hideZoneText then
-		ZoneTextFrame:UnregisterAllEvents()
-	else
-		ZoneTextFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-		ZoneTextFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
-		ZoneTextFrame:RegisterEvent("ZONE_CHANGED")
-	end
-end
+-- ElvUI Wotlk: the zone text hiding and the watched faction change are gone, ElvUI 16 has them natively (General >
+-- Hide Zone Text, Automation > Auto Track Reputation); turned off, the zone text one registered the zone events again
+-- after ElvUI and undid its setting
 
 function M:Initialize()
 	self:AutoRelease()
 	self:DeclineDuel()
-	self:HideZone()
 	self:ToggleQuestReward()
-	self:WatchedFaction()
 	self:LoadMoverTransparancy()
 	self:QuestLevelToggle()
 	self:BuyStackToggle()
