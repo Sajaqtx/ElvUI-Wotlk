@@ -442,6 +442,38 @@ function E:GeneralMedia_ApplyToAll()
 	E.db.unitframe.units.raid2.rdebuffs.font = font
 	E.db.unitframe.units.raid3.rdebuffs.font = font
 
+	-- ElvUI Wotlk: the font (not the size) to every font setting of the profile as well: the list above leaves out the
+	-- fonts of each element (action bar hotkeys, macros and counts, the texts of each nameplate and unit frame, custom
+	-- texts, cooldowns, data bars, plugins...), so the font was far from uniform. A key named ...font / ...Font holding
+	-- a font of the media list (a key such as fontOutline or fontSize is left alone). The profile keeps only what differs
+	-- from the defaults, so both are walked: the defaults (P) and what the profile holds besides (custom texts...)
+	local LSM = E.Libs.LSM
+	local function IsFontKey(key, value)
+		return type(key) == 'string' and type(value) == 'string' and strlower(key):sub(-4) == 'font' and LSM:IsValid('font', value)
+	end
+
+	local function ApplyFont(db, defaults, depth)
+		if depth > 12 or type(db) ~= 'table' then return end
+
+		local keys = {}
+		for key in next, db do keys[key] = true end
+		if type(defaults) == 'table' then
+			for key in next, defaults do keys[key] = true end
+		end
+
+		for key in next, keys do
+			local value = db[key]
+			if type(value) == 'table' then
+				ApplyFont(value, type(defaults) == 'table' and defaults[key] or nil, depth + 1)
+			elseif IsFontKey(key, value) then
+				db[key] = font
+			end
+		end
+	end
+
+	ApplyFont(E.db, P, 1)
+	E.private.general.chatBubbleFont = font
+
 	E:UpdateAll()
 end
 
