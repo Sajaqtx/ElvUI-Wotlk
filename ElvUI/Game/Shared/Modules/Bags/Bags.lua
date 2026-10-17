@@ -1490,7 +1490,16 @@ end
 function B:UpdateBankBagIcon(holder)
 	if not holder then return end
 
-	BankFrameItemButton_Update(holder)
+	-- ElvUI Wotlk: the 3.3.5 BankFrameItemButton_Update takes the bag slot from the button's name ("BankFrameBag1" -> "Bag1"),
+	-- an invalid slot for ElvUI's holders (an error on each bank update): the icon is set here, then the locked look
+	if ElvUI335 then
+		local texture = GetInventoryItemTexture('player', holder:GetInventorySlot())
+		holder.icon:SetTexture(texture or DEFAULT_ICON)
+		holder.hasItem = texture and 1 or nil
+		BankFrameItemButton_UpdateLocked(holder)
+	else
+		BankFrameItemButton_Update(holder)
+	end
 
 	local numSlots = GetNumBankSlots()
 	local color = ((holder.index - 1) <= numSlots) and 1 or 0.1
