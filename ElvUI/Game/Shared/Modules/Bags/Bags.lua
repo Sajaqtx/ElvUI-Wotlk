@@ -727,7 +727,9 @@ function B:UpdateSlot(frame, bagID, slotID)
 	slot.isEquipment, slot.junkDesaturate = nil, slot.isJunk and db.junkDesaturate
 	slot.hasItem = (info.iconFileID and 1) or nil -- used for ShowInspectCursor
 
-	SetItemButtonTexture(slot, (info.iconFileID ~= 4701874 and info.iconFileID) or E.Media.Textures.Invisible)
+	-- ElvUI Wotlk: an empty slot hides its icon (as 3.3.5's own bags do): the Invisible texture did not take, the item gone
+	-- stayed drawn in its old slot (measured in game: the slot held nothing, the icon still showed)
+	SetItemButtonTexture(slot, (info.iconFileID ~= 4701874 and info.iconFileID) or (not ElvUI335 and E.Media.Textures.Invisible) or nil)
 	SetItemButtonCount(slot, info.stackCount)
 	SetItemButtonDesaturated(slot, slot.locked or slot.junkDesaturate)
 	SetItemButtonQuality(slot, slot.rarity, slot.itemLink)
