@@ -220,7 +220,100 @@ function UF:Configure_HealComm(frame)
 	end
 end
 
-function UF:UpdateHealComm(_, _, _, absorb, _, hasOverAbsorb, hasOverHealAbsorb, health, maxHealth)
+-- ElvUI Wotlk: the bars laid out from the values, part by part. ElvUI chains them by their fill textures (heals at the end
+-- of the health, others' heals at the end of those, absorbs at the end of those), but a 3.3.5 bar with nothing in it
+-- still has a full size texture (measured in game: the absorbs a whole bar further, over the next frames), and 3.3.5
+-- bars only fill from their start (no reverse fill). Each segment is placed at its offset from the start of the health
+-- bar, as long as its value, in the health bar's direction. Absorb styles: Normal in the missing health (a sliver when
+-- full), Overflow past the end up to Max Overflow, Wrapped back from the end once over the missing health, Reversed at
+-- the end of the current health, over it (the part a hit takes first)
+function UF:UpdateHealComm335(frame, db, myIncomingHeal, otherIncomingHeal, absorb, healAbsorbAmount, hasOverAbsorb, hasOverHealAbsorb, health, maxHealth)
+	local pred = frame.HealthPrediction
+	local bar = frame.Health
+	local horizontal = bar:GetOrientation() == 'HORIZONTAL'
+	local size = horizontal and bar:GetWidth() or bar:GetHeight()
+	if not size or size <= 0 or not maxHealth or maxHealth <= 0 then return end
+
+	local reverse = bar:GetReverseFill() -- the health fills from the right (or the top)
+	local per = size / maxHealth
+	local anchor = db.anchorPoint or 'BOTTOM'
+	local side = (anchor == 'TOP' and 'TOP') or (anchor == 'BOTTOM' and 'BOTTOM') or ''
+
+	local function Place(segment, start, length)
+		if not length or length < 0.5 then
+			segment:Hide()
+			return
+		end
+
+		-- 3.3.5 bars fill from the left (bottom): a segment counted from the right (top) is placed from its far end
+		local from = reverse and (size - start - length) or start
+
+		segment:ClearAllPoints()
+		if horizontal then
+			segment:Point(side .. 'LEFT', bar, side .. 'LEFT', from, 0)
+		else
+			local vside = (anchor == 'RIGHT' and 'RIGHT') or (anchor == 'LEFT' and 'LEFT') or ''
+			segment:Point('BOTTOM' .. vside, bar, 'BOTTOM' .. vside, 0, from)
+		end
+
+		segment:SetMinMaxValues(0, size)
+		segment:SetValue(length)
+		segment:Show()
+	end
+
+	local healthEnd = min(health or 0, maxHealth) * per
+	local mine, others = (myIncomingHeal or 0) * per, (otherIncomingHeal or 0) * per
+	Place(pred.healingPlayer, healthEnd, mine)
+	Place(pred.healingOther, healthEnd + mine, others)
+
+	local colors = UF.db.colors.healPrediction
+	local style = db.absorbStyle
+	local healsEnd = min(healthEnd + mine + others, size)
+	local damageAbsorb, healAbsorb = pred.damageAbsorb, pred.healAbsorb
+	local absorbLength = (absorb or 0) * per
+
+	if style == 'NONE' or absorbLength <= 0 then
+		damageAbsorb:Hide()
+	elseif style == 'REVERSED' then
+		local length = min(absorbLength, healthEnd)
+		Place(damageAbsorb, healthEnd - length, length)
+	elseif style == 'WRAPPED' then
+		if absorbLength > size - healsEnd then -- over the missing health: back from the end of the bar
+			local length = min(absorbLength, size)
+			Place(damageAbsorb, size - length, length)
+		else
+			Place(damageAbsorb, healsEnd, absorbLength)
+		end
+	elseif style == 'OVERFLOW' then
+		Place(damageAbsorb, healsEnd, min(absorbLength, size - healsEnd + (colors.maxOverflow or 0) * size))
+	else -- NORMAL: in the missing health, a sliver at the end when there is none
+		local room = size - healsEnd
+		if room >= 1 then
+			Place(damageAbsorb, healsEnd, min(absorbLength, room))
+		else
+			Place(damageAbsorb, size - max(1, size * 0.015), max(1, size * 0.015))
+		end
+	end
+
+	-- heal absorbs: back from the end of the health (the part a heal fills first), past it when they are over the health
+	local healAbsorbLength = (healAbsorbAmount or 0) * per
+	if style == 'NONE' or healAbsorbLength <= 0 then
+		healAbsorb:Hide()
+	elseif hasOverHealAbsorb then
+		Place(healAbsorb, healthEnd, min(healAbsorbLength, size - healthEnd))
+	else
+		local length = min(healAbsorbLength, healthEnd)
+		Place(healAbsorb, healthEnd - length, length)
+	end
+
+	local absorbColor = hasOverAbsorb and colors.overabsorbs or colors.absorbs
+	damageAbsorb:SetStatusBarColor(absorbColor.r, absorbColor.g, absorbColor.b, absorbColor.a)
+
+	local healAbsorbColor = hasOverHealAbsorb and colors.overhealabsorbs or colors.healAbsorbs
+	healAbsorb:SetStatusBarColor(healAbsorbColor.r, healAbsorbColor.g, healAbsorbColor.b, healAbsorbColor.a)
+end
+
+function UF:UpdateHealComm(_, myIncomingHeal, otherIncomingHeal, absorb, healAbsorbAmount, hasOverAbsorb, hasOverHealAbsorb, health, maxHealth)
 	local frame = self.frame
 	local db = frame and frame.db and frame.db.healPrediction
 	if not db or not db.absorbStyle then return end
@@ -230,6 +323,10 @@ function UF:UpdateHealComm(_, _, _, absorb, _, hasOverAbsorb, hasOverHealAbsorb,
 	local damageAbsorb = pred.damageAbsorb
 
 	UF:SetSize_HealComm(frame)
+
+	if ElvUI335 then -- ElvUI Wotlk: laid out from the values (see UpdateHealComm335)
+		return UF:UpdateHealComm335(frame, db, myIncomingHeal, otherIncomingHeal, absorb, healAbsorbAmount, hasOverAbsorb, hasOverHealAbsorb, health, maxHealth)
+	end
 
 	-- absorbs is set to none so hide both
 	if E.Classic or db.absorbStyle == 'NONE' then
