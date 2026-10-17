@@ -8,7 +8,8 @@ local function Configure_Portrait(self, frame)
 
 		frame.PORTRAIT_DETACHED = frame.USE_PORTRAIT and db.enable and not frame.USE_PORTRAIT_OVERLAY
 		frame.PORTRAIT_WIDTH = (frame.USE_PORTRAIT_OVERLAY or frame.PORTRAIT_DETACHED or not frame.USE_PORTRAIT) and 0 or frame.db.portrait.width
-		frame.CLASSBAR_WIDTH = frame.UNIT_WIDTH - (frame.BORDER + frame.SPACING) * 2 - frame.PORTRAIT_WIDTH - frame.POWERBAR_OFFSET
+		-- ElvUI Wotlk: ElvUI 16's class bar width (Update_PlayerFrame / Update_TargetFrame), no BORDER / SPACING on the frame there
+		frame.CLASSBAR_WIDTH = frame.UNIT_WIDTH - frame.PORTRAIT_WIDTH - (frame.ORIENTATION == "MIDDLE" and (frame.POWERBAR_OFFSET * 2) or frame.POWERBAR_OFFSET)
 
 		if frame.USE_PORTRAIT then
 			local portrait = frame.Portrait
@@ -19,9 +20,9 @@ local function Configure_Portrait(self, frame)
 					portrait.Holder:Size(db.width, db.height)
 
 					if frame.ORIENTATION == "LEFT" then
-						portrait.Holder:Point("RIGHT", frame, "LEFT", -frame.BORDER, 0)
+						portrait.Holder:Point("RIGHT", frame, "LEFT", -UF.BORDER, 0)
 					elseif frame.ORIENTATION == "RIGHT" then
-						portrait.Holder:Point("LEFT", frame, "RIGHT", frame.BORDER, 0)
+						portrait.Holder:Point("LEFT", frame, "RIGHT", UF.BORDER, 0)
 					end
 
 					portrait:SetInside(portrait.Holder)

@@ -99,6 +99,8 @@ local function HideMinimap()
 end
 
 local function Update_ZoneText()
+	if not location then return end -- ElvUI Wotlk: ElvUI 16 updates the zone text before the UpdateSettings hook made the panel
+
 	if E.db.enhanced.minimap.showlocationdigits then
 		xMap.text:FontTemplate(E.LSM:Fetch("font", E.db.general.minimap.locationFont), E.db.general.minimap.locationFontSize, E.db.general.minimap.locationFontOutline)
 		yMap.text:FontTemplate(E.LSM:Fetch("font", E.db.general.minimap.locationFont), E.db.general.minimap.locationFontSize, E.db.general.minimap.locationFontOutline)
@@ -123,7 +125,7 @@ local function UpdateSettings()
 		M:UnregisterEvent("PLAYER_REGEN_ENABLED")
 	end
 
-	local holder = MMHolder
+	local holder = M.MapHolder -- ElvUI Wotlk: MMHolder in ElvUI 6.10
 	panel:Point("BOTTOMLEFT", holder, "TOPLEFT", 0, -(E.PixelMode and 1 or -1))
 	panel:Size(E:Scale(holder:GetWidth()) + (E.PixelMode and 1 or -1), 22)
 
@@ -177,21 +179,12 @@ function ML:UpdateSettings()
 	elseif init then
 		self:UnhookAll()
 
-		local mmholder = MMHolder
-		local point, relativeTo, relativePoint = MMHolder:GetPoint()
+		local mmholder = M.MapHolder -- ElvUI Wotlk: MMHolder in ElvUI 6.10
+		local point, relativeTo, relativePoint = mmholder:GetPoint()
 		mmholder:Point(point, relativeTo, relativePoint, 0, 0)
 
-		if E.db.datatexts.minimapPanels then
-			mmholder:Height(Minimap:GetHeight() + (LeftMiniPanel and (LeftMiniPanel:GetHeight() + E.Border) or 24) + E.Spacing * 3)
-		else
-			mmholder:Height(Minimap:GetHeight() + E.Border + E.Spacing * 3)
-		end
-
-		if MinimapMover then
-			MinimapMover:Size(mmholder:GetSize())
-		end
-
 		panel:Hide()
+		M:UpdateSettings() -- ElvUI Wotlk: ElvUI 16 sizes its holder again (no LeftMiniPanel there)
 	end
 end
 

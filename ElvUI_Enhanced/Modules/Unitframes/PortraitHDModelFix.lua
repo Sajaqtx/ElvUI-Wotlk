@@ -51,7 +51,7 @@ end
 
 local unitTypes = {
 	{"player", "target", "targettarget", "targettargettarget", "focus", "focustarget", "pet", "pettarget"},
-	{"party", "raid", "raid40"},
+	{"party", "raid1", "raid2", "raid3"}, -- ElvUI Wotlk: ElvUI 16's raid headers (6.10 had raid and raid40)
 	{"boss", "arena"},
 }
 
@@ -71,7 +71,9 @@ function UFPM:UpdatePortraits()
 
 	for i = 1, #unitTypes do
 		for _, unit in ipairs(unitTypes[i]) do
-			if i == 1 then
+			if not UF.db.units[unit] then
+				-- ElvUI Wotlk: a unit this ElvUI version doesn't have
+			elseif i == 1 then
 				UF.CreateAndUpdateUF(UF, unit)
 			elseif i == 2 then
 				UF.CreateAndUpdateHeaderGroup(UF, unit)
@@ -121,7 +123,18 @@ function UFPM:Initialize()
 
 	if not E.db.enhanced.unitframe.portraitHDModelFix.enable then return end
 
-	self:ToggleState()
+	-- ElvUI Wotlk: ElvUI 16 spawns its unit frames later (UF:LoadUnits, from oUF's factory): rebuilt before, they lacked
+	-- their parts (no class bar). Once ElvUI has loaded its units
+	if _G.ElvUF_Player and _G.ElvUF_Player.ClassBar then
+		self:ToggleState()
+	else
+		local done
+		hooksecurefunc(UF, "LoadUnits", function()
+			if done then return end
+			done = true
+			self:ToggleState()
+		end)
+	end
 end
 
 local function InitializeCallback()
