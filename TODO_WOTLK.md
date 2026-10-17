@@ -1,6 +1,6 @@
 # ElvUI Wotlk : état du backport et reste à faire
 
-ElvUI v16 (saveur Wrath, branche `merge-v16`) sur le client 3.3.5 Frostmourne Rebuffed (Whitemane). Tout ce qui manque au client est dans
+ElvUI v16 (saveur Wrath, branche `main`, dépôt privé https://github.com/Sajaqtx/ElvUI-Wotlk) sur le client 3.3.5 Frostmourne Rebuffed (Whitemane). Tout ce qui manque au client est dans
 `ElvUI_Libraries\Game\Shared\Compat335` (environnement privé `ElvUI335_ENV`, invisible des autres addons).
 
 ## Points ouverts (2026-10-17)
@@ -8,10 +8,12 @@ ElvUI v16 (saveur Wrath, branche `merge-v16`) sur le client 3.3.5 Frostmourne Re
 - [ ] Véhicules : castbar inactive et vie des alliés figée en véhicule. Relevé à faire en jeu : `/elvtest vehicle`
       (ElvUI_Diag), puis corriger la bascule d'unité d'oUF selon les noms que le client donne au véhicule.
 - [ ] Barre de véhicule (relais LibActionButton, commit 91e32eb) : à confirmer en jeu.
-- [ ] Fenêtres Blizzard habillées : un tour en jeu de chacune (voir plus bas).
-- [ ] Désactiver l'addon de test `ElvUI_EnhancedAllOn` une fois les tests d'ElvUI_Enhanced finis.
-- [ ] Fusionner `merge-v16` dans `main` quand la v16 est jugée stable.
-- [ ] En option : texture hachurée des absorptions (façon EllesmereUI).
+- [x] Fenêtres Blizzard habillées : tour fait en jeu le 2026-10-17, toutes bonnes.
+- [x] Addon de test `ElvUI_EnhancedAllOn` retiré du client de test (2026-10-17).
+- [x] `merge-v16` fusionné dans `main` et publié (dépôt privé) le 2026-10-17.
+- [x] Texture hachurée des absorptions : abandonnée.
+
+La suite : corrections au fil du jeu.
 
 Fait depuis le 2026-10-15 (validé en jeu sauf mention) : Style Filters (ElvUI 14) avec filtres de mobs, Kick CD et
 non-attaquables ; absorptions et soins entrants (placement des 4 styles) ; ordre d'affichage des plaques ; hitbox et
@@ -44,7 +46,7 @@ import : `outils\elvui335_skins610.js`, puis corrigés à la main). `Skins335\Ad
 les fonctions de cette version. Les skins Wrath des mêmes fenêtres sont coupés en 3.3.5 (`S.Unported335`).
 Carte, inspection, raccourcis : branche 3.3.5 dans leur fichier Wrath.
 
-- [ ] Vérifier en jeu chaque fenêtre (rendu, positions) : personnage, grimoire, talents, quêtes, hauts faits, amis,
+- [x] Vérifier en jeu chaque fenêtre (fait le 2026-10-17 : bonnes) (rendu, positions) : personnage, grimoire, talents, quêtes, hauts faits, amis,
       PvP, recherche de donjon, aide, menu Échap, marchand, courrier, échange, métiers, hôtel des ventes...
 
 ## Repris d'ElvUI_Enhanced (2026-10-14)
