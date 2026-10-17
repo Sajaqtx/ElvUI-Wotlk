@@ -112,7 +112,7 @@ do
 			button:SetAttribute('macrotext1', tm)
 			button:SetAttribute('macrotext2', tm)
 			button:SetAttribute('useOnKeyDown', keydown)
-			button:RegisterForClicks('AnyDown', 'AnyUp')
+			E:RegisterClicks(button) -- ElvUI Wotlk: one click on 3.3.5 (twice, the marker was set then taken off)
 
 			button:Size(40)
 			button:SetID(i)

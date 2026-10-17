@@ -294,7 +294,15 @@ function lib:CreateButton(id, name, header, config)
 
 	local button = setmetatable(CreateFrame("CheckButton", name, header, "ActionButtonTemplate, SecureActionButtonTemplate"), Generic_MT)
 	button:RegisterForDrag("LeftButton", "RightButton")
-	button:RegisterForClicks("AnyDown", "AnyUp")
+	-- ElvUI Wotlk: the 3.3.5 secure action button acts on each click it is registered for (later clients drop the one
+	-- that does not match ActionButtonUseKeyDown, a cvar 3.3.5 lacks): with both, a click and a key binding used the
+	-- action twice (a profession window opened and closed at once, a macro ran twice). The release only, as the
+	-- 3.3.5 action buttons (ActionButton.lua)
+	if ElvUI335 then
+		button:RegisterForClicks("AnyUp")
+	else
+		button:RegisterForClicks("AnyDown", "AnyUp")
+	end
 
 	button.cooldown:SetSwipeColor(0, 0, 0, 0.8)
 	button.cooldown:SetFrameStrata(button:GetFrameStrata())

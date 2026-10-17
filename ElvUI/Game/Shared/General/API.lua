@@ -242,7 +242,12 @@ end
 -- the secure header is different on retail because of evokers
 -- if both are registered on non-retail, it will fire on down and up
 function E:RegisterClicks(frame)
-	frame:RegisterForClicks('AnyDown', 'AnyUp')
+	-- ElvUI Wotlk: the 3.3.5 secure buttons act on each click registered (no useOnKeyDown check): the release only
+	if ElvUI335 then
+		frame:RegisterForClicks('AnyUp')
+	else
+		frame:RegisterForClicks('AnyDown', 'AnyUp')
+	end
 end
 
 function E:GetCurrencyIDFromLink(link)
