@@ -100,7 +100,7 @@ function E:InspectGearSlot(line, lineText, slotInfo, slot, lastLine)
 		slotInfo.enchantColors[1] = r
 		slotInfo.enchantColors[2] = g
 		slotInfo.enchantColors[3] = b
-	elseif lastLine and (not slotInfo.enchantText and db.showMissing) and (slot ~= 17 or slotInfo.offhandWeapon) and MISSING_ENCHANTS[slot] then
+	elseif not ElvUI335 and lastLine and (not slotInfo.enchantText and db.showMissing) and (slot ~= 17 or slotInfo.offhandWeapon) and MISSING_ENCHANTS[slot] then
 		slotInfo.enchantText = MISSING_RED
 		slotInfo.enchantTextShort = MISSING_RED
 		slotInfo.enchantTextReal = nil
@@ -108,6 +108,65 @@ function E:InspectGearSlot(line, lineText, slotInfo, slot, lastLine)
 		slotInfo.enchantColors[1] = 1
 		slotInfo.enchantColors[2] = 0.3
 		slotInfo.enchantColors[3] = 0.3
+	end
+end
+
+-- ElvUI Wotlk: a 3.3.5 tooltip shows an enchant as a plain green line, no "Enchanted: %s": the enchant is the item
+-- link's enchant ID (item:ID:enchantID:...), named through E.Enchants335 (Wrath\General\Enchants.lua, from Zidras'
+-- WrathArmory). Missing: the slots a WotLK enchant goes on, the rings for an enchanter of 400 or more (the player only)
+local Enchant335
+if ElvUI335 then
+	local GetItemInfo335, GetSkillLineInfo, GetNumSkillLines, GetSpellInfo = GetItemInfo, GetSkillLineInfo, GetNumSkillLines, GetSpellInfo
+	local MISSING_335 = { [1] = true, [3] = true, [5] = true, [7] = true, [8] = true, [9] = true, [10] = true, [15] = true, [16] = true, [17] = true }
+	local RINGS = { [11] = true, [12] = true }
+	local ENCHANTING = GetSpellInfo(7411) -- the profession's name, as the skill lines give it
+
+	local function EnchanterRings()
+		for i = 1, GetNumSkillLines() do
+			local name, _, _, rank = GetSkillLineInfo(i)
+			if name == ENCHANTING then
+				return rank and rank >= 400
+			end
+		end
+	end
+
+	local function MissingSlot(unit, slot, link)
+		if RINGS[slot] then
+			return unit == 'player' and EnchanterRings()
+		elseif slot == 17 then -- an off-hand item held in the hand (no enchant) is not a weapon nor a shield
+			local equipLoc = select(9, GetItemInfo335(link))
+			return equipLoc ~= nil and equipLoc ~= 'INVTYPE_HOLDABLE'
+		end
+
+		return MISSING_335[slot]
+	end
+
+	function Enchant335(unit, slot, slotInfo)
+		local link = GetInventoryItemLink(unit, slot)
+		if not link then return end
+
+		local db = E.db.general.itemLevel
+		local enchantID = tonumber(strmatch(link, 'item:%d+:(%d+)'))
+		if enchantID and enchantID > 0 then
+			local name = E.Enchants335 and E.Enchants335[enchantID] or format('#%d', enchantID)
+			local shortStrip = gsub(name, '[&+] ?', '')
+			local shortAbbrev = db.enchantAbbrev and gsub(shortStrip, '(%w%w%w%w%w)%w+', '%1')
+			slotInfo.enchantText = name
+			slotInfo.enchantTextShort = utf8sub(shortAbbrev or shortStrip, 1, 20)
+			slotInfo.enchantTextReal = name
+
+			slotInfo.enchantColors[1] = 0.1 -- the green of an enchant line
+			slotInfo.enchantColors[2] = 1
+			slotInfo.enchantColors[3] = 0.1
+		elseif db.showMissing and MissingSlot(unit, slot, link) then
+			slotInfo.enchantText = MISSING_RED
+			slotInfo.enchantTextShort = MISSING_RED
+			slotInfo.enchantTextReal = nil
+
+			slotInfo.enchantColors[1] = 1
+			slotInfo.enchantColors[2] = 0.3
+			slotInfo.enchantColors[3] = 0.3
+		end
 	end
 end
 
@@ -161,6 +220,10 @@ function E:GetGearSlotInfo(unit, slot, deepScan)
 					E:CollectEssenceInfo(i, text, slotInfo)
 				end
 			end
+		end
+
+		if Enchant335 then -- reads the link itself
+			Enchant335(unit, slot, slotInfo)
 		end
 	elseif lines then
 		local firstLine = lines[1]
