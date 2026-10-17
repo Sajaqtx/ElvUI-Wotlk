@@ -391,7 +391,11 @@ function M:START_LOOT_ROLL(event, rollID, rollTime)
 
 	bar:Show()
 
-	_G.AlertFrame:UpdateAnchors()
+	if ElvUI335 then -- ElvUI Wotlk: 3.3.5 places its alerts with AlertFrame_FixAnchors (hooked by PostAlertMove)
+		_G.AlertFrame_FixAnchors()
+	else
+		_G.AlertFrame:UpdateAnchors()
+	end
 
 	-- Add cached roll info, if any
 	for rollid, rollTable in next, cachedRolls do
