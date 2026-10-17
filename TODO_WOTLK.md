@@ -1,7 +1,25 @@
 # ElvUI Wotlk : état du backport et reste à faire
 
-ElvUI v15.26 (saveur Wrath) sur le client 3.3.5 Frostmourne Rebuffed. Tout ce qui manque au client est dans
+ElvUI v16 (saveur Wrath, branche `merge-v16`) sur le client 3.3.5 Frostmourne Rebuffed (Whitemane). Tout ce qui manque au client est dans
 `ElvUI_Libraries\Game\Shared\Compat335` (environnement privé `ElvUI335_ENV`, invisible des autres addons).
+
+## Points ouverts (2026-10-17)
+
+- [ ] Véhicules : castbar inactive et vie des alliés figée en véhicule. Relevé à faire en jeu : `/elvtest vehicle`
+      (ElvUI_Diag), puis corriger la bascule d'unité d'oUF selon les noms que le client donne au véhicule.
+- [ ] Barre de véhicule (relais LibActionButton, commit 91e32eb) : à confirmer en jeu.
+- [ ] Fenêtres Blizzard habillées : un tour en jeu de chacune (voir plus bas).
+- [ ] Désactiver l'addon de test `ElvUI_EnhancedAllOn` une fois les tests d'ElvUI_Enhanced finis.
+- [ ] Fusionner `merge-v16` dans `main` quand la v16 est jugée stable.
+- [ ] En option : texture hachurée des absorptions (façon EllesmereUI).
+
+Fait depuis le 2026-10-15 (validé en jeu sauf mention) : Style Filters (ElvUI 14) avec filtres de mobs, Kick CD et
+non-attaquables ; absorptions et soins entrants (placement des 4 styles) ; ordre d'affichage des plaques ; hitbox et
+vitesse des plaques ; liste CC (contrôles durs et silences) ; sacs, LootRoll, menu clic milieu de la minicarte,
+invitation auto (amis, guilde), chat, hauts faits ; ElvUI_Enhanced en plugin compatible (doublons retirés) ;
+enchantements et enchantements manquants de l'item level (table de Zidras) ; Apply Font To All sur toutes les polices ;
+Key Down en réglage ElvUI ; un seul déclenchement par clic des boutons sécurisés ; « raidN is not in your party » ;
+balayage des auras rafraîchies sur les plaques ; atlas absents remplacés (pièce de camelote, « ! » de quête).
 
 ## État dans le simulateur (`outils/wowsim/elvui.sh`)
 
@@ -34,7 +52,8 @@ Carte, inspection, raccourcis : branche 3.3.5 dans leur fichier Wrath.
 - [x] Fiche personnage d'ElvUI_Enhanced, activée par défaut (`Game\Wrath\Enhanced335\CharacterFrame`, options : Général ->
       Améliorations Blizzard -> Character Frame). **(à vérifier en jeu)**
 - [x] Boutons « AddOns » (liste des addons d'ElvUI_Enhanced) et « ElvUI » du menu Échap. **(à vérifier en jeu)**
-- [ ] Textes d'enchantement à côté des emplacements : viennent d'ElvUI_ProjectZidras (LibGetEnchant), pas encore repris.
+- [x] Textes d'enchantement à côté des emplacements : lien de l'objet + table de LibGetEnchant (ElvUI_ProjectZidras),
+      dans l'item level natif (`Game\Wrath\General\Enchants.lua`).
 
 ## Client de test (depuis le 2026-10-14)
 
@@ -88,13 +107,13 @@ Fonctionnent en jeu : plaques de nom, cadres joueur / cible / cible de la cible,
 
 ## Autres points ouverts
 
-- [ ] Hooks ignorés (fonctions absentes en 3.3.5, liste `ElvUI335.skippedHooks` affichée par le simulateur) :
-      vérifier qu'aucun ne manque à une fonction visible.
-- [ ] Atlas absents de Rebuffed (`ElvUI335.missingAtlases`) : pièce de camelote et icône « à démonter » des sacs,
-      point d'exclamation de quête des plaques, sac de parangon, flèches de rotation. Remplacer par des textures 3.3.5.
+- [x] Hooks ignorés (`ElvUI335.skippedHooks`) : revus le 2026-10-17, tous visent des fonctions absentes en 3.3.5
+      (cadres de raid compacts, infobulles intégrées, sorts en éventail, barres de progression d'infobulle, LFG list).
+- [x] Atlas absents de Rebuffed : pièce de camelote et « ! » de quête remplacés par des textures 3.3.5 (compat
+      `SetAtlas`) ; les autres (démontage, parangon, sorts en éventail) sont des fonctions absentes de la 3.3.5.
 - [x] Bulles de discussion : le skin ElvUI marche sur la bulle 3.3.5 ; style « Disable » = ChatBubbleSkin, et « Replace Font »
       garde la police ElvUI sur ses bulles. **(à vérifier en jeu)**
-- [ ] Données (DataTexts) liées au retail à retirer de la liste : logement, Mythique+, jetons WoW...
+- [x] Données (DataTexts) : jeton WoW, bataillon et Mythique+ ne s'affichent pas en 3.3.5 (réservés retail / MoP).
 
 ## Nettoyage retail et plugins (2026-10-15)
 
@@ -107,8 +126,9 @@ Fonctionnent en jeu : plaques de nom, cadres joueur / cible / cible de la cible,
     DataTexts (stats, munitions, combat, ilvl, courrier), icônes de rôle LFG dans le chat, tags [guild] [npctitle]
     [target] des plaques, barres de cast des plaques par unité, masquage du suivi d'objectifs.
   - Déjà portés : feuille de personnage Enhanced, liste des addons.
-  - [ ] Manque sur 3.3.5 : soins entrants + absorptions (LibHealComm-4.0 + SpecializedAbsorbs, vides en v15).
-  - [ ] À choisir : regroupement des boutons de minicarte, carte sans brouillard, Lose Control, suivi des interruptions,
+  - [x] Soins entrants + absorptions (LibHealComm-4.0 + SpecializedAbsorbs) : faits, validés en jeu.
+  - [x] Choisi (2026-10-17) : ElvUI_Enhanced reste un plugin à part, rendu compatible, sans ce que la v16 a déjà.
+        Liste d'origine : regroupement des boutons de minicarte, carte sans brouillard, Lose Control, suivi des interruptions,
         récap de mort, « tout prendre » du courrier, déjà connu, tout apprendre, achat par pile, déshabiller, refus des
         duels, libération auto en JcJ, niveau des quêtes, icône des infobulles, taille du cadre d'erreurs, animation
         des touches, liens DPS, couronne du maître de guilde dans le chat.
