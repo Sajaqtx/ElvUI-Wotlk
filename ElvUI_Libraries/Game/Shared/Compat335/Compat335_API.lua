@@ -829,11 +829,21 @@ define("FCF_Tab_SetupMenu", function(tab)
 	realG.ToggleDropDownMenu(1, nil, realG[name .. "DropDown"], name, 0, 0)
 end)
 
+--the raid's main tank / assist assignments: 3.3.5 prints "<unit> is not in your party" in the chat for a unit not in the
+--raid (raid1..raid10 refreshed by the raid frames as the raid breaks up, a party unit): asked for raid members only
+local function GetPartyAssignment(assignment, unit, ...)
+	if type(unit) == "string" and not (realG.GetNumRaidMembers() > 0 and realG.UnitExists(unit) and realG.UnitInRaid(unit)) then
+		return nil
+	end
+	return realG.GetPartyAssignment(assignment, unit, ...)
+end
+rawset(env, "GetPartyAssignment", GetPartyAssignment)
+
 rawset(env, "UnitGroupRolesAssigned", function(unit)
 	local isTank, isHealer, isDamage = realG.UnitGroupRolesAssigned(unit)
 	if type(isTank) == "string" then return isTank end
 	if isTank then return "TANK" elseif isHealer then return "HEALER" elseif isDamage then return "DAMAGER" end
-	if type(unit) == "string" and realG.GetPartyAssignment and realG.GetPartyAssignment("MAINTANK", unit) then return "TANK" end
+	if type(unit) == "string" and GetPartyAssignment("MAINTANK", unit) then return "TANK" end
 	return "NONE"
 end)
 
