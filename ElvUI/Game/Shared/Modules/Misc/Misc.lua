@@ -166,6 +166,22 @@ function M:FACTION_STANDING_CHANGED(_, factionID)
 	end
 end
 
+local function TrackFaction(faction)
+	local data = E:GetWatchedFactionInfo()
+	if not (data and data.name) or faction ~= data.name then
+		ExpandAllFactionHeaders()
+
+		for i = 1, GetNumFactions() do
+			local name, _, _, _, _, _, _, _, _, _, _, _, _, factionID = GetFactionInfo(i)
+			if name == faction and (ElvUI335 or (factionID and factionID ~= 0)) then -- no faction ID on 3.3.5
+				SetWatchedFactionIndex(i)
+
+				break
+			end
+		end
+	end
+end
+
 function M:COMBAT_TEXT_UPDATE(_, messagetype, factionName, amount)
 	if messagetype ~= 'FACTION' or not E.db.general.autoTrackReputation then return end
 
@@ -178,18 +194,20 @@ function M:COMBAT_TEXT_UPDATE(_, messagetype, factionName, amount)
 	end
 
 	if (faction and faction ~= 'Guild') and (rep and rep > 0) then
-		local data = E:GetWatchedFactionInfo()
-		if not (data and data.name) or faction ~= data.name then
-			ExpandAllFactionHeaders()
+		TrackFaction(faction)
+	end
+end
 
-			for i = 1, GetNumFactions() do
-				local name, _, _, _, _, _, _, _, _, _, _, _, _, factionID = GetFactionInfo(i)
-				if name == faction and (ElvUI335 or (factionID and factionID ~= 0)) then -- no faction ID on 3.3.5
-					SetWatchedFactionIndex(i)
+-- ElvUI Wotlk: 3.3.5 sends COMBAT_TEXT_UPDATE only with the floating combat text on (its reputation changes): the
+-- reputation line of the chat comes in any case ("Reputation with %s increased by %d."), as ElvUI_Enhanced read it
+if ElvUI335 then
+	local INCREASED = gsub(gsub(_G.FACTION_STANDING_INCREASED, '%%s', '(.+)'), '%%d', '%%d+')
+	function M:CHAT_MSG_COMBAT_FACTION_CHANGE(_, msg)
+		if not E.db.general.autoTrackReputation or type(msg) ~= 'string' then return end
 
-					break
-				end
-			end
+		local faction = strmatch(msg, INCREASED)
+		if faction and faction ~= 'Guild' then
+			TrackFaction(faction)
 		end
 	end
 end
@@ -468,6 +486,10 @@ function M:Initialize()
 		M:RegisterEvent('FACTION_STANDING_CHANGED')
 	else
 		M:RegisterEvent('COMBAT_TEXT_UPDATE')
+	end
+
+	if ElvUI335 then
+		M:RegisterEvent('CHAT_MSG_COMBAT_FACTION_CHANGE')
 	end
 
 	for _, addon in next, { 'Blizzard_InspectUI', 'Blizzard_PTRFeedback', E.Retail and 'Blizzard_HousingControls' or nil, vanillaStyle and 'Blizzard_GroupFinder_VanillaStyle' or nil } do
