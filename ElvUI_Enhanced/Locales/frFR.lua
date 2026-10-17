@@ -135,6 +135,17 @@ L["Tiers"] = true
 L["Tooltip Icon"] = true
 L["Trial of the Crusader"] = true
 L["Ulduar"] = true
+-- ElvUI Wotlk: the tiers of the progression (short names in the tooltip lines, full names in the options)
+L["RS"] = true
+L["ICC"] = true
+L["ToC"] = true
+L["ToGC"] = true
+L["Naxx"] = true
+L["EoE"] = true
+L["OS"] = true
+L["Naxxramas"] = true
+L["The Eye of Eternity"] = true
+L["The Obsidian Sanctum"] = true
 
 -- Movers
 L["Loss Control"] = "Perte de contrôle"

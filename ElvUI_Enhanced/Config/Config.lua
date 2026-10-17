@@ -1076,6 +1076,21 @@ local function TooltipOptions()
 								order = 4,
 								type = "toggle",
 								name = L["Ulduar"]
+							},
+							Naxx = {
+								order = 5,
+								type = "toggle",
+								name = L["Naxxramas"]
+							},
+							EoE = {
+								order = 6,
+								type = "toggle",
+								name = L["The Eye of Eternity"]
+							},
+							OS = {
+								order = 7,
+								type = "toggle",
+								name = L["The Obsidian Sanctum"]
 							}
 						}
 					}

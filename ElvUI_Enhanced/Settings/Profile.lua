@@ -111,7 +111,10 @@ P.enhanced = {
 				["RS"] = true,
 				["ICC"] = true,
 				["ToC"] = true,
-				["Ulduar"] = true
+				["Ulduar"] = true,
+				["Naxx"] = true,
+				["EoE"] = true,
+				["OS"] = true
 			}
 		}
 	},
