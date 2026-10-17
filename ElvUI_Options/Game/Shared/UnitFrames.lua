@@ -767,7 +767,7 @@ local function GetOptionsTable_HealPrediction(updateFunc, groupName, numGroup, s
 			local text = L["Max Overflow is set to zero. Absorb Overflows will be hidden when using Overflow style.\nIf used together Max Overflow at zero and Overflow mode will act like Normal mode without the ending sliver of overflow."]
 			return text .. (E.db.unitframe.units[groupName].healPrediction.absorbStyle == 'OVERFLOW' and ' |cffFF9933' .. L["You are using Overflow with Max Overflow at zero."] .. '|r ' or '')
 		end
-	end, 50, 'medium', nil, nil, nil, nil, 'full', not (E.Modern or E.Mists))
+	end, 50, 'medium', nil, nil, nil, nil, 'full', not (E.Modern or E.Mists or ElvUI335)) -- ElvUI Wotlk: absorbs from SpecializedAbsorbs
 
 	if subGroup then
 		config.get = function(info) return E.db.unitframe.units[groupName][subGroup].healPrediction[info[#info]] end
@@ -1300,10 +1300,10 @@ Colors.healPrediction.args.maxOverflow = ACH:Range(L["Max Overflow"], L["Max amo
 Colors.healPrediction.args.spacer1 = ACH:Spacer(2, 'full')
 Colors.healPrediction.args.personal = ACH:Color(L["Personal"], nil, 3, true)
 Colors.healPrediction.args.others = ACH:Color(L["Others"], nil, 4, true)
-Colors.healPrediction.args.absorbs = ACH:Color(L["Absorbs"], nil, 5, true, nil, nil, nil, nil, not (E.Modern or E.Mists))
-Colors.healPrediction.args.healAbsorbs = ACH:Color(L["Heal Absorbs"], nil, 6, true, nil, nil, nil, nil, not (E.Modern or E.Mists))
-Colors.healPrediction.args.overabsorbs = ACH:Color(L["Over Absorbs"], nil, 7, true, nil, nil, nil, nil, not (E.Modern or E.Mists))
-Colors.healPrediction.args.overhealabsorbs = ACH:Color(L["Over Heal Absorbs"], nil, 8, true, nil, nil, nil, nil, not (E.Modern or E.Mists))
+Colors.healPrediction.args.absorbs = ACH:Color(L["Absorbs"], nil, 5, true, nil, nil, nil, nil, not (E.Modern or E.Mists or ElvUI335)) -- ElvUI Wotlk: absorbs from SpecializedAbsorbs
+Colors.healPrediction.args.healAbsorbs = ACH:Color(L["Heal Absorbs"], nil, 6, true, nil, nil, nil, nil, not (E.Modern or E.Mists or ElvUI335)) -- ElvUI Wotlk: absorbs from SpecializedAbsorbs
+Colors.healPrediction.args.overabsorbs = ACH:Color(L["Over Absorbs"], nil, 7, true, nil, nil, nil, nil, not (E.Modern or E.Mists or ElvUI335)) -- ElvUI Wotlk: absorbs from SpecializedAbsorbs
+Colors.healPrediction.args.overhealabsorbs = ACH:Color(L["Over Heal Absorbs"], nil, 8, true, nil, nil, nil, nil, not (E.Modern or E.Mists or ElvUI335)) -- ElvUI Wotlk: absorbs from SpecializedAbsorbs
 
 Colors.powerGroup = ACH:Group(L["Power"], nil, nil, nil, function(info) return E.db.unitframe.colors[info[#info]] end, function(info, value) E.db.unitframe.colors[info[#info]] = value UF:Update_AllFrames() end)
 Colors.powerGroup.args.transparentPower = ACH:Toggle(L["Transparent"], L["Make textures transparent."], 1)
