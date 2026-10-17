@@ -1403,6 +1403,7 @@ if ElvUI335 then
 
 	-- the Style Filters: the unit events rebuffed.dll does not send for the plate units, from what changed since the last poll
 	local UnitAffectingCombat = UnitAffectingCombat
+	local targetOf = setmetatable({}, {__index = function(t, unit) local token = unit..'target' t[unit] = token return token end}) -- nameplateNtarget, made once
 	local function StyleFilterPoll(plate, unit, seen)
 		-- the threat (no UNIT_THREAT_* either): the health color and the threat scale follow it, then the filters
 		local threat = E:GetThreatSituation(unit, 'player')
@@ -1437,7 +1438,7 @@ if ElvUI335 then
 		end
 
 		if events.UNIT_TARGET then
-			local targetingMe = UnitIsUnit(unit..'target', 'player') and true or false
+			local targetingMe = UnitIsUnit(targetOf[unit], 'player') and true or false
 			if seen.targetingMe ~= targetingMe then
 				seen.targetingMe = targetingMe
 				update(plate, 'UNIT_TARGET', unit)
@@ -1477,19 +1478,26 @@ if ElvUI335 then
 		return maxBands
 	end
 
-	-- a part at its level, its children one over it (its backdrop one under it), within the band
-	local function LevelPart(frame, level, top)
-		if frame:GetFrameLevel() ~= level then
-			frame:SetFrameLevel(level)
-		end
-
-		for _, child in next, { frame:GetChildren() } do
+	-- a part at its level, its children one over it (its backdrop one under it), within the band (the children read from
+	-- the vararg: no table made for each part, every plate is laid out again each second)
+	local LevelPart
+	local function LevelChildren(frame, level, top, ...)
+		for i = 1, select('#', ...) do
+			local child = select(i, ...)
 			if child == frame.backdrop then
 				child:SetFrameLevel(max(level - 1, 0))
 			else
 				LevelPart(child, min(level + 1, top), top)
 			end
 		end
+	end
+
+	function LevelPart(frame, level, top)
+		if frame:GetFrameLevel() ~= level then
+			frame:SetFrameLevel(level)
+		end
+
+		LevelChildren(frame, level, top, frame:GetChildren())
 	end
 
 	local function LevelPlate(plate, rank)
@@ -1517,7 +1525,8 @@ if ElvUI335 then
 			local holder = text and text.GetParent and text:GetParent()
 			if holder and holder ~= raised then holder:SetFrameLevel(base + LAYOUT.TagTextLevel) end
 		end
-		for _, element in next, { plate.Health, plate.Power } do
+		for i = 1, 2 do
+			local element = (i == 1 and plate.Health) or plate.Power
 			local holder = element and element.Text and element.Text:GetParent()
 			if holder and holder ~= raised then holder:SetFrameLevel(base + LAYOUT.TagTextLevel) end
 		end
