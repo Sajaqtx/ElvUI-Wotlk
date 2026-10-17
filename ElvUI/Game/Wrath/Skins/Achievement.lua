@@ -129,6 +129,7 @@ local function SetAchievementColor(frame)
 end
 
 local function HookHybridScrollButtons()
+	if ElvUI335 then return end -- ElvUI Wotlk: the 3.3.5 window gets the ElvUI 6.10 skin (Skins335), this one skinned its rows over it
 	if not (E.private.skins.blizzard.enable and E.private.skins.blizzard.achievement) then return end
 
 	hooksecurefunc('HybridScrollFrame_CreateButtons', function(frame, template)
