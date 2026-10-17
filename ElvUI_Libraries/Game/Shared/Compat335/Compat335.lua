@@ -490,6 +490,8 @@ do
 	--status bars fill left to right on 3.3.5; the flag is kept for the getter (ElvUI places its own textures)
 	add("SetReverseFill", function(self, reverse) self.__elvReverseFill = reverse and true or false end, objectType("StatusBar"))
 	add("GetReverseFill", function(self) return self.__elvReverseFill == true end, objectType("StatusBar"))
+	--a chat tab click brings its faded lines back (4.x): 3.3.5 shows them again on its own once the frame is used
+	add("ResetAllFadeTimes", noop, objectType("ScrollingMessageFrame"))
 	--the 3.3.5 cooldown always draws its swipe, has no bling, edge or countdown numbers
 	for _, name in ipairs({"SetDrawSwipe", "SetDrawBling", "SetDrawEdge", "SetHideCountdownNumbers", "SetSwipeColor",
 		"SetSwipeTexture", "SetEdgeTexture", "SetBlingTexture", "SetUseCircularEdge", "SetCountdownFont",

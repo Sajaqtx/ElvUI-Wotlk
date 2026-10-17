@@ -821,6 +821,9 @@ end)
 --later order has no rank and a spell ID last (for ElvUI only: oUF read the rank as the text and every value after shifted)
 --3.3.5 gives the role as three booleans (tank, healer, damage, set by the dungeon finder only): the later string, the
 --raid's main tank assignment when the dungeon finder gave none
+--the taskbar icon flashing on a whisper (4.x): none on 3.3.5
+define("FlashClientIcon", noop)
+
 rawset(env, "UnitGroupRolesAssigned", function(unit)
 	local isTank, isHealer, isDamage = realG.UnitGroupRolesAssigned(unit)
 	if type(isTank) == "string" then return isTank end
