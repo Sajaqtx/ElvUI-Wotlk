@@ -823,6 +823,11 @@ end)
 --raid's main tank assignment when the dungeon finder gave none
 --the taskbar icon flashing on a whisper (4.x): none on 3.3.5
 define("FlashClientIcon", noop)
+--a chat tab's options menu (right click, 4.x+): 3.3.5 opens the tab's own dropdown (FCF_Tab_OnClick, FloatingChatFrame.lua)
+define("FCF_Tab_SetupMenu", function(tab)
+	local name = tab:GetName()
+	realG.ToggleDropDownMenu(1, nil, realG[name .. "DropDown"], name, 0, 0)
+end)
 
 rawset(env, "UnitGroupRolesAssigned", function(unit)
 	local isTank, isHealer, isDamage = realG.UnitGroupRolesAssigned(unit)
