@@ -294,10 +294,35 @@ function M:PVPMessageEnhancement(_, msg)
 end
 
 local hideStatic
-function M:AutoInvite(event, _, _, _, _, _, _, inviterGUID)
+-- ElvUI Wotlk: 3.3.5's PARTY_INVITE_REQUEST gives the inviter's name only (no GUID): a friend (character or Real ID) or a
+-- guild member is told by that name, as the 3.3.5 ElvUI did
+local function IsKnownInviter335(name)
+	if not name or name == '' then return end
+	name = strsplit('-', name) -- no realm on 3.3.5, to be safe
+
+	for i = 1, GetNumFriends() do
+		if GetFriendInfo(i) == name then return true end
+	end
+
+	if _G.BNGetNumFriends and _G.BNGetFriendInfo then
+		for i = 1, _G.BNGetNumFriends() do
+			local _, _, _, toonName = _G.BNGetFriendInfo(i)
+			if toonName == name then return true end
+		end
+	end
+
+	if IsInGuild() then
+		for i = 1, GetNumGuildMembers(true) do
+			if GetGuildRosterInfo(i) == name then return true end
+		end
+	end
+end
+
+function M:AutoInvite(event, inviterName, _, _, _, _, _, inviterGUID)
 	if not E.db.general.autoAcceptInvite then return end
 
 	if event == 'PARTY_INVITE_REQUEST' then
+		if ElvUI335 then inviterGUID = IsKnownInviter335(inviterName) and inviterName or nil end -- the name stands for the GUID
 		if not inviterGUID or inviterGUID == '' or IsInGroup() then return end
 
 		local queueButton = M:GetQueueStatusButton() -- don't auto accept during a queue
@@ -311,7 +336,7 @@ function M:AutoInvite(event, _, _, _, _, _, _, inviterGUID)
 			end
 		end
 
-		if GetGameAccountInfoByGUID(inviterGUID) or IsFriend(inviterGUID) or IsGuildMember(inviterGUID) then
+		if ElvUI335 or GetGameAccountInfoByGUID(inviterGUID) or IsFriend(inviterGUID) or IsGuildMember(inviterGUID) then -- ElvUI Wotlk: known by name above
 			hideStatic = true
 			AcceptGroup()
 		end
