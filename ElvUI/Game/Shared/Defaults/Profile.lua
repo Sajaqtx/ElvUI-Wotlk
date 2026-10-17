@@ -866,9 +866,9 @@ P.nameplates = {
 	motionSpeed = 1, -- ElvUI Wotlk: the speed of the stacked plates (rebuffed.dll), times the game's own (1)
 	-- ElvUI Wotlk: the Style Filters enabled in this profile (ElvUI 14)
 	filters = {
-		ElvUI_MobBoss = { triggers = { enable = true } },
-		ElvUI_MobMiniBoss = { triggers = { enable = true } },
-		ElvUI_MobCaster = { triggers = { enable = true } },
+		ElvUI_MobBoss = { triggers = { enable = false } },
+		ElvUI_MobMiniBoss = { triggers = { enable = false } },
+		ElvUI_MobCaster = { triggers = { enable = false } },
 	},
 	classColorNames = false,
 	showEnemyCombat = 'DISABLED',

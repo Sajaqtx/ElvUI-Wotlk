@@ -46,6 +46,7 @@ G.nameplates.filters = {
 			priority = 3,
 			mobType = { enable = true, boss = true },
 			threat = { enable = true, good = true, offTank = true, noThreat = true }, -- a bad threat or a transition shows the threat color
+			instanceType = { party = true, raid = true }, -- in dungeons and raids only
 			nameplateType = { enable = true, enemyNPC = true }
 		},
 		actions = {
@@ -57,6 +58,7 @@ G.nameplates.filters = {
 			priority = 3,
 			mobType = { enable = true, miniBoss = true },
 			threat = { enable = true, good = true, offTank = true, noThreat = true }, -- a bad threat or a transition shows the threat color
+			instanceType = { party = true, raid = true }, -- in dungeons and raids only
 			nameplateType = { enable = true, enemyNPC = true }
 		},
 		actions = {
@@ -68,6 +70,7 @@ G.nameplates.filters = {
 			priority = 3,
 			mobType = { enable = true, caster = true },
 			threat = { enable = true, good = true, offTank = true, noThreat = true }, -- a bad threat or a transition shows the threat color
+			instanceType = { party = true, raid = true }, -- in dungeons and raids only
 			nameplateType = { enable = true, enemyNPC = true }
 		},
 		actions = {
