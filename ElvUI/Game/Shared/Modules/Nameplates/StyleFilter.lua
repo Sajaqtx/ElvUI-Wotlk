@@ -452,7 +452,10 @@ function NP:StyleFilterAuraCheck(frame, event, arg1, arg2, filter, names, ticker
 end
 
 function NP:StyleFilterCooldownCheck(names, mustHaveAll)
-	local _, gcd = E:GetSpellCooldown(61304)
+	-- ElvUI Wotlk: no global cooldown spell (61304) on 3.3.5: a cooldown longer than a global cooldown is a cooldown
+	local _, gcd
+	if not ElvUI335 then _, gcd = E:GetSpellCooldown(61304) end
+	gcd = gcd or 1.5
 	local total, count = 0, 0
 
 	for name, value in next, names do
