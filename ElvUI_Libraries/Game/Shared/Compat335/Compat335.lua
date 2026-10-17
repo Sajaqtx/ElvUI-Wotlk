@@ -199,12 +199,29 @@ do
 	function Compat.AtlasExists(atlas)
 		return type(atlas) == "string" and realG.AtlasUtil ~= nil and realG.AtlasUtil:AtlasExists(atlas)
 	end
-	function Compat.SetAtlas(region, atlas, ...)
+	--a 3.3.5 texture for the atlases of features 3.3.5 has (the size when the call asks for the atlas size); the
+	--others belong to features it lacks (scrapping, paragon chest, spell flyouts) and stay empty
+	local FALLBACK = {
+		["bags-junkcoin"] = { texture = [[Interface\MoneyFrame\UI-GoldIcon]], width = 14, height = 14 }, -- the gray item coin of the bags
+		["SmallQuestBang"] = { texture = [[Interface\GossipFrame\AvailableQuestIcon]], width = 16, height = 16 }, -- the quest mark of the plates
+	}
+	local NOT_ON_335 = { ["bags-icon-scrappable"] = true, ["ParagonReputation_Bag"] = true, ["UI-HUD-ActionBar-IconFrame-FlyoutButton"] = true,
+		["UI-HUD-ActionBar-IconFrame-FlyoutBottom"] = true, ["!UI-HUD-ActionBar-IconFrame-FlyoutMid"] = true, ["_UI-HUD-ActionBar-IconFrame-FlyoutMidLeft"] = true }
+	function Compat.SetAtlas(region, atlas, useAtlasSize, ...)
 		if (atlas == nil or atlas == "" or Compat.AtlasExists(atlas)) then
 			if (atlas == "") then atlas = nil end
-			return region:SetAtlas(atlas, ...)
+			return region:SetAtlas(atlas, useAtlasSize, ...)
 		end
-		missing[atlas] = true
+
+		local fallback = FALLBACK[atlas]
+		if (fallback) then
+			region:SetTexture(fallback.texture)
+			region:SetTexCoord(0, 1, 0, 1)
+			if (useAtlasSize) then region:SetSize(fallback.width, fallback.height) end
+			return
+		end
+
+		if (not NOT_ON_335[atlas]) then missing[atlas] = true end
 		region:SetTexture(nil)
 	end
 end
