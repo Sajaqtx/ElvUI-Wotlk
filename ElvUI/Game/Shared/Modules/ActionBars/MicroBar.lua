@@ -70,6 +70,13 @@ do
 	}
 end
 
+-- ElvUI Wotlk: on 3.3.5 the Help button is the help request (the '?' of the sheet) and the Main Menu the game menu (the
+-- WoW logo, as Classic): Wrath had them the other way, the Help button showing the WoW logo of the Store as well
+if ElvUI335 then
+	AB.MICRO_OFFSETS.MainMenuMicroButton = 10 / 12.125
+	AB.MICRO_OFFSETS.HelpMicroButton = 9 / 12.125
+end
+
 local microBar = CreateFrame('Frame', 'ElvUI_MicroBar', E.UIParent)
 microBar:SetSize(100, 100)
 
@@ -122,6 +129,11 @@ end
 
 function AB:GetMicroCoords(name, icons, character)
 	local l, r, t, b = 0.17, 0.87, 0.5, 0.908
+
+	-- ElvUI Wotlk: the Store button shows the icon Rebuffed puts on it (StoreMicroButtonIcon) only: ElvUI's, under it, made two
+	if ElvUI335 and name == 'StoreMicroButton' and _G.StoreMicroButtonIcon then
+		return 0, 0, 0, 0
+	end
 
 	if name == 'PVPMicroButton' or (character and name == 'CharacterMicroButton') then
 		l, r, t, b = 0, 1, 0, 1
@@ -282,7 +294,10 @@ function AB:HandleMicroButton(button, name)
 	-- ElvUI Wotlk: the icons Rebuffed puts over its own buttons, anchored for the stock micro bar (as ElvUI 6.10 did)
 	if ElvUI335 then
 		local icon = _G[name..'Icon']
-		if icon and (name == 'CollectionsMicroButton' or name == 'StoreMicroButton') then
+		if icon and name == 'StoreMicroButton' then -- the only icon of the button (GetMicroCoords): fitted to it
+			icon:ClearAllPoints()
+			icon:SetInside(button)
+		elseif icon and name == 'CollectionsMicroButton' then
 			icon:ClearAllPoints()
 			icon:SetPoint('CENTER', button, 'CENTER')
 		elseif icon and name == 'ParagonMicroButton' then
