@@ -3272,6 +3272,7 @@ local ACTION_SLOTS = _G.NUM_PET_ACTION_SLOTS or 10
 local STANCE_SLOTS = _G.NUM_STANCE_SLOTS or 10
 
 P.actionbar = {
+	keyDown335 = false, -- ElvUI Wotlk: Key Down on 3.3.5, which has no ActionButtonUseKeyDown cvar
 	hotkeyTextPosition = 'TOPRIGHT',
 	macroTextPosition = 'TOPRIGHT',
 	countTextPosition = 'BOTTOMRIGHT',

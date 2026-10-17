@@ -1569,6 +1569,11 @@ function Generic:UpdateConfig(config)
 
 	self:SetAttribute('flyoutDirection', self.config.flyoutDirection)
 	self:SetAttribute('useOnKeyDown', self.config.clickOnDown)
+
+	-- ElvUI Wotlk: Key Down on 3.3.5 (no useOnKeyDown check there): the press only, else the release only (CreateButton)
+	if ElvUI335 and not InCombatLockdown() then
+		self:RegisterForClicks(self.config.clickOnDown and "AnyDown" or "AnyUp")
+	end
 end
 
 -----------------------------------------------------------

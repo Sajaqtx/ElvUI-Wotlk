@@ -130,9 +130,15 @@ general.args.customGlowShortcut = ACH:Execute(L["Custom Glow"], nil, 4, function
 
 general.args.generalGroup = ACH:Group(L["General"], nil, 20, nil, function(info) return E.db.actionbar[info[#info]] end, function(info, value) E.db.actionbar[info[#info]] = value AB:UpdateButtonSettings() end)
 general.args.generalGroup.inline = true
-general.args.generalGroup.args.keyDown = ACH:Toggle(L["Key Down"], L["OPTION_TOOLTIP_ACTION_BUTTON_USE_KEY_DOWN"], 1, nil, nil, nil, function() return GetCVarBool('ActionButtonUseKeyDown') end, function(_, value) E:SetCVar('ActionButtonUseKeyDown', value and 1 or 0) AB:UpdateButtonSettings() end)
+if ElvUI335 then -- ElvUI Wotlk: 3.3.5 has no ActionButtonUseKeyDown cvar, the setting is ElvUI's (the bar buttons take the key press)
+	general.args.generalGroup.args.keyDown = ACH:Toggle(L["Key Down"], L["OPTION_TOOLTIP_ACTION_BUTTON_USE_KEY_DOWN"], 1, nil, nil, nil, function() return E.db.actionbar.keyDown335 end, function(_, value) E.db.actionbar.keyDown335 = value AB:UpdateButtonSettings() end)
+else
+	general.args.generalGroup.args.keyDown = ACH:Toggle(L["Key Down"], L["OPTION_TOOLTIP_ACTION_BUTTON_USE_KEY_DOWN"], 1, nil, nil, nil, function() return GetCVarBool('ActionButtonUseKeyDown') end, function(_, value) E:SetCVar('ActionButtonUseKeyDown', value and 1 or 0) AB:UpdateButtonSettings() end)
+end
 general.args.generalGroup.args.lockActionBars = ACH:Toggle(L["LOCK_ACTIONBAR_TEXT"], L["If you unlock actionbars then trying to move a spell might instantly cast it if you cast spells on key press instead of key release."], 2, nil, nil, nil, nil, function(info, value) E.db.actionbar[info[#info]] = value E:SetCVar('lockActionBars', value and 1 or 0) _G.LOCK_ACTIONBAR = (value and '1' or '0') AB:UpdateButtonSettings() end)
-general.args.generalGroup.args.addNewSpells = ACH:Toggle(L["Auto Add New Spells"], L["Allow newly learned spells to be automatically placed on an empty actionbar slot."], 4, nil, nil, nil, function() return GetCVarBool('AutoPushSpellToActionBar') end, function(_, value) E:SetCVar('AutoPushSpellToActionBar', value and 1 or 0) end)
+if not ElvUI335 then -- ElvUI Wotlk: 3.3.5 puts no new spell on the bars (no AutoPushSpellToActionBar cvar)
+	general.args.generalGroup.args.addNewSpells = ACH:Toggle(L["Auto Add New Spells"], L["Allow newly learned spells to be automatically placed on an empty actionbar slot."], 4, nil, nil, nil, function() return GetCVarBool('AutoPushSpellToActionBar') end, function(_, value) E:SetCVar('AutoPushSpellToActionBar', value and 1 or 0) end)
+end
 general.args.generalGroup.args.desaturateOnCooldown = ACH:Toggle(L["Desaturate Cooldowns"], nil, 11, nil, nil, nil, nil, function(info, value) E.db.actionbar[info[#info]] = value AB:ToggleCooldownOptions() end)
 general.args.generalGroup.args.transparent = ACH:Toggle(L["Transparent"], nil, 12, nil, nil, nil, nil, function(info, value) E.db.actionbar[info[#info]] = value E.ShowPopup = true end)
 general.args.generalGroup.args.flashAnimation = ACH:Toggle(L["Button Flash"], L["Use a more visible flash animation for Auto Attacks."], 13, nil, nil, nil, nil, function(info, value) E.db.actionbar[info[#info]] = value E.ShowPopup = true end)

@@ -1546,7 +1546,7 @@ function AB:UpdateButtonConfig(barName, buttonName)
 	config.showGrid = db.showGrid
 	config.targetReticle = db.targetReticle
 	config.spellCastVFX = db.spellCastVFX
-	config.clickOnDown = GetCVarBool('ActionButtonUseKeyDown')
+	config.clickOnDown = (ElvUI335 and AB.db.keyDown335) or (not ElvUI335 and GetCVarBool('ActionButtonUseKeyDown')) -- ElvUI Wotlk: no such cvar on 3.3.5
 	config.outOfRangeColoring = (AB.db.useRangeColorText and 'hotkey') or 'button'
 	config.colors.range = E:SetColorTable(config.colors.range, AB.db.noRangeColor)
 	config.colors.mana = E:SetColorTable(config.colors.mana, AB.db.noPowerColor)
