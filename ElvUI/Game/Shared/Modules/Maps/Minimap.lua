@@ -270,6 +270,10 @@ function M:Minimap_OnMouseDown(btn)
 			E:ComplicatedMenu(menuList, menuFrame, 'cursor', position:match('LEFT') and 0 or -160, 0, 'MENU')
 			menuFrame:Show()
 		end
+	elseif btn == 'RightButton' and ElvUI335 then -- ElvUI Wotlk: the 3.3.5 tracking menu is a drop down of its own
+		if _G.MiniMapTrackingDropDown then
+			_G.ToggleDropDownMenu(1, nil, _G.MiniMapTrackingDropDown, 'cursor')
+		end
 	elseif btn == 'RightButton' then
 		local button = (E.Modern and _G.MinimapCluster.Tracking.Button) or _G.MiniMapTrackingButton
 		if button then
@@ -842,6 +846,20 @@ function M:Initialize()
 	clickHandler:SetScript('OnMouseWheel', M.Minimap_OnMouseWheel)
 	clickHandler:SetScript('OnMouseDown', M.Minimap_OnMouseDown)
 	M.MinimapClickHandler = clickHandler
+
+	-- ElvUI Wotlk: a 3.3.5 frame gets no mouse unless enabled, and has no pass through for the left button: the click
+	-- handler got nothing (no middle click menu, no wheel zoom). The minimap itself takes them, as the 3.3.5 ElvUI did:
+	-- the left button pings, the others open the menus
+	if ElvUI335 then
+		Minimap:SetScript('OnMouseWheel', M.Minimap_OnMouseWheel)
+		Minimap:SetScript('OnMouseUp', function(minimap, btn)
+			if btn == 'LeftButton' then
+				if _G.Minimap_OnClick then _G.Minimap_OnClick(minimap) end
+			else
+				M.Minimap_OnMouseDown(minimap, btn)
+			end
+		end)
+	end
 
 	M:ClusterLayout()
 	MinimapCluster:EnableMouse(false)
