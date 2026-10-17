@@ -139,42 +139,6 @@ local achievementTiers = {
 	}
 }
 
--- ElvUI Wotlk: Naxxramas, the Eye of Eternity and the Obsidian Sanctum (the IDs read in the client with /elvtest stats; the
--- server has heroic modes of them, achievements only: 65xx in 10, 84xx in 25)
-statisticTiers.Naxx = {
-	{},	-- Heroic 25
-	{},	-- Heroic 10
-	{1368, 1378, 1379, 1380, 1381, 1382, 1383, 1384, 1385, 1386, 1387, 1367, 1388, 1389, 1390},	-- Normal 25
-	{1361, 1362, 1363, 1364, 1365, 1366, 1369, 1370, 1371, 1372, 1373, 1374, 1375, 1376, 1377}	-- Normal 10
-}
-statisticTiers.EoE = { {}, {}, {1394}, {1391} }	-- Malygos kills (25, 10)
-statisticTiers.OS = { {}, {}, {1393}, {1392} }	-- Sartharion kills (25, 10)
-
-achievementTiers.Naxx = {
-	{8437, 8438, 8439, 8440, 8441, 8442},	-- Heroic 25: the four quarters, Sapphiron's Demise, Kel'Thuzad's Defeat
-	{6537, 6538, 6539, 6540, 6541, 6542},	-- Heroic 10
-	{563, 565, 567, 569, 573, 575},	-- Normal 25
-	{562, 564, 566, 568, 572, 574}	-- Normal 10
-}
-achievementTiers.EoE = { {8444}, {6544}, {623}, {622} }	-- The Spellweaver's Downfall
-achievementTiers.OS = { {8445}, {6543}, {625}, {1876} }	-- Heroic: The Twilight Zone, Besting the Black Dragonflight
-
--- the IDs the client holds only (an ID it does not know is dropped), the boss kill statistics checked by their name
-local statisticBoss = { [1391] = "Malygos", [1394] = "Malygos", [1392] = "Sartharion", [1393] = "Sartharion" }
-local function CheckIDs(tiers, isStatistic)
-	for _, tier in pairs(tiers) do
-		for _, list in ipairs(tier) do
-			for i = #list, 1, -1 do
-				local id, name = GetAchievementInfo(list[i])
-				local boss = isStatistic and statisticBoss[list[i]]
-				if not id or (boss and not (name and name:find(boss, 1, true))) then
-					tremove(list, i)
-				end
-			end
-		end
-	end
-end
-
 local progressCache = {}
 
 --[[
@@ -275,9 +239,8 @@ local function SetProgressionInfo(guid, tt)
 	for tier in pairs(tiers) do
 		if E.db.enhanced.tooltip.progressInfo.tiers[tier] then
 			for i = 1, #difficulties do
-				local header = progressCache[guid].header[tier] and progressCache[guid].header[tier][i]
-				if #tiers[tier][i] > 0 and header then -- ElvUI Wotlk: a difficulty with no kill adds no empty line
-					tt:AddDoubleLine(header, progressCache[guid].info[tier][i], nil, nil, nil, 1, 1, 1)
+				if #tiers[tier][i] > 0 then
+					tt:AddDoubleLine(progressCache[guid].header[tier][i], progressCache[guid].info[tier][i], nil, nil, nil, 1, 1, 1)
 				end
 			end
 		end
@@ -378,8 +341,6 @@ end
 
 function PI:ToggleState()
 	if E.db.enhanced.tooltip.progressInfo.enable then
-		self:CheckTierIDs()
-
 		-- ElvUI Wotlk: ElvUI 16 sets its handler on the tooltip script by reference (SecureHookScript at its start): a hook of
 		-- TT.GameTooltip_OnTooltipSetUnit made later is never called. The script itself is hooked, after ElvUI's
 		if not self:IsHooked(GameTooltip, "OnTooltipSetUnit") then
@@ -393,19 +354,10 @@ function PI:ToggleState()
 	end
 end
 
-function PI:CheckTierIDs()
-	if self.idsChecked then return end
-	self.idsChecked = true
-
-	CheckIDs(statisticTiers, true)
-	CheckIDs(achievementTiers)
-end
-
 function PI:Initialize()
 	if not E.db.enhanced.tooltip.progressInfo.enable then return end
 
 	self.progressCache = progressCache
-	self:CheckTierIDs()
 	self:ToggleState()
 end
 
