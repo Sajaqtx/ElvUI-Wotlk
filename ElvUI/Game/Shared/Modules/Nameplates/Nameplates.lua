@@ -1225,6 +1225,10 @@ if ElvUI335 then
 	local strfind = strfind
 	local UnitIsUnit = UnitIsUnit
 	local dirty = {}
+	-- a combat log aura line can come before the client holds the aura's new data (a refresh read on the next frame kept
+	-- the old duration: the sweep went on from the first cast): the plate is read again a moment later
+	local late, LATE_DELAY = {}, 0.3
+	local GetTime = GetTime
 	local AURA_EVENTS = { SPELL_AURA_APPLIED = true, SPELL_AURA_REMOVED = true, SPELL_AURA_REFRESH = true,
 		SPELL_AURA_APPLIED_DOSE = true, SPELL_AURA_REMOVED_DOSE = true, SPELL_AURA_BROKEN = true, SPELL_AURA_BROKEN_SPELL = true }
 
@@ -1288,6 +1292,7 @@ if ElvUI335 then
 			local plate = AURA_EVENTS[subEvent] and destGUID and NP.PlateGUID[destGUID]
 			if plate then
 				Mark(plate)
+				late[plate] = GetTime() + LATE_DELAY
 			end
 
 			local cast = CAST_LOG[subEvent]
@@ -1299,7 +1304,19 @@ if ElvUI335 then
 	end)
 
 	AuraRelay335:SetScript('OnUpdate', function(relay)
-		relay:Hide()
+		local now, waiting = GetTime()
+		for plate, at in next, late do
+			if now >= at then
+				late[plate] = nil
+				dirty[plate] = true
+			else
+				waiting = true
+			end
+		end
+
+		if not waiting then
+			relay:Hide()
+		end
 
 		for plate in next, dirty do
 			dirty[plate] = nil
