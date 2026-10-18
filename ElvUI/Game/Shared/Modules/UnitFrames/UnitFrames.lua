@@ -1006,7 +1006,9 @@ function UF.groupPrototype:Configure_Groups(Header)
 				group:SetAttribute('sortDir', sortDir)
 				group:SetAttribute('showPlayer', showPlayer)
 
-				if not group.initialized then -- keep below maxColumns and unitsPerColumn, otherwise it spawns more buttons than it can show
+				-- ElvUI Wotlk: not for a disabled header (raid pets by default): a 3.3.5 unit frame takes some 50 ms to make,
+				-- 40 frames made for nothing at every login; its frames are made once it is enabled (this runs again then)
+				if not group.initialized and (db.enable or not ElvUI335) then -- keep below maxColumns and unitsPerColumn, otherwise it spawns more buttons than it can show
 					group:SetAttribute('startingIndex', raidWideSorting and (-min(numGroups * (groupsPerRowCol * 5), _G.MAX_RAID_MEMBERS) + 1) or -4)
 					group:Show()
 					group.initialized = true
