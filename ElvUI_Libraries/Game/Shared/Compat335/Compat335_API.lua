@@ -568,6 +568,8 @@ define("UnitIsGroupAssistant", function(unit)
 	return NumRaid() > 0 and UnitIsRaidOfficer(unit) and not UnitIsPartyLeader(unit) and true or false
 end)
 define("IsEveryoneAssistant", returnFalse)
+--the Mac Command key (later clients): none on 3.3.5 (the binding mode, /kb, read it on each key)
+define("IsMetaKeyDown", returnFalse)
 define("IsTrialAccount", returnFalse)
 define("IsVeteranTrialAccount", returnFalse)
 define("IsRestrictedAccount", returnFalse)
