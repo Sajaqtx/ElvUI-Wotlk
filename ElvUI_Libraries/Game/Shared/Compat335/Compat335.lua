@@ -620,6 +620,7 @@ do
 	local direct = setmetatable({}, {__mode = "k"})  --frame -> {event -> true} registered under its own name
 	local aliased = setmetatable({}, {__mode = "k"}) --frame -> {legacy -> {modern -> true}}
 	local filters = setmetatable({}, {__mode = "k"}) --frame -> {event -> {unit -> true}}
+	local filterUnits = setmetatable({}, {__mode = "k"}) --frame -> {event -> {unit1, unit2}}, as RegisterUnitEvent got them
 	local handlers = setmetatable({}, {__mode = "k"}) --frame -> its own OnEvent
 	--events the 3.3.5 client never sends, raised here (Compat.FireUnitEventByGUID): event -> frames registered for it
 	local VIRTUAL = {UNIT_ABSORB_AMOUNT_CHANGED = true, UNIT_HEAL_ABSORB_AMOUNT_CHANGED = true, UNIT_HEAL_PREDICTION = true}
@@ -698,6 +699,7 @@ do
 	end
 	local function UnregisterEvent(frame, event, ...)
 		if (filters[frame]) then filters[frame][event] = nil end
+		if (filterUnits[frame]) then filterUnits[frame][event] = nil end
 		local legacy = ALIASES[event]
 		if (legacy) then
 			for _, l in ipairs(legacy) do
@@ -714,9 +716,12 @@ do
 	local function RegisterUnitEvent(frame, event, unit1, unit2, ...)
 		RegisterEvent(frame, event)
 		filters[frame] = filters[frame] or {}
+		filterUnits[frame] = filterUnits[frame] or {}
 		if (unit1 == nil and unit2 == nil) then
 			filters[frame][event] = nil
+			filterUnits[frame][event] = nil
 		else
+			filterUnits[frame][event] = {unit1, unit2}
 			local units = {}
 			if (unit1) then units[unit1] = true end
 			if (unit2) then units[unit2] = true end
@@ -724,14 +729,24 @@ do
 		end
 		return true
 	end
+	--registered, and for a unit event its units (as later clients answer: oUF registers a unit event again when its
+	--frame's unit changes, e.g. to the vehicle of a raid member, only when these differ; with no units it never did, and
+	--the frame went on listening to the rider only: a raid frame on a drake kept its health at full)
 	local function IsEventRegistered(frame, event)
+		local units = filterUnits[frame] and filterUnits[frame][event]
 		if (ALIASES[event]) then
 			for _, a in pairs(aliased[frame] or {}) do
-				if (a[event]) then return true end
+				if (a[event]) then
+					if (units) then return true, units[1], units[2] end
+					return true
+				end
 			end
 			return false
 		end
-		if (direct[frame] and direct[frame][event]) then return true end
+		if (direct[frame] and direct[frame][event]) then
+			if (units) then return true, units[1], units[2] end
+			return true
+		end
 		return nativeIsRegistered(frame, event) and true or false
 	end
 	--a virtual unit event about a GUID (the absorbs SpecializedAbsorbs follows, the heals of LibHealComm): to each frame
