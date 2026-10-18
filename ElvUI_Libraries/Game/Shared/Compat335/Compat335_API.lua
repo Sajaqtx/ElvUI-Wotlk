@@ -542,11 +542,29 @@ define("GetNumGroupMembers", function()
 	return party > 0 and party + 1 or 0
 end)
 define("GetNumSubgroupMembers", function() return NumParty() end)
+--3.3.5 prints "<unit> is not in your party" for a raidN / partyN token of nobody (the group functions given the units of
+--the raid frames as the raid breaks up): nothing asked for those, in ElvUI's calls and in these ones
+local function GroupUnitGone(unit)
+	return type(unit) == "string" and (strfind(unit, "^raid%d") or strfind(unit, "^party%d") or strfind(unit, "^raidpet%d")
+		or strfind(unit, "^partypet%d")) and not realG.UnitExists(unit)
+end
+Compat.GroupUnitGone = GroupUnitGone
+rawset(env, "UnitIsPartyLeader", function(unit, ...)
+	if GroupUnitGone(unit) then return nil end
+	return realG.UnitIsPartyLeader(unit, ...)
+end)
+rawset(env, "UnitIsRaidOfficer", function(unit, ...)
+	if GroupUnitGone(unit) then return nil end
+	return realG.UnitIsRaidOfficer(unit, ...)
+end)
+
 define("UnitIsGroupLeader", function(unit)
+	if GroupUnitGone(unit) then return false end
 	if (NumRaid() > 0) then return UnitIsRaidOfficer(unit) and UnitIsPartyLeader(unit) and true or (UnitIsPartyLeader(unit) and true or false) end
 	return UnitIsPartyLeader(unit) and true or false
 end)
 define("UnitIsGroupAssistant", function(unit)
+	if GroupUnitGone(unit) then return false end
 	return NumRaid() > 0 and UnitIsRaidOfficer(unit) and not UnitIsPartyLeader(unit) and true or false
 end)
 define("IsEveryoneAssistant", returnFalse)
@@ -554,7 +572,7 @@ define("IsTrialAccount", returnFalse)
 define("IsVeteranTrialAccount", returnFalse)
 define("IsRestrictedAccount", returnFalse)
 define("GetRealmID", function() return 1 end)
-define("UnitLeadsAnyGroup", function(unit) return UnitIsPartyLeader(unit) and true or false end)
+define("UnitLeadsAnyGroup", function(unit) return not GroupUnitGone(unit) and UnitIsPartyLeader(unit) and true or false end)
 
 fill("C_PartyInfo", {
 	ConvertToRaid = ConvertToRaid,
@@ -840,6 +858,7 @@ end
 rawset(env, "GetPartyAssignment", GetPartyAssignment)
 
 rawset(env, "UnitGroupRolesAssigned", function(unit)
+	if GroupUnitGone(unit) then return "NONE" end -- see GroupUnitGone
 	local isTank, isHealer, isDamage = realG.UnitGroupRolesAssigned(unit)
 	if type(isTank) == "string" then return isTank end
 	if isTank then return "TANK" elseif isHealer then return "HEALER" elseif isDamage then return "DAMAGER" end
