@@ -234,6 +234,16 @@ local function BlizzardOptions()
 						order = 4,
 						type = "toggle",
 						name = L["Animated Achievement Bars"]
+					},
+					modelFrames = { -- ElvUI Wotlk: its option went with the 6.10 character frame options
+						order = 5,
+						type = "toggle",
+						name = L["Enhanced Model Frames"],
+						get = function() return E.private.enhanced.character.modelFrames end,
+						set = function(_, value)
+							E.private.enhanced.character.modelFrames = value
+							E:StaticPopup_Show("PRIVATE_RL")
+						end
 					}
 				}
 			},

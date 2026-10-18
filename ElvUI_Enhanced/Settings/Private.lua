@@ -11,7 +11,7 @@ V.enhanced = {
 	},
 	character = {
 		enable = false,
-		modelFrames = false,
+		modelFrames = true, -- ElvUI Wotlk: on by default (the rotate / zoom / drag controls of the model frames, centered)
 		collapsed = false,
 		player = {
 			orderName = "",
