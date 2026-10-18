@@ -1410,8 +1410,9 @@ if ElvUI335 then
 		local threatChanged = seen.threat ~= threat
 		if threatChanged then
 			seen.threat = threat
-			if plate.Health and plate.Health.ForceUpdate and plate.Health.__owner then plate.Health:ForceUpdate() end
-			if plate.ThreatIndicator and plate.ThreatIndicator.ForceUpdate and plate.ThreatIndicator.__owner then plate.ThreatIndicator:ForceUpdate() end
+			if plate.Health and plate.Health.ForceUpdate and plate.Health.__owner and plate:IsElementEnabled('Health') then plate.Health:ForceUpdate() end
+			-- only where it is enabled (enemy plates): forced on the others, it showed its red mark on the personal plate in combat
+			if plate.ThreatIndicator and plate.ThreatIndicator.ForceUpdate and plate.ThreatIndicator.__owner and plate:IsElementEnabled('ThreatIndicator') then plate.ThreatIndicator:ForceUpdate() end
 		end
 
 		local events = NP.StyleFilterTriggerEvents
@@ -1584,14 +1585,14 @@ if ElvUI335 then
 
 				if seen.unit ~= unit or seen.health ~= health or seen.maxHealth ~= maxHealth then
 					seen.unit, seen.health, seen.maxHealth = unit, health, maxHealth
-					if plate.Health and plate.Health.ForceUpdate and plate.Health.__owner then plate.Health:ForceUpdate() end
-					if plate.HealthPrediction and plate.HealthPrediction.ForceUpdate and plate.HealthPrediction.__owner then plate.HealthPrediction:ForceUpdate() end
+					if plate.Health and plate.Health.ForceUpdate and plate.Health.__owner and plate:IsElementEnabled('Health') then plate.Health:ForceUpdate() end
+					if plate.HealthPrediction and plate.HealthPrediction.ForceUpdate and plate.HealthPrediction.__owner and plate:IsElementEnabled('HealthPrediction') then plate.HealthPrediction:ForceUpdate() end
 					seen.healthChanged = true
 				end
 
 				if seen.power ~= power or seen.maxPower ~= maxPower then
 					seen.power, seen.maxPower = power, maxPower
-					if plate.Power and plate.Power.ForceUpdate and plate.Power.__owner and plate.Power:IsShown() then plate.Power:ForceUpdate() end
+					if plate.Power and plate.Power.ForceUpdate and plate.Power.__owner and plate:IsElementEnabled('Power') and plate.Power:IsShown() then plate.Power:ForceUpdate() end
 					seen.powerChanged = true
 				end
 
