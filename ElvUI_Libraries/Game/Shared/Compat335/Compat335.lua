@@ -634,25 +634,46 @@ do
 	local index = getmetatable(holder).__index
 	local nativeRegister, nativeUnregister, nativeIsRegistered = index.RegisterEvent, index.UnregisterEvent, index.IsEventRegistered
 
-	local function Passes(frame, event, unit)
+	--the unit the frame watches this event for: the event's own, or another name of the same vehicle. 3.3.5 sends a
+	--vehicle's unit events mostly under its pet slot (pet, raidpet10, partypet2) while a frame swapped to it watches
+	--"vehicle" (or another of these slots): seen at Malygos, the player frame's power and health bars stayed still on
+	--the drake (its tags, read otherwise, did follow)
+	local function VehicleToken(unit)
+		return type(unit) == "string" and (strfind(unit, "pet") or unit == "vehicle") and true or false
+	end
+	local function Watched(frame, event, unit)
 		local units = filters[frame] and filters[frame][event]
-		return not units or unit == nil or units[unit] ~= nil
+		if (not units or unit == nil or units[unit] ~= nil) then return unit end
+		if (VehicleToken(unit)) then
+			for watched in pairs(units) do
+				if (watched ~= unit and VehicleToken(watched) and realG.UnitIsUnit(unit, watched)) then return watched end
+			end
+		end
 	end
 	local function Wrapper(self, event, ...)
 		local handler = handlers[self]
 		if (not handler) then return end
 		local d = direct[self]
 		local a = aliased[self] and aliased[self][event]
+		local unit = (...)
 		if (d and d[event]) then
-			if (Passes(self, event, (...))) then handler(self, event, ...) end
+			local watched = Watched(self, event, unit)
+			if (unit == nil or watched == unit) then
+				handler(self, event, ...)
+			elseif (watched) then
+				handler(self, event, watched, select(2, ...))
+			end
 		elseif (not a) then
 			--registered with the frame's own RegisterEvent (the client method, not ours): it reaches the frame as is
 			handler(self, event, ...)
 		end
 		if (a) then
 			for modern in pairs(a) do
-				if (Passes(self, modern, (...))) then
+				local watched = Watched(self, modern, unit)
+				if (unit == nil or watched == unit) then
 					handler(self, modern, Translate(modern, event, ...))
+				elseif (watched) then
+					handler(self, modern, Translate(modern, event, watched, select(2, ...)))
 				end
 			end
 		end
