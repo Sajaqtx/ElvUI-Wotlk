@@ -119,8 +119,7 @@ ElvUI's own code as close to upstream as possible. What the old client lacks is 
 
 ## Known issues
 
-- **Vehicles:** the cast bar can stay inactive in a vehicle, and allies' health may not update while they ride one.
-  The vehicle action bar fix still has to be confirmed in game.
+- No open issue at the moment. Vehicles (unit frames, cast bar, vehicle bar) were checked in game in The Oculus.
 - Rendering and taint can only be checked in game. Please report any *"Interface action failed because of an
   AddOn"* message with what you were doing.
 
