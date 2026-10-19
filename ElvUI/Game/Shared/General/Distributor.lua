@@ -163,7 +163,7 @@ do
 	local shared = { panelBackdrop = 'backdrop', panelTransparency = 'panelTransparency', battleground = 'battleground' }
 	local miniPanels = { 'LeftMiniPanel', 'RightMiniPanel', 'BottomMiniPanel', 'TopMiniPanel', 'BottomLeftMiniPanel', 'BottomRightMiniPanel', 'TopRightMiniPanel', 'TopLeftMiniPanel' }
 
-	function D:Convert610Profile(data)
+	function D:Convert610DataTexts(data)
 		local dt = type(data) == 'table' and data.datatexts
 		if type(dt) ~= 'table' then return end
 
@@ -215,6 +215,185 @@ do
 		if changed then dt.panels = panels end
 		return changed
 	end
+end
+
+-- ElvUI Wotlk: the nameplates of an ElvUI 6.10 profile. Nearly every setting changed name or meaning in ElvUI 16
+-- (plate size, aura rows and filters, text styles, name abbreviation, reaction colors), and the anchors moved: 6.10
+-- puts the health bar at the top of the plate, its texts on the health bar, the cast bar under it and the aura rows
+-- centered on it; ElvUI 16 centers the health bar on the plate, its texts on the plate, and anchors the cast bar and
+-- the aura rows by their edge. A 6.10 profile only holds what differs from 6.10's defaults, so each unit is first
+-- rebuilt on them (E.NamePlateDefaults610), then converted, positions included. Only done on import: a profile already
+-- in use may have been set again by hand.
+do
+	local STYLE_TAGS = { CURRENT = '[health:current]', CURRENT_MAX = '[health:current-max]', PERCENT = '[health:percent]',
+		CURRENT_PERCENT = '[health:current-percent]', CURRENT_MAX_PERCENT = '[health:current-max-percent]', DEFICIT = '[health:deficit]' }
+	local UNITS = { FRIENDLY_PLAYER = 'friendly', FRIENDLY_NPC = 'friendly', ENEMY_PLAYER = 'enemy', ENEMY_NPC = 'enemy' }
+	local LEFT_SIDE = { TOPLEFT = true, BOTTOMLEFT = true }
+	local RIGHT_SIDE = { TOPRIGHT = true, BOTTOMRIGHT = true }
+	local TEXT_KEYS = { 'enable', 'position', 'parent', 'xOffset', 'yOffset', 'font', 'fontSize', 'fontOutline' }
+	local CASTBAR_KEYS = { 'enable', 'width', 'height', 'hideSpellName', 'hideTime', 'textPosition', 'castTimeFormat', 'channelTimeFormat',
+		'timeToHold', 'iconPosition', 'iconSize', 'iconOffsetX', 'iconOffsetY', 'showIcon', 'xOffset', 'font', 'fontSize', 'fontOutline' }
+	local AURA_KEYS = { 'enable', 'size', 'spacing', 'anchorPoint', 'growthX', 'growthY', 'yOffset', 'onlyShowPlayer', 'countFont',
+		'countFontSize', 'countFontOutline', 'countPosition', 'countXOffset', 'countYOffset' }
+
+	-- a copy of the defaults with the profile's values over them
+	local function merged(defaults, values)
+		local out = {}
+		if type(defaults) == 'table' then
+			for k, v in next, defaults do out[k] = (type(v) == 'table' and merged(v)) or v end
+		end
+		if type(values) == 'table' then
+			for k, v in next, values do
+				out[k] = (type(v) == 'table' and merged(out[k], v)) or v
+			end
+		end
+		return out
+	end
+
+	local function copyKeys(from, keys, to)
+		to = to or {}
+		for _, key in next, keys do
+			if from[key] ~= nil then to[key] = from[key] end
+		end
+		return to
+	end
+
+	local function Is610(np)
+		if np.plateSize ~= nil or np.nonTargetTransparency ~= nil or np.useTargetScale ~= nil or np.trivial ~= nil then return true end
+		for unit in next, UNITS do
+			local u = type(np.units) == 'table' and np.units[unit]
+			if type(u) == 'table' then
+				for _, auraType in next, { 'buffs', 'debuffs' } do
+					local a = u[auraType]
+					if type(a) == 'table' and (a.perrow ~= nil or a.numrows ~= nil or a.filters ~= nil or a.durationFont ~= nil) then return true end
+				end
+				if type(u.name) == 'table' and (u.name.abbrev ~= nil or u.name.useClassColor ~= nil) then return true end
+				if type(u.comboPoints) == 'table' or (type(u.health) == 'table' and u.health.glowStyle ~= nil) then return true end
+				local text = type(u.health) == 'table' and u.health.text
+				if type(text) == 'table' and STYLE_TAGS[text.format] then return true end
+			end
+		end
+	end
+
+	-- 6.10 centers an aura row on what it is attached to, ElvUI 16 lines its edge up with that one's: the x offset that
+	-- keeps the row in place (width: the row's, attachWidth: the health bar's or the buffs row's)
+	local function auraX(db, width, attachWidth)
+		if LEFT_SIDE[db.anchorPoint] then
+			return db.xOffset + attachWidth / 2 - width / 2
+		elseif RIGHT_SIDE[db.anchorPoint] then
+			return db.xOffset - attachWidth / 2 + width / 2
+		end
+		return db.xOffset
+	end
+
+	local function rowWidth(db)
+		local perrow = db.perrow or 1
+		return perrow * db.size + (perrow - 1) * (db.spacing or 0)
+	end
+
+	function D:Convert610NamePlates(data)
+		local np = type(data) == 'table' and data.nameplates
+		local defaults = E.NamePlateDefaults610
+		if type(np) ~= 'table' or not defaults or not Is610(np) then return end
+
+		local plateSize = merged(defaults.plateSize, np.plateSize)
+		if type(np.clickSize) ~= 'table' then np.clickSize = {} end
+		for _, key in next, { 'friendlyWidth', 'friendlyHeight', 'enemyWidth', 'enemyHeight' } do
+			if np.clickSize[key] == nil then np.clickSize[key] = plateSize[key] end
+		end
+
+		-- the alpha of the plates not targeted (6.10 default 0.4)
+		local alpha = np.nonTargetTransparency
+		if alpha == nil then alpha = defaults.nonTargetTransparency end
+		if np.nonTargetAlpha == nil then np.nonTargetAlpha = alpha end
+
+		-- reaction colors: 6.10 names them, ElvUI 16 numbers them by standing
+		local reactions = type(np.colors) == 'table' and np.colors.reactions
+		if type(reactions) == 'table' then
+			local bad, neutral, good = reactions.bad, reactions.neutral, reactions.good
+			for i = 1, 8 do
+				local color = (i <= 3 and bad) or (i == 4 and neutral) or good
+				if type(color) == 'table' then reactions[i] = { r = color.r, g = color.g, b = color.b, a = 1 } end
+			end
+			reactions.bad, reactions.neutral, reactions.good, reactions.friendlyPlayer = nil, nil, nil, nil
+		end
+
+		for _, key in next, { 'plateSize', 'nonTargetTransparency', 'useTargetScale', 'targetScale', 'trivial', 'trivialWidth', 'trivialHeight',
+			'arrowSize', 'arrowSpacing', 'glowStyle', 'alwaysShowTargetHealth', 'motionType', 'fadeIn', 'cutawayHealth', 'cutawayHealthLength',
+			'cutawayHealthFadeOutTime', 'smoothbars' } do
+			np[key] = nil
+		end
+
+		if type(np.units) ~= 'table' then np.units = {} end
+		for unit, side in next, UNITS do
+			local u = merged(defaults.units[unit], np.units[unit])
+			local out = type(np.units[unit]) == 'table' and np.units[unit] or {}
+			np.units[unit] = out
+
+			local plateHeight = plateSize[side..'Height']
+			local health = u.health or {}
+			local healthHeight, healthWidth = health.height or 10, health.width or 150
+
+			out.health = { enable = health.enable, height = healthHeight, width = healthWidth, useClassColor = health.useClassColor }
+			if type(health.text) == 'table' then
+				out.health.text = copyKeys(health.text, TEXT_KEYS)
+				out.health.text.format = STYLE_TAGS[health.text.format] or health.text.format
+			end
+
+			if type(u.name) == 'table' then
+				out.name = copyKeys(u.name, TEXT_KEYS)
+				out.name.format = (u.name.useClassColor and '[classcolor]' or '') .. (u.name.abbrev and '[name:abbrev]' or '[name]')
+			end
+
+			if type(u.level) == 'table' then
+				out.level = copyKeys(u.level, TEXT_KEYS)
+			end
+
+			-- 6.10: the cast bar's top under the health bar; ElvUI 16: under the plate, which is centered on the bar
+			if type(u.castbar) == 'table' then
+				out.castbar = copyKeys(u.castbar, CASTBAR_KEYS)
+				out.castbar.anchorPoint = 'BOTTOM'
+				out.castbar.yOffset = (u.castbar.yOffset or 0) + (plateHeight - healthHeight) / 2
+			end
+
+			local buffsWidth
+			for _, auraType in next, { 'buffs', 'debuffs' } do
+				local a = u[auraType]
+				if type(a) == 'table' then
+					local db = copyKeys(a, AURA_KEYS)
+					local filters = type(a.filters) == 'table' and a.filters or {}
+					db.numAuras, db.numRows = a.perrow, a.numrows
+					db.minDuration, db.maxDuration, db.priority = filters.minDuration, filters.maxDuration, filters.priority
+					db.font, db.fontSize, db.fontOutline = a.durationFont, a.durationFontSize, a.durationFontOutline
+					db.keepSizeRatio = true
+					db.attachTo = (a.attachTo == 'BUFFS' and 'BUFFS') or 'HEALTH'
+
+					local width = rowWidth(a)
+					if auraType == 'buffs' then buffsWidth = width end
+					db.xOffset = auraX(a, width, (db.attachTo == 'BUFFS' and buffsWidth) or healthWidth)
+
+					out[auraType] = db
+				end
+			end
+
+			out.comboPoints = nil
+		end
+
+		-- the target arrow and glow keep their names; the combo points are the class bar's in ElvUI 16
+		local target = type(np.units.TARGET) == 'table' and np.units.TARGET
+		if target then
+			target.comboPoints, target.arrowSize, target.arrowXOffset, target.arrowYOffset = nil, nil, nil, nil
+		end
+
+		return true
+	end
+end
+
+-- the conversions of an ElvUI 6.10 profile; the nameplates only on import (onImport)
+function D:Convert610Profile(data, onImport)
+	local changed = D:Convert610DataTexts(data)
+	if onImport and D:Convert610NamePlates(data) then changed = true end
+	return changed
 end
 
 function D:Initialize()
@@ -705,7 +884,7 @@ end
 
 function D:SetImportedProfile(dataType, dataKey, dataProfile, force)
 	if dataType == 'profile' then
-		D:Convert610Profile(dataProfile) -- ElvUI Wotlk: an ElvUI 6.10 profile's data panel settings
+		D:Convert610Profile(dataProfile, true) -- ElvUI Wotlk: an ElvUI 6.10 profile's data panels and nameplates
 		local profileData = E:FilterTableFromBlacklist(dataProfile, D.blacklistedKeys.profile) --Remove unwanted options from import
 		if not ElvDB.profiles[dataKey] or force then
 			if force and E.data.keys.profile == dataKey then

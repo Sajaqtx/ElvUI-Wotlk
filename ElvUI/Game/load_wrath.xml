@@ -53,6 +53,7 @@
 
 	<Script file='Wrath\Filters\Filters.lua'/>
 	<Script file='Wrath\General\Enchants.lua'/> <!-- ElvUI Wotlk: the enchant names of the item links (Item Level enchants) -->
+	<Script file='Wrath\General\NamePlateDefaults610.lua'/> <!-- ElvUI Wotlk: ElvUI 6.10's nameplate defaults (profile import) -->
 	<Script file='Shared\Modules\Blizzard\ColorPickerLegacy.lua'/>
 	<Script file='Wrath\Blizzard\ObjectiveFrame.lua'/>
 	<Script file='Shared\Modules\ActionBars\TotemBar.lua'/>
