@@ -1235,6 +1235,14 @@ UnitFrame.borderOptions = ACH:Execute(L["Border Options"], nil, 4, function() AC
 UnitFrame.generalOptionsGroup = ACH:Group(L["General"], nil, 5, 'tree')
 UnitFrame.generalOptionsGroup.args.multiplier = ACH:Range(L["Multiplier"], L["Backdrop Multiplier. Also used for the Transparent multiplier."], 1, { softMin = 0.2, min = 0, softMax = 0.8, max = 1, step = 0.01 }, nil, function(info) return E.db.unitframe[info[#info]] end, function(info, value) E.db.unitframe[info[#info]] = value UF:Update_AllFrames() end)
 UnitFrame.generalOptionsGroup.args.targetOnMouseDown = ACH:Toggle(L["Target On Mouse-Down"], L["Target units on mouse down rather than mouse up.\n\n|cffff3333Note:|r If Clique is enabled, this option only effects ElvUI frames if they are not blacklisted in Clique."], 2)
+-- ElvUI Wotlk: the role icon style (ElvUI or Blizzard, ElvUI_ProjectZidras' LFG Icons), a preview of the three icons
+do
+	local function preview(style)
+		local t = UF.RoleIconStyles[style]
+		return style .. ' ' .. E:TextureString(t.TANK, ':15:15') .. ' ' .. E:TextureString(t.HEALER, ':15:15') .. ' ' .. E:TextureString(t.DAMAGER, ':15:15')
+	end
+	UnitFrame.generalOptionsGroup.args.roleIconStyle = ACH:Select(L["Role Icon"], nil, 3, function() return { ElvUI = preview('ElvUI'), Blizzard = preview('Blizzard') } end, nil, nil, function(info) return E.db.unitframe[info[#info]] end, function(info, value) E.db.unitframe[info[#info]] = value UF:Update_AllFrames() end)
+end
 UnitFrame.generalOptionsGroup.args.targetSound = ACH:Toggle(L["Targeting Sound"], L["Enable a sound if you select a unit."], 3)
 UnitFrame.generalOptionsGroup.args.maxAllowedGroups = ACH:Toggle(L["Max Allowed Groups"], L["Groups will be maxed as Mythic to 4, Other Raids to 6, and PVP / World to 8."], 4, nil, nil, nil, nil, function(info, value) E.db.unitframe[info[#info]] = value UF:ZONE_CHANGED_NEW_AREA() end, nil, not E.Retail)
 

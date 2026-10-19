@@ -176,6 +176,9 @@ AddMedia('texture','SkullIcon')
 AddMedia('texture','Smooth')
 AddMedia('texture','Spark')
 AddMedia('texture','Tank')
+AddMedia('texture','BlizzardTank') -- ElvUI Wotlk: the Blizzard role icons of ElvUI_ProjectZidras
+AddMedia('texture','BlizzardHealer')
+AddMedia('texture','BlizzardDPS')
 AddMedia('texture','TukuiLogo')
 AddMedia('texture','TargetReticle')
 

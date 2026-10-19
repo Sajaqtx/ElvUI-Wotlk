@@ -22,6 +22,17 @@ UF.RoleIconTextures = {
 	DAMAGER = E.Media.Textures.DPS
 }
 
+-- ElvUI Wotlk: the role icon style of the unit frames (Unit Frames > General > Role Icon Style), Blizzard as in
+-- ElvUI_ProjectZidras' LFG Icons
+UF.RoleIconStyles = {
+	ElvUI = UF.RoleIconTextures,
+	Blizzard = {
+		TANK = E.Media.Textures.BlizzardTank,
+		HEALER = E.Media.Textures.BlizzardHealer,
+		DAMAGER = E.Media.Textures.BlizzardDPS
+	}
+}
+
 function UF:GetRoleIcon(frame)
 	if frame.isForced then
 		local rnd = random(1, 3)
@@ -49,7 +60,7 @@ function UF:UpdateRoleIcon()
 
 	local show = self.isForced or UnitExists(self.__unit)
 	if show and (not lfdrole.combatHide or not UnitAffectingCombat(self.__unit)) and ((role == 'DAMAGER' and db.damager) or (role == 'HEALER' and db.healer) or (role == 'TANK' and db.tank)) then
-		lfdrole:SetTexture(UF.RoleIconTextures[role])
+		lfdrole:SetTexture((UF.RoleIconStyles[UF.db and UF.db.roleIconStyle] or UF.RoleIconTextures)[role])
 		lfdrole:Show()
 	else
 		lfdrole:Hide()

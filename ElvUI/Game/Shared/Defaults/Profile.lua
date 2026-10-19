@@ -2095,6 +2095,7 @@ P.unitframe = {
 	fontOutline = 'MONOCHROMEOUTLINE',
 	debuffHighlighting = 'FILL',
 	targetOnMouseDown = false,
+	roleIconStyle = 'Blizzard', -- ElvUI Wotlk: ElvUI or Blizzard (UF.RoleIconStyles)
 	maxAllowedGroups = true,
 	multiplier = 0.35,
 	modifiers = {

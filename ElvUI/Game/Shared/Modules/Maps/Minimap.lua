@@ -716,7 +716,7 @@ function M:SetMinimapRotate()
 end
 
 function M:PLAYER_ENTERING_WORLD(_, initLogin, isReload)
-	if initLogin or isReload then
+	if initLogin or isReload or ElvUI335 then -- ElvUI Wotlk: 3.3.5 gives PLAYER_ENTERING_WORLD no arguments (the round border of the LFG eye stayed)
 		local LFGIconBorder = _G.MiniMapLFGFrameBorder or _G.MiniMapLFGBorder or _G.LFGMinimapFrameBorder
 		if LFGIconBorder then
 			LFGIconBorder:Hide()
