@@ -493,14 +493,9 @@ do -- Import and Export
 				count = count + 1 -- keep this after the count usage
 
 				if which == 'text' and ValidateString(nil, importText) then
-					-- ElvUI Wotlk: an older ElvUI's text export (6.10: LibCompress + Base64) is not readable, its Lua table export is
-					if ElvUI335 and D:GetImportStringType(importText) == '' then
-						label.name = '|cffff3333This text export comes from an older ElvUI (6.10). Export the profile in the Lua Table format there, then import that.|r'
-					else
-						local profileType = D:Decode(importText)
-						local imported = profileType and D:ImportProfile(importText)
-						label.name = (imported and L["Profile imported successfully!"]) or L["Error decoding data. Import string may be corrupted!"]
-					end
+					local profileType = D:Decode(importText)
+					local imported = profileType and D:ImportProfile(importText)
+					label.name = (imported and L["Profile imported successfully!"]) or L["Error decoding data. Import string may be corrupted!"]
 				else
 					if which == 'luaTable' then
 						importTexts[textKey] = DecodeLabel(label, importText)

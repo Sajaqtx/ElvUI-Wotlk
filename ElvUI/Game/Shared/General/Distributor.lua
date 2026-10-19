@@ -596,7 +596,43 @@ function D:IsPreviousImport(dataString)
 end
 
 function D:GetImportStringType(dataString)
-	return (strmatch(dataString, '^'..EXPORT_PREFIX) and 'Deflate') or (strmatch(dataString, '^{') and 'Table') or ''
+	return (strmatch(dataString, '^'..EXPORT_PREFIX) and 'Deflate') or (strmatch(dataString, '^{') and 'Table')
+		or (ElvUI335 and D:Is610TextExport(dataString) and 'Legacy610') or ''
+end
+
+-- ElvUI Wotlk: the text export of ElvUI 6.10 (3.3.5): base64 (LibBase64) of LibCompress data, an AceSerializer string
+-- followed by "::<type>::<key>"
+function D:Is610TextExport(dataString)
+	local LibBase64 = E.Libs.Base64 or LibStub('LibBase64-1.0-ElvUI', true)
+	return LibBase64 and not strmatch(dataString, '^!') and LibBase64:IsBase64(dataString)
+end
+
+function D:Decode610(dataString)
+	local LibBase64 = E.Libs.Base64 or LibStub('LibBase64-1.0-ElvUI')
+	local LibCompress = E.Libs.Compress or LibStub('LibCompress')
+
+	local decompressed, message = LibCompress:Decompress(LibBase64:Decode(dataString))
+	if not decompressed then
+		E:Print('Error decompressing data:', message)
+		return
+	end
+
+	local serialized, info = strmatch(decompressed, '^(.-)%^%^::(.+)$') -- '^^' ends the AceSerializer string
+	if not serialized then
+		E:Print('Error importing profile. String is invalid or corrupted!')
+		return
+	end
+
+	local profileType, profileKey = strmatch(info, '^([^:]+)::(.*)$')
+	profileType = profileType or info
+
+	local success, profileData = LibStub('AceSerializer-3.0'):Deserialize(serialized..'^^')
+	if not success or type(profileData) ~= 'table' then
+		E:Print('Error deserializing:', profileData)
+		return
+	end
+
+	return profileType, (profileKey ~= '' and profileKey) or nil, profileData
 end
 
 function D:GetExportInfo(str)
@@ -619,7 +655,9 @@ function D:Decode(dataString)
 	local stringType = D:GetImportStringType(dataString)
 	local profileData, profileType, profileKey
 
-	if stringType == 'Deflate' then
+	if stringType == 'Legacy610' then
+		return D:Decode610(dataString)
+	elseif stringType == 'Deflate' then
 		local data = gsub(dataString, '^'..EXPORT_PREFIX, '')
 		local decodedData = DecodeBase64(data)
 		local decompressed = DecompressString(decodedData, COMPRESS)

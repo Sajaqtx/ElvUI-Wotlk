@@ -29,7 +29,8 @@ local SHARED = {
 --and the libraries other addons ship in their 3.3.5 version: ElvUI's newer copy would take their place in the shared
 --LibStub (the highest minor wins) and break them (LibCustomGlow 25 stopped WeakAuras' 3.3.5 copy, 21, at login)
 local PRIVATE = {"^AceGUI", "^AceConfig", "^AceDBOptions", "^LibActionButton", "^LibAceConfigHelper", "^LibElvUIPlugin",
-	"^LibCustomGlow", "^LibDualSpec", "^LibDispel", "^LibAnim", "^LibSimpleSticky", "^LibTranslit"}
+	"^LibCustomGlow", "^LibDualSpec", "^LibDispel", "^LibAnim", "^LibSimpleSticky", "^LibTranslit",
+	"^LibDeflate", "^LibCompress", "^LibBase64"}
 local function AlwaysPrivate(major)
 	for _, pattern in ipairs(PRIVATE) do
 		if (major:find(pattern)) then return true end

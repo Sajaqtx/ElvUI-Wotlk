@@ -21,6 +21,10 @@
 	<Include file='Shared\Ace3\AceComm-3.0\AceComm-3.0.xml'/>
 	<!-- ElvUI Wotlk: profile export / sharing without C_EncodingUtil (12.x), see Compat335_API.lua -->
 	<Script file='Shared\Ace3\AceSerializer-3.0\AceSerializer-3.0.lua'/>
+	<!-- ElvUI Wotlk: the real Deflate of the 12.x text exports (retail, MoP), the LibCompress / Base64 of ElvUI 6.10's -->
+	<Script file='Shared\LibDeflate\LibDeflate.lua'/>
+	<Script file='Shared\LibCompress\LibCompress.lua'/>
+	<Script file='Shared\LibBase64-1.0\LibBase64-1.0.lua'/>
 	<Include file='Shared\Ace3\AceTimer-3.0\AceTimer-3.0.xml'/>
 	<Include file='Shared\Ace3\AceHook-3.0\AceHook-3.0.xml'/>
 

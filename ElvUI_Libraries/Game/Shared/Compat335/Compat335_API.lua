@@ -1635,8 +1635,9 @@ fill("C_CurrencyInfo", {
 fill("C_PvP", {GetMatchPVPStatColumns = Compat.returnNil})
 fill("C_TradeSkillUI", {GetItemReagentQualityInfo = Compat.returnNil})
 
---profile export and sharing (12.x C_EncodingUtil): AceSerializer for the data, no compression, a pure Lua base64.
---Strings stay between clients of this backport (retail exports are CBOR, not readable here)
+--profile export and sharing (12.x C_EncodingUtil): CBOR, raw Deflate (LibDeflate) and base64 as the 12.x client writes
+--them, so the text exports of retail and MoP import here and ours there; the older strings of this backport
+--(AceSerializer, not compressed) are still read
 do
 	local CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 	local byte, char, sub, concat, floor = string.byte, string.char, string.sub, table.concat, math.floor
@@ -1669,16 +1670,198 @@ do
 		return concat(out)
 	end
 
-	local function Serializer() return LibStub("AceSerializer-3.0") end
+	--ElvUI's own LibStub (Compat335_LibStub.lua): LibDeflate is private to ElvUI
+	local function Lib(major) return (rawget(env, "LibStub") or LibStub)(major) end
+	local function Serializer() return Lib("AceSerializer-3.0") end
+	local function Deflate() return Lib("LibDeflate") end
+
+	--CBOR (RFC 8949), as the 12.x SerializeCBOR writes a Lua value: tables as maps, integers as major types 0 / 1,
+	--other numbers as 64 bit floats, strings as text strings, booleans
+	local frexp, ldexp, huge = math.frexp, math.ldexp, math.huge
+
+	local function head(out, major, n)
+		local m = major * 32
+		if (n < 24) then out[#out + 1] = char(m + n)
+		elseif (n < 256) then out[#out + 1] = char(m + 24, n)
+		elseif (n < 65536) then out[#out + 1] = char(m + 25, floor(n / 256), n % 256)
+		elseif (n < 4294967296) then out[#out + 1] = char(m + 26, floor(n / 16777216), floor(n / 65536) % 256, floor(n / 256) % 256, n % 256)
+		else
+			local hi, lo = floor(n / 4294967296), n % 4294967296
+			out[#out + 1] = char(m + 27, floor(hi / 16777216), floor(hi / 65536) % 256, floor(hi / 256) % 256, hi % 256,
+				floor(lo / 16777216), floor(lo / 65536) % 256, floor(lo / 256) % 256, lo % 256)
+		end
+	end
+
+	local function float64(out, x)
+		local sign = 0
+		if (x < 0 or (x == 0 and 1 / x < 0)) then sign, x = 128, -x end
+		local exponent, mantissa
+		if (x ~= x) then exponent, mantissa = 2047, 1
+		elseif (x == huge) then exponent, mantissa = 2047, 0
+		elseif (x == 0) then exponent, mantissa = 0, 0
+		else
+			local m, e = frexp(x) -- x = m * 2^e, 0.5 <= m < 1
+			exponent = e + 1022
+			if (exponent <= 0) then -- subnormal: x / 2^-1074
+				mantissa, exponent = floor(ldexp(x, 1074) + 0.5), 0
+			else
+				mantissa = floor((m * 2 - 1) * 4503599627370496 + 0.5) -- 2^52
+			end
+		end
+		local bytes = {}
+		local lo = mantissa % 4294967296
+		local hi = floor(mantissa / 4294967296) + (exponent % 2048) * 1048576 -- 20 mantissa bits above the low word
+		for i = 4, 1, -1 do bytes[i] = lo % 256 lo = floor(lo / 256) end
+		for i = 4, 1, -1 do bytes[i + 4] = hi % 256 hi = floor(hi / 256) end
+		out[#out + 1] = char(0xFB, sign + bytes[5], bytes[6], bytes[7], bytes[8], bytes[1], bytes[2], bytes[3], bytes[4])
+	end
+
+	local function encode(out, value)
+		local t = type(value)
+		if (t == "number") then
+			if (value == floor(value) and value >= -9007199254740992 and value <= 9007199254740992) then
+				if (value >= 0) then head(out, 0, value) else head(out, 1, -1 - value) end
+			else
+				float64(out, value)
+			end
+		elseif (t == "string") then
+			head(out, 3, #value)
+			out[#out + 1] = value
+		elseif (t == "boolean") then
+			out[#out + 1] = char(value and 0xF5 or 0xF4)
+		elseif (t == "table") then
+			local count = 0
+			for _ in next, value do count = count + 1 end
+			head(out, 5, count)
+			for k, v in next, value do
+				encode(out, k)
+				encode(out, v)
+			end
+		else
+			out[#out + 1] = char(0xF6) -- null
+		end
+	end
+
+	local function SerializeCBOR(value)
+		local out = {}
+		encode(out, value)
+		return concat(out)
+	end
+
+	local function readFloat(s, pos, size)
+		local b = {byte(s, pos, pos + size - 1)}
+		local sign = b[1] >= 128 and -1 or 1
+		if (size == 2) then
+			local exponent, mantissa = floor(b[1] / 4) % 32, (b[1] % 4) * 256 + b[2]
+			if (exponent == 0) then return sign * ldexp(mantissa, -24) end
+			if (exponent == 31) then return mantissa == 0 and sign * huge or 0 / 0 end
+			return sign * ldexp(mantissa + 1024, exponent - 25)
+		elseif (size == 4) then
+			local exponent = (b[1] % 128) * 2 + floor(b[2] / 128)
+			local mantissa = ((b[2] % 128) * 256 + b[3]) * 256 + b[4]
+			if (exponent == 0) then return sign * ldexp(mantissa, -149) end
+			if (exponent == 255) then return mantissa == 0 and sign * huge or 0 / 0 end
+			return sign * ldexp(mantissa + 8388608, exponent - 150)
+		end
+		local exponent = (b[1] % 128) * 16 + floor(b[2] / 16)
+		local mantissa = ((((((b[2] % 16) * 256 + b[3]) * 256 + b[4]) * 256 + b[5]) * 256 + b[6]) * 256 + b[7]) * 256 + b[8]
+		if (exponent == 0) then return sign * ldexp(mantissa, -1074) end
+		if (exponent == 2047) then return mantissa == 0 and sign * huge or 0 / 0 end
+		return sign * ldexp(mantissa + 4503599627370496, exponent - 1075)
+	end
+
+	local decode
+	local function readLength(s, pos, info)
+		if (info < 24) then return info, pos end
+		local size = (info == 24 and 1) or (info == 25 and 2) or (info == 26 and 4) or (info == 27 and 8)
+		if (not size) then return nil, pos end -- 31: indefinite length
+		local n = 0
+		for i = pos, pos + size - 1 do n = n * 256 + byte(s, i) end
+		return n, pos + size
+	end
+
+	local BREAK = {}
+	decode = function(s, pos)
+		local b = byte(s, pos)
+		if (not b) then error("CBOR: data ends early") end
+		local major, info = floor(b / 32), b % 32
+		pos = pos + 1
+		if (major == 7) then
+			if (info == 20) then return false, pos
+			elseif (info == 21) then return true, pos
+			elseif (info == 22 or info == 23) then return nil, pos
+			elseif (info == 25) then return readFloat(s, pos, 2), pos + 2
+			elseif (info == 26) then return readFloat(s, pos, 4), pos + 4
+			elseif (info == 27) then return readFloat(s, pos, 8), pos + 8
+			elseif (info == 31) then return BREAK, pos
+			end
+			return nil, pos
+		end
+		local n
+		n, pos = readLength(s, pos, info)
+		if (major == 0) then return n, pos
+		elseif (major == 1) then return -1 - n, pos
+		elseif (major == 2 or major == 3) then
+			if (n) then return sub(s, pos, pos + n - 1), pos + n end
+			local parts = {} -- indefinite: chunks up to a break
+			while true do
+				local chunk
+				chunk, pos = decode(s, pos)
+				if (chunk == BREAK) then break end
+				parts[#parts + 1] = chunk
+			end
+			return concat(parts), pos
+		elseif (major == 4) then
+			local t, i = {}, 0
+			while (not n or i < n) do
+				local v
+				v, pos = decode(s, pos)
+				if (v == BREAK) then break end
+				i = i + 1
+				t[i] = v
+			end
+			return t, pos
+		elseif (major == 5) then
+			local t, i = {}, 0
+			while (not n or i < n) do
+				local k, v
+				k, pos = decode(s, pos)
+				if (k == BREAK) then break end
+				v, pos = decode(s, pos)
+				if (k ~= nil) then t[k] = v end
+				i = i + 1
+			end
+			return t, pos
+		elseif (major == 6) then -- a tag: its value
+			return decode(s, pos)
+		end
+	end
+
+	--the strings of this backport before the real encoding: AceSerializer data ("^1^..."), not compressed
+	local function IsAceSerialized(text) return type(text) == "string" and sub(text, 1, 2) == "^1" end
 
 	fill("C_EncodingUtil", {
-		SerializeCBOR = function(data) return Serializer():Serialize(data) end,
+		SerializeCBOR = SerializeCBOR,
 		DeserializeCBOR = function(text)
-			local ok, data = Serializer():Deserialize(text)
+			if (type(text) ~= "string") then return end
+			if (IsAceSerialized(text)) then
+				local ok, data = Serializer():Deserialize(text)
+				if (ok) then return data end
+				return
+			end
+			local ok, data = pcall(decode, text, 1)
 			if (ok) then return data end
 		end,
-		CompressString = function(text) return text end,
-		DecompressString = function(text) return text end,
+		--Enum.CompressionMethod.Deflate: a raw deflate stream (a zlib one is read as well)
+		CompressString = function(text) return Deflate():CompressDeflate(text) end,
+		DecompressString = function(text)
+			if (type(text) ~= "string") then return end
+			local lib = Deflate()
+			local data = lib:DecompressDeflate(text)
+			if (not data) then data = lib:DecompressZlib(text) end
+			if (not data and IsAceSerialized(text)) then data = text end
+			return data
+		end,
 		EncodeBase64 = EncodeBase64,
 		DecodeBase64 = DecodeBase64,
 	})
