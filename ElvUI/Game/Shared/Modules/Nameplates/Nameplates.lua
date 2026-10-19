@@ -714,6 +714,8 @@ function NP:PLAYER_ENTERING_WORLD(event, initLogin, isReload)
 end
 
 function NP:ToggleStaticPlate()
+	if not NP.PlayerFrame then return end -- ElvUI Wotlk: no personal plate on 3.3.5
+
 	local playerEnabled = NP.db.units.PLAYER.enable
 	local isStatic = NP.db.units.PLAYER.useStaticPosition
 
@@ -773,7 +775,9 @@ function NP:ConfigurePlates(init)
 	local staticEvent = (NP.db.units.PLAYER.enable and NP.db.units.PLAYER.useStaticPosition) and 'NAME_PLATE_UNIT_ADDED' or 'NAME_PLATE_UNIT_REMOVED'
 	local staticFunc = NP[staticEvent]
 	if init then -- since this is a fake plate, we actually need to trigger this always
-		staticFunc(NP.PlayerFrame, staticEvent, 'player')
+		if NP.PlayerFrame then -- ElvUI Wotlk: no personal plate on 3.3.5
+			staticFunc(NP.PlayerFrame, staticEvent, 'player')
+		end
 
 		if E.Modern then
 			NP:AuraContainer_ConstructContainers() -- this spawns the containers
@@ -784,7 +788,7 @@ function NP:ConfigurePlates(init)
 			E:CoroutineUpdate(NP.AuraContainer_Preloader, NP.AuraContainersCreated, nil, NP.AuraContainer_PreloadDone, 1, 0.3)
 		end
 
-		if staticEvent == 'NAME_PLATE_UNIT_ADDED' then
+		if staticEvent == 'NAME_PLATE_UNIT_ADDED' and NP.PlayerFrame then
 			NP.PlayerFrame:UpdateAllElements('ForceUpdate')
 		end
 	else -- however, these only need to happen when changing options
@@ -1667,33 +1671,33 @@ function NP:Initialize()
 		hooksecurefunc(_G.NamePlateDriverFrame, 'SetupClassNameplateBars', NP.SetupClassNameplateBars)
 	end
 
-	local playerFrame = ElvUF:Spawn('player', 'ElvNP_Player', '')
-	playerFrame:ClearAllPoints()
-	playerFrame:Point('TOP', UIParent, 'CENTER', 0, -150)
-	playerFrame:Size(NP.db.clickSize.personalWidth, NP.db.clickSize.personalHeight)
-	playerFrame.frameType = 'PLAYER'
+	-- ElvUI Wotlk: the personal plate (a frame ElvUI makes for the retail personal resource display, with its mover and
+	-- click button) has nothing to stand for on 3.3.5: not made (its threat mark showed over the player in fights)
+	if not ElvUI335 then
+		local playerFrame = ElvUF:Spawn('player', 'ElvNP_Player', '')
+		playerFrame:ClearAllPoints()
+		playerFrame:Point('TOP', UIParent, 'CENTER', 0, -150)
+		playerFrame:Size(NP.db.clickSize.personalWidth, NP.db.clickSize.personalHeight)
+		playerFrame.frameType = 'PLAYER'
 
-	local playerHolder = E:CreateMover(playerFrame, 'ElvNP_PlayerMover', L["Player NamePlate"], nil, nil, nil, 'ALL,SOLO', nil, 'nameplate,playerGroup')
-	NP.PlayerMover = playerHolder.mover
+		local playerHolder = E:CreateMover(playerFrame, 'ElvNP_PlayerMover', L["Player NamePlate"], nil, nil, nil, 'ALL,SOLO', nil, 'nameplate,playerGroup')
+		NP.PlayerMover = playerHolder.mover
 
-	local staticSecure = CreateFrame('Button', 'ElvNP_StaticSecure', UIParent, 'SecureUnitButtonTemplate')
-	staticSecure:SetAttribute('unit', 'player')
-	staticSecure:SetAttribute('*type1', 'target')
-	if ElvUI335 then -- the 3.3.5 unit button has no togglemenu type
-		ElvUI335.SetUnitMenu(staticSecure)
-	else
+		local staticSecure = CreateFrame('Button', 'ElvNP_StaticSecure', UIParent, 'SecureUnitButtonTemplate')
+		staticSecure:SetAttribute('unit', 'player')
+		staticSecure:SetAttribute('*type1', 'target')
 		staticSecure:SetAttribute('*type2', 'togglemenu')
+		staticSecure:SetAttribute('toggleForVehicle', true)
+		staticSecure:RegisterForClicks('LeftButtonDown', 'RightButtonDown')
+		staticSecure:SetScript('OnEnter', UF.UnitFrame_OnEnter)
+		staticSecure:SetScript('OnLeave', UF.UnitFrame_OnLeave)
+		staticSecure:ClearAllPoints()
+		staticSecure:Point('TOPLEFT', NP.PlayerMover)
+		staticSecure:Point('BOTTOMRIGHT', NP.PlayerMover)
+		staticSecure:Hide()
+		staticSecure.__unit = 'player' -- Needed for OnEnter, OnLeave
+		NP.StaticSecure = staticSecure
 	end
-	staticSecure:SetAttribute('toggleForVehicle', true)
-	staticSecure:RegisterForClicks('LeftButtonDown', 'RightButtonDown')
-	staticSecure:SetScript('OnEnter', UF.UnitFrame_OnEnter)
-	staticSecure:SetScript('OnLeave', UF.UnitFrame_OnLeave)
-	staticSecure:ClearAllPoints()
-	staticSecure:Point('TOPLEFT', NP.PlayerMover)
-	staticSecure:Point('BOTTOMRIGHT', NP.PlayerMover)
-	staticSecure:Hide()
-	staticSecure.__unit = 'player' -- Needed for OnEnter, OnLeave
-	NP.StaticSecure = staticSecure
 
 	local testFrame = ElvUF:Spawn('player', 'ElvNP_TestFrame')
 	testFrame:ClearAllPoints()
