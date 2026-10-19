@@ -114,7 +114,7 @@ ElvUI's own code as close to upstream as possible. What the old client lacks is 
   - Enhanced character frame and addon list.
 
 ### ElvUI_AddOnSkins (plugin)
-- AddOnSkins 1.06 for 3.3.5, ported to this ElvUI: skins for about 90 period addons (DBM, Omen, Recount, Skada,
+- AddOnSkins 1.06 for 3.3.5, ported to this ElvUI: skins for about 100 period addons (DBM, Omen, Recount, Skada,
   AtlasLoot, Auctionator, WeakAuras, Postal, BugSack…).
 
 ## Known issues
