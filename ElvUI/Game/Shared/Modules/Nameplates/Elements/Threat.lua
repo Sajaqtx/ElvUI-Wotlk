@@ -16,6 +16,14 @@ end
 
 function NP:ThreatIndicator_PostUpdate(unit, status)
 	local nameplate, db = self.__owner, NP.db.threat
+
+	-- ElvUI Wotlk: a forced update on a plate the element is off on (the personal plate, friendly plates: the end of a
+	-- style filter, the 3.3.5 poll) showed its red diamond there; it keeps the plate's scale as well
+	if not nameplate:IsElementEnabled('ThreatIndicator') then
+		self:Hide()
+		return
+	end
+
 	local allow = status and db.enable and db.useThreatColor and not UnitIsTapDenied(unit)
 	local scale = allow and NP:GetThreatSituationScale(self, db, status) or 1
 	nameplate.threatScale = scale -- ElvUI Wotlk: Style Filters, a filter's scale stays (and goes back to this one)

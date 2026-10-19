@@ -513,7 +513,7 @@ function NP:StyleFilterBaseUpdate(frame, event, previous, state)
 		if db.health.enable then frame.Health:ForceUpdate() end
 		if db.castbar.enable then frame.Castbar:ForceUpdate() end
 
-		if NP.db.threat.enable and NP.db.threat.useThreatColor and not UnitIsTapDenied(frame.unit) then
+		if NP.db.threat.enable and NP.db.threat.useThreatColor and frame:IsElementEnabled('ThreatIndicator') and not UnitIsTapDenied(frame.unit) then
 			frame.ThreatIndicator:ForceUpdate() -- this will account for the threat health color
 		end
 
