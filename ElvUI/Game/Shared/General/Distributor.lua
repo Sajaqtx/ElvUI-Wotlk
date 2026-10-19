@@ -151,8 +151,82 @@ do
 	end
 end
 
+-- ElvUI Wotlk: the data panel settings of an ElvUI 6.10 profile (its Lua table export, or a profile imported before
+-- this conversion) under their ElvUI 16 names. 6.10 turned the chat and minimap data panels on and off with
+-- datatexts.leftChatPanel / rightChatPanel / minimapPanels, set their backdrop, transparency and battleground for all
+-- of them at once, named the chat slots left / middle / right and had the minimap one as LeftMiniPanel /
+-- RightMiniPanel; ElvUI 16 reads datatexts.panels.<panel>.enable and the rest per panel, so these profiles came in
+-- with every panel shown. Only what the profile does not already set the ElvUI 16 way is filled. Returns true when
+-- something was converted.
+do
+	local toggles = { leftChatPanel = 'LeftChatDataPanel', rightChatPanel = 'RightChatDataPanel', minimapPanels = 'MinimapPanel' }
+	local shared = { panelBackdrop = 'backdrop', panelTransparency = 'panelTransparency', battleground = 'battleground' }
+	local miniPanels = { 'LeftMiniPanel', 'RightMiniPanel', 'BottomMiniPanel', 'TopMiniPanel', 'BottomLeftMiniPanel', 'BottomRightMiniPanel', 'TopRightMiniPanel', 'TopLeftMiniPanel' }
+
+	function D:Convert610Profile(data)
+		local dt = type(data) == 'table' and data.datatexts
+		if type(dt) ~= 'table' then return end
+
+		local changed
+		local panels = type(dt.panels) == 'table' and dt.panels or {}
+		local function panel(name)
+			if type(panels[name]) ~= 'table' then panels[name] = {} end
+			return panels[name]
+		end
+
+		for old, name in next, toggles do
+			if dt[old] ~= nil then
+				local p = panel(name)
+				if p.enable == nil then p.enable = dt[old] and true or false end
+				dt[old], changed = nil, true
+			end
+		end
+
+		for _, name in next, { 'LeftChatDataPanel', 'RightChatDataPanel' } do
+			local p = panels[name]
+			if type(p) == 'table' and (p.left or p.middle or p.right) then
+				if p[1] == nil then p[1] = p.left end
+				if p[2] == nil then p[2] = p.middle end
+				if p[3] == nil then p[3] = p.right end
+				p.left, p.middle, p.right, changed = nil, nil, nil, true
+			end
+		end
+
+		local left, right = panels.LeftMiniPanel, panels.RightMiniPanel
+		if type(left) == 'string' or type(right) == 'string' then
+			local p = panel('MinimapPanel')
+			if p[1] == nil and type(left) == 'string' then p[1] = left end
+			if p[2] == nil and type(right) == 'string' then p[2] = right end
+		end
+		for _, name in next, miniPanels do
+			if panels[name] ~= nil then panels[name], changed = nil, true end
+		end
+
+		for old, key in next, shared do
+			if dt[old] ~= nil then
+				for _, name in next, { 'LeftChatDataPanel', 'RightChatDataPanel', 'MinimapPanel' } do
+					local p = panel(name)
+					if p[key] == nil then p[key] = dt[old] and true or false end
+				end
+				dt[old], changed = nil, true
+			end
+		end
+
+		if changed then dt.panels = panels end
+		return changed
+	end
+end
+
 function D:Initialize()
 	D.Initialized = true
+
+	-- ElvUI Wotlk: the profiles imported from ElvUI 6.10 before the conversion existed (applied once, the old keys go)
+	local active = ElvDB.profileKeys and ElvDB.profileKeys[E.mynameRealm]
+	for key, data in next, ElvDB.profiles or {} do
+		if D:Convert610Profile(data) and key == active then
+			E:Delay(1, E.UpdateAll, E)
+		end
+	end
 
 	D:UpdateSettings()
 
@@ -593,6 +667,7 @@ end
 
 function D:SetImportedProfile(dataType, dataKey, dataProfile, force)
 	if dataType == 'profile' then
+		D:Convert610Profile(dataProfile) -- ElvUI Wotlk: an ElvUI 6.10 profile's data panel settings
 		local profileData = E:FilterTableFromBlacklist(dataProfile, D.blacklistedKeys.profile) --Remove unwanted options from import
 		if not ElvDB.profiles[dataKey] or force then
 			if force and E.data.keys.profile == dataKey then
