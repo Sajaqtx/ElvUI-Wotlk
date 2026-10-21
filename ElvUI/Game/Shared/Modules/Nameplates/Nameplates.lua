@@ -1237,6 +1237,7 @@ if ElvUI335 then
 		SPELL_AURA_APPLIED_DOSE = true, SPELL_AURA_REMOVED_DOSE = true, SPELL_AURA_BROKEN = true, SPELL_AURA_BROKEN_SPELL = true }
 
 	AuraRelay335 = CreateFrame('Frame')
+	NP.AuraRelay335 = AuraRelay335 -- for ElvUI_Diag's /elvtest perf
 	AuraRelay335:Hide()
 
 	local function Mark(plate)
@@ -1566,6 +1567,7 @@ if ElvUI335 then
 	end
 
 	HealthPoll335 = CreateFrame('Frame')
+	NP.HealthPoll335 = HealthPoll335 -- for ElvUI_Diag's /elvtest perf
 	HealthPoll335:Hide()
 	HealthPoll335:SetScript('OnUpdate', function(_, delta)
 		FullAlpha()

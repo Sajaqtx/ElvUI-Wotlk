@@ -650,7 +650,31 @@ do
 			end
 		end
 	end
+	local Dispatch
+	--Compat.profile (set by ElvUI_Diag's /elvtest perf, nil otherwise): the time and the Lua memory each event takes,
+	--per event and frame, to find what makes the micro freezes
+	local function collectgarbage(opt) return realG.collectgarbage(opt) or 0 end
+	local function debugprofilestop() return realG.debugprofilestop() or 0 end
+	local function ProfileName(frame)
+		local name = frame.GetName and frame:GetName()
+		if (name) then return name end
+		local parent = frame.GetParent and frame:GetParent()
+		local parentName = parent and parent.GetName and parent:GetName()
+		return parentName and (parentName .. ".child") or "anonymous"
+	end
 	local function Wrapper(self, event, ...)
+		local profile = Compat.profile
+		if (not profile) then return Dispatch(self, event, ...) end
+		local kb, ms = collectgarbage("count"), debugprofilestop()
+		Dispatch(self, event, ...)
+		local key = event .. " " .. ProfileName(self)
+		local entry = profile[key]
+		if (not entry) then entry = {0, 0, 0} profile[key] = entry end
+		entry[1], entry[2] = entry[1] + 1, entry[2] + (debugprofilestop() - ms)
+		local grown = collectgarbage("count") - kb
+		if (grown > 0) then entry[3] = entry[3] + grown end
+	end
+	Dispatch = function(self, event, ...)
 		local handler = handlers[self]
 		if (not handler) then return end
 		local d = direct[self]
