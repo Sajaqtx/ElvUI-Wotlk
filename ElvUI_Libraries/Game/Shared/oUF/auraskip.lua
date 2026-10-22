@@ -25,6 +25,9 @@ local auraFiltered = {
 oUF.AuraInfo = auraInfo -- export it, not filtered
 oUF.AuraFiltered = auraFiltered -- by filter
 
+local AuraDispatchId = ElvUI335 and ElvUI335.AuraDispatchId -- ElvUI Wotlk: one full rescan per unit and UNIT_AURA
+local scannedAt, scannedGUID = {}, {}
+
 local hasValidPlayer
 local eventFrame = CreateFrame('Frame')
 eventFrame:RegisterEvent('PLAYER_ENTERING_WORLD')
@@ -173,9 +176,18 @@ local function ShouldSkipAura(frame, event, unit, updateInfo, showFunc)
 
 		return true -- who are you
 	elseif hasValidPlayer ~= false and event ~= 'ElvUI_UpdateAllElements' then -- skip in this case
-		oUF:ClearUnitAuraInfo(unit) -- clear these since we cant verify it
+		-- ElvUI Wotlk: 3.3.5 sends UNIT_AURA without a payload, so every element of every frame showing the unit (auras,
+		-- tags, highlight, aura watch, raid debuffs, its nameplate...) asked for a full rescan of the same unit: one
+		-- rescan per UNIT_AURA is enough (and per unit, by its GUID: target changes are rescanned; other events too)
+		local stamp = event == 'UNIT_AURA' and AuraDispatchId and AuraDispatchId()
+		local guid = UnitGUID(unit)
+		if not stamp or scannedAt[unit] ~= stamp or scannedGUID[unit] ~= guid then
+			scannedAt[unit], scannedGUID[unit] = stamp, guid
 
-		ProcessExisting(frame, event, unit) -- we need to collect full data here
+			oUF:ClearUnitAuraInfo(unit) -- clear these since we cant verify it
+
+			ProcessExisting(frame, event, unit) -- we need to collect full data here
+		end
 	end
 
 	return false -- this is from something

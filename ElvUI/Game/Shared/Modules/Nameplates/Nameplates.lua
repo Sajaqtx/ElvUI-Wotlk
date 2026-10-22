@@ -1329,6 +1329,7 @@ if ElvUI335 then
 			local unit = plate.__unit
 			local element = plate.Debuffs or plate.Buffs or plate.Auras
 			if unit and element and element.UpdateAuras then
+				ElvUI335.NewAuraDispatch() -- a read of its own: not the one of the last UNIT_AURA (see oUF's auraskip.lua)
 				element.UpdateAuras(plate, 'UNIT_AURA', unit)
 			end
 

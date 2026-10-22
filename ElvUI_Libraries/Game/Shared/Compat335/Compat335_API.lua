@@ -204,6 +204,7 @@ do
 	local function isHarmful(filter) return filter and filter:find("HARMFUL") and true or false end
 	local function baseFilter(filter) return isHarmful(filter) and "HARMFUL" or "HELPFUL" end
 	local playerUnits = {player = true, pet = true, vehicle = true}
+	local NO_POINTS = {} --3.3.5 gives no aura points: one shared empty list (read only)
 
 	local function BuildAuraData(unit, index, filter, harmful)
 		local name, rank, icon, count, dispelName, duration, expirationTime, sourceUnit, isStealable, shouldConsolidate, spellId =
@@ -215,7 +216,7 @@ do
 			sourceUnit = sourceUnit, isStealable = isStealable and true or false, nameplateShowPersonal = false,
 			spellId = spellId, canApplyAura = false, isBossAura = false,
 			isFromPlayerOrPlayerPet = sourceUnit ~= nil and playerUnits[sourceUnit] or false,
-			nameplateShowAll = false, timeMod = 1, points = {}, isHelpful = not harmful, isHarmful = harmful,
+			nameplateShowAll = false, timeMod = 1, points = NO_POINTS, isHelpful = not harmful, isHarmful = harmful,
 			isNameplateOnly = false, isRaid = false, auraInstanceID = index * 2 + (harmful and 1 or 0),
 			index = index, filter = filter, shouldConsolidate = shouldConsolidate and true or false,
 		}
@@ -229,24 +230,72 @@ do
 		return BuildAuraData(unit, index, lastFilter[kind], kind == 1)
 	end
 
+	--a filter read once: its base list, PLAYER, the tokens 3.3.5's UnitAura knows (RAID, CANCELABLE, NOT_CANCELABLE),
+	--and whether it asks for one 3.3.5 has not (CROWD_CONTROL, BIG_DEFENSIVE, RAID_IN_COMBAT...: no aura passes it).
+	--oUF asks about 16 filters for every aura of a unit at every UNIT_AURA: parsing them each time (string work) and
+	--scanning the unit's list for each (40 UnitAura calls) made the raid freezes (2 GB of garbage in 3 minutes)
+	local KNOWN = {RAID = true, CANCELABLE = true, NOT_CANCELABLE = true}
+	local IGNORED = {HELPFUL = true, HARMFUL = true, INCLUDE_NAME_PLATE_ONLY = true}
+	local parsed = {}
+	local function Parse(filter)
+		local p = parsed[filter]
+		if (p) then return p end
+		local harmful = isHarmful(filter)
+		local base = harmful and "HARMFUL" or "HELPFUL"
+		local player, unsupported, others = false, false, {}
+		for token in filter:gmatch("[^|]+") do
+			if (token == "PLAYER") then player = true
+			elseif (KNOWN[token]) then others[#others + 1] = token
+			elseif (not IGNORED[token]) then unsupported = true end
+		end
+		p = {harmful = harmful, base = base, player = player, unsupported = unsupported,
+			rest = #others > 0 and (base .. "|" .. table.concat(others, "|")) or nil}
+		parsed[filter] = p
+		return p
+	end
+
+	--the auras of a unit under a filter of known tokens (spell ID and expiration of each), read once per frame drawn and
+	--UNIT_AURA dispatched (two aura changes within one frame are read twice)
+	local frameStamp = 0
+	local stamper = CreateFrame("Frame")
+	stamper:SetScript("OnUpdate", function() frameStamp = frameStamp + 1 end)
+	local lists = {} --unit -> rest -> {stamp, n, ids, exps}
+	local function FilteredList(unit, rest)
+		local byRest = lists[unit]
+		if (not byRest) then byRest = {} lists[unit] = byRest end
+		local list = byRest[rest]
+		if (not list) then list = {stamp = -1, n = 0, ids = {}, exps = {}} byRest[rest] = list end
+		local dispatch = Compat.AuraDispatchId()
+		if (list.stamp ~= frameStamp or list.dispatch ~= dispatch) then
+			list.stamp, list.dispatch = frameStamp, dispatch
+			local n = 0
+			for i = 1, 40 do
+				local name, _, _, _, _, _, exp, _, _, _, id = UnitAura(unit, i, rest)
+				if (not name) then break end
+				n = n + 1
+				list.ids[n], list.exps[n] = id, exp
+			end
+			list.n = n
+		end
+		return list
+	end
+
 	--does the aura at index (in its base list) also pass the other tokens of the filter: PLAYER, RAID, CANCELABLE...
 	local function PassesFilter(unit, slot, filter)
 		local kind = slot % 2
 		local index = (slot - kind) / 2
 		local harmful = kind == 1
-		if (isHarmful(filter) ~= harmful) then return false end
-		local base = harmful and "HARMFUL" or "HELPFUL"
-		local name, _, _, _, _, _, expirationTime, sourceUnit, _, _, spellId = UnitAura(unit, index, base)
+		local p = Parse(filter)
+		if (p.harmful ~= harmful) then return false end
+		local name, _, _, _, _, _, expirationTime, sourceUnit, _, _, spellId = UnitAura(unit, index, p.base)
 		if (not name) then return false end
-		if (filter == base) then return true end
-		if (filter:find("PLAYER") and not (sourceUnit and playerUnits[sourceUnit])) then return false end
-		--the other tokens: the client's own filtered list
-		local rest = filter:gsub("PLAYER", ""):gsub("|+", "|"):gsub("^|", ""):gsub("|$", "")
-		if (rest == base) then return true end
-		for i = 1, 40 do
-			local n, _, _, _, _, _, exp, _, _, _, id = UnitAura(unit, i, rest)
-			if (not n) then return false end
-			if (id == spellId and exp == expirationTime) then return true end
+		if (p.unsupported) then return false end
+		if (p.player and not (sourceUnit and playerUnits[sourceUnit])) then return false end
+		if (not p.rest) then return true end
+		local list = FilteredList(unit, p.rest)
+		local ids, exps = list.ids, list.exps
+		for i = 1, list.n do
+			if (ids[i] == spellId and exps[i] == expirationTime) then return true end
 		end
 		return false
 	end

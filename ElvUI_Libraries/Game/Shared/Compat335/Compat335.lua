@@ -662,7 +662,21 @@ do
 		local parentName = parent and parent.GetName and parent:GetName()
 		return parentName and (parentName .. ".child") or "anonymous"
 	end
+	--one UNIT_AURA reaches each registered frame in turn: a frame seen again (or another unit) is a new event. The id
+	--lets the frames' aura rescans of one event share one scan (Compat.AuraDispatchId, oUF's auraskip.lua)
+	local auraDispatch, auraUnit, auraSeen = 0, nil, setmetatable({}, {__mode = "k"})
+	Compat.AuraDispatchId = function() return auraDispatch end
+	--an aura read of its own, outside a UNIT_AURA (the nameplate relay after a combat log aura line): a new id
+	Compat.NewAuraDispatch = function() auraDispatch, auraUnit = auraDispatch + 1, nil wipe(auraSeen) end
 	local function Wrapper(self, event, ...)
+		if (event == "UNIT_AURA") then
+			local unit = (...)
+			if (unit ~= auraUnit or auraSeen[self]) then
+				auraDispatch, auraUnit = auraDispatch + 1, unit
+				wipe(auraSeen)
+			end
+			auraSeen[self] = true
+		end
 		local profile = Compat.profile
 		if (not profile) then return Dispatch(self, event, ...) end
 		local kb, ms = collectgarbage("count"), debugprofilestop()
